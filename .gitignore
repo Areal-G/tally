@@ -57,6 +57,7 @@ PROJECT_PLAN.md
 
 # local
 .local
+.playwright-mcp
 
 
 # Sentry Errors
