@@ -5,7 +5,6 @@
 
 "use client";
 
-import React from "react";
 import { Column, ColumnDef } from "@tanstack/react-table";
 import {
   ImportStatusBadge,

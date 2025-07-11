@@ -1,5 +1,5 @@
 /**
- * REQ-0035 — shared welcome toast copy for email login and Google OAuth.
+ * Shared welcome toast copy for email login and Google OAuth.
  */
 
 import type { PostLoginWelcomePayload } from "@/lib/auth/post-login-welcome";

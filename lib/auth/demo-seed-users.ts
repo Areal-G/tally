@@ -11,6 +11,9 @@ export type DemoRoleKey = "guest-user" | "guest-supplier" | "guest-client";
 /** Shared password for all demo accounts (login role Select pre-fill). */
 export const DEMO_PASSWORD = "12345678";
 
+/** Seeded store admin; client browse picks this store first when it exists. */
+export const DEMO_ADMIN_EMAIL = "test@admin.com";
+
 export type DemoSeedUser = {
   roleKey: DemoRoleKey;
   email: string;
@@ -27,7 +30,7 @@ export type DemoSeedUser = {
 export const DEMO_SEED_USERS: readonly DemoSeedUser[] = [
   {
     roleKey: "guest-user",
-    email: "test@admin.com",
+    email: DEMO_ADMIN_EMAIL,
     name: "Test Admin",
     username: "testadmin",
     role: "admin",

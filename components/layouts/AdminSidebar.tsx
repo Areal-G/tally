@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -30,10 +29,10 @@ import {
   ADMIN_SETTINGS_EMAIL_HREF,
   type AdminNavItemConfig,
 } from "@/lib/navigation/admin-nav-config";
-import { adminSidebarLinkClass } from "@/lib/navigation/nav-link-styles";
+import { isAdminNavActive } from "@/lib/navigation/nav-link-styles";
 import type { AdminCounts } from "@/types";
 
-/** Icon map for admin sidebar items (REQ-0094 — hrefs live in admin-nav-config). */
+/** Icon per admin page (hrefs live in admin-nav-config). */
 const ADMIN_NAV_ICONS: Record<string, LucideIcon> = {
   "/admin/dashboard-overall-insights": LayoutDashboard,
   "/admin/orders": ShoppingCart,
@@ -50,12 +49,33 @@ const ADMIN_NAV_ICONS: Record<string, LucideIcon> = {
   [ADMIN_SETTINGS_EMAIL_HREF]: Mail,
 };
 
+/** Short tab labels so every tile fits. */
+const ADMIN_TAB_LABELS: Record<string, string> = {
+  "/admin/dashboard-overall-insights": "Overview",
+  "/admin/support-tickets": "Tickets",
+  "/admin/product-reviews": "Reviews",
+  "/admin/supplier-portal": "Suppliers",
+  "/admin/client-portal": "Clients",
+  "/admin/user-management": "Users",
+  "/admin/activity-history": "Activity",
+  [ADMIN_SETTINGS_EMAIL_HREF]: "Email",
+};
+
+const ADMIN_TABS: AdminNavItemConfig[] = [
+  ...ADMIN_MY_STORE_ITEMS,
+  ...ADMIN_MANAGEMENT_ITEMS,
+  ...ADMIN_MY_ACTIVITY_ITEMS,
+  { href: ADMIN_SETTINGS_EMAIL_HREF, label: "Email Preferences" },
+];
+
+/**
+ * Admin panel navigation: a tidy grid of equal tiles above the page (no second sidebar).
+ * Two rows on desktop; compact icon-over-label tiles on phones. Never scrolls sideways.
+ */
 export default function AdminSidebar({
-  collapsed = false,
   initialCounts,
 }: {
-  collapsed?: boolean;
-  /** SSR-passed sidebar badge counts (REQ-0025) */
+  /** SSR-passed sidebar badge counts */
   initialCounts?: AdminCounts;
 } = {}) {
   const pathname = usePathname();
@@ -63,117 +83,54 @@ export default function AdminSidebar({
   const counts = countsQuery.data ?? initialCounts;
   const countsLoading = isDataSlotUnsettled(countsQuery, initialCounts);
 
-  const getCount = (key: AdminNavItemConfig["countKey"]): number | undefined => {
-    if (!counts || !key) return undefined;
-    return counts[key];
+  const countBadge = (item: AdminNavItemConfig, active: boolean) => {
+    if (!item.countKey) return null;
+    const count = counts?.[item.countKey];
+    if (!countsLoading && (count === undefined || count <= 0)) return null;
+    return (
+      <span
+        className={cn(
+          // Counts only where tiles are wide enough; labels must never get cut off.
+          "ml-auto hidden shrink-0 rounded-full px-1.5 py-0.5 text-[11px] font-semibold tabular-nums min-[1400px]:inline-block",
+          active
+            ? "bg-white/20 text-white"
+            : "bg-[var(--bg-elevated)] text-[var(--text-secondary)]",
+        )}
+        aria-label={countsLoading ? "Loading count" : `${count} items`}
+      >
+        {countsLoading ? <DataSlotPulse variant="badge" /> : count! > 99 ? "99+" : count}
+      </span>
+    );
   };
 
-  const renderNavItems = (items: AdminNavItemConfig[], isSub = true) =>
-    items.map((item) => {
-      const Icon = ADMIN_NAV_ICONS[item.href] ?? Package;
-      const count = getCount(item.countKey);
-      const showBadge = item.countKey != null;
-      return (
-        <Link
-          key={item.href}
-          href={item.href}
-          prefetch
-          className={adminSidebarLinkClass(pathname, item.href, {
-            isSub,
-            collapsed,
-          })}
-          title={collapsed ? item.label : undefined}
-        >
-          <Icon className="h-4 w-4 flex-shrink-0" />
-          {!collapsed && (
-            <span className="min-w-0 flex-1 truncate">{item.label}</span>
-          )}
-          {!collapsed && showBadge && (
-            <span
-              className={cn(
-                "flex-shrink-0 rounded-full px-1 py-0.5 text-xs font-medium min-w-[1.25rem] text-center",
-                "bg-muted text-muted-foreground",
-              )}
-              aria-label={
-                countsLoading
-                  ? "Loading count"
-                  : count !== undefined
-                    ? `${count} items`
-                    : undefined
-              }
-            >
-              {countsLoading ? (
-                <DataSlotPulse variant="badge" className="mx-auto" />
-              ) : count !== undefined && count > 0 ? (
-                count > 99 ? (
-                  "99+"
-                ) : (
-                  count
-                )
-              ) : null}
-            </span>
-          )}
-        </Link>
-      );
-    });
-
-  if (collapsed) {
-    return (
-      <nav
-        className="flex min-h-0 flex-col items-center px-2 gap-1"
-        aria-label="Admin navigation"
-      >
-        {renderNavItems(ADMIN_MY_STORE_ITEMS)}
-        <div className="w-6 border-t border-gray-200/50 dark:border-white/10 my-1" />
-        {renderNavItems(ADMIN_MANAGEMENT_ITEMS)}
-        <div className="w-6 border-t border-gray-200/50 dark:border-white/10 my-1" />
-        {renderNavItems(ADMIN_MY_ACTIVITY_ITEMS)}
-        <div className="w-6 border-t border-gray-200/50 dark:border-white/10 my-1" />
-        <Link
-          href={ADMIN_SETTINGS_EMAIL_HREF}
-          prefetch
-          className={adminSidebarLinkClass(pathname, ADMIN_SETTINGS_EMAIL_HREF, {
-            isSub: true,
-            collapsed,
-          })}
-          title="Email Preferences"
-        >
-          <Mail className="h-4 w-4 flex-shrink-0" />
-        </Link>
-      </nav>
-    );
-  }
-
   return (
-    <nav className="flex min-h-0 flex-col p-2 gap-1">
-      <p className="px-2 pt-2  text-xs font-normal uppercase tracking-wider text-muted-foreground">
-        My Store
-      </p>
-      {renderNavItems(ADMIN_MY_STORE_ITEMS)}
-
-      <p className="px-2 pt-2  text-xs font-normal uppercase tracking-wider text-muted-foreground">
-        Product & System Management
-      </p>
-      {renderNavItems(ADMIN_MANAGEMENT_ITEMS)}
-
-      <p className="px-2 pt-2  text-xs font-normal uppercase tracking-wider text-muted-foreground">
-        Personal activity
-      </p>
-      {renderNavItems(ADMIN_MY_ACTIVITY_ITEMS)}
-
-      <p className="px-2 pt-2  text-xs font-normal uppercase tracking-wider text-muted-foreground">
-        System Settings
-      </p>
-      <Link
-        href={ADMIN_SETTINGS_EMAIL_HREF}
-        prefetch
-        className={adminSidebarLinkClass(pathname, ADMIN_SETTINGS_EMAIL_HREF, {
-          isSub: true,
-        })}
-      >
-        <Mail className="h-4 w-4 flex-shrink-0" />
-        Email Preferences
-      </Link>
+    <nav
+      aria-label="Admin navigation"
+      className="money-surface grid grid-cols-4 gap-1 !rounded-2xl p-1.5 sm:grid-cols-5 lg:grid-cols-7"
+    >
+      {ADMIN_TABS.map((item) => {
+        const Icon = ADMIN_NAV_ICONS[item.href] ?? Package;
+        const active = isAdminNavActive(pathname, item.href);
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            prefetch
+            aria-current={active ? "page" : undefined}
+            className={cn(
+              "flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[11px] font-medium transition",
+              "sm:flex-row sm:gap-1.5 sm:px-2.5 sm:text-sm",
+              active
+                ? "money-nav-active"
+                : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]",
+            )}
+          >
+            <Icon className="h-4 w-4 shrink-0" />
+            <span className="min-w-0 truncate">{ADMIN_TAB_LABELS[item.href] ?? item.label}</span>
+            {countBadge(item, active)}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

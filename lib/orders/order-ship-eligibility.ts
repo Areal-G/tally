@@ -1,5 +1,5 @@
 /**
- * REQ-0211 — Shared gate for Auto Generate / Ship Order UI + API.
+ * Shared gate for Auto Generate / Ship Order UI + API.
  * Confirmed|processing OR money collected (partial|paid). Not pending unpaid / cancelled.
  */
 

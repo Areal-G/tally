@@ -1,5 +1,5 @@
 /**
- * REQ-0084 — client-safe forecast helpers for detail pages.
+ * Client-safe forecast helpers for detail pages.
  */
 
 import type { ProductDemandForecast } from "@/types";

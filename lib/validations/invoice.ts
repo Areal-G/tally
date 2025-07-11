@@ -6,8 +6,8 @@
 import { z } from "zod";
 
 /**
- * Create Invoice Schema
- * Validates invoice creation from order
+ * Create Invoice Schema — tax/shipping/discount optional for client compat;
+ * prisma createInvoice ignores them (order fees only).
  */
 export const createInvoiceSchema = z.object({
   orderId: z.string().min(1, "Order ID is required"),
@@ -32,7 +32,7 @@ export const updateInvoiceSchema = z.object({
   total: z.number().min(0, "Total cannot be negative").optional(),
   amountDue: z.number().min(0, "Amount due cannot be negative").optional(),
   dueDate: z.string().datetime().optional().or(z.string().date()).or(z.literal("")),
-  // REQ-0151 — DialogDateField writes YYYY-MM-DD; accept date-only like dueDate
+  // DialogDateField writes YYYY-MM-DD; accept date-only like dueDate
   sentAt: z.string().datetime().optional().or(z.string().date()).or(z.literal("")),
   paidAt: z.string().datetime().optional().or(z.string().date()).or(z.literal("")),
   cancelledAt: z

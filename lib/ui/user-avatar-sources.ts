@@ -1,5 +1,5 @@
 /**
- * REQ-0039/0040 — shared avatar URL resolution for all SafeAvatarImage consumers.
+ * Shared avatar URL resolution for all SafeAvatarImage consumers.
  * Primary: Google OAuth or custom profile image; fallback: stable robohash per seed.
  */
 import type { User } from "@/types";

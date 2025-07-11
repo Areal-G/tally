@@ -12,7 +12,7 @@ import { getWarehouseDetailForPage } from "./warehouse-detail-data";
 
 const session = { id: "admin-1", role: "admin" as const };
 
-describe("getWarehouseDetailForPage (REQ-0096)", () => {
+describe("getWarehouseDetailForPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

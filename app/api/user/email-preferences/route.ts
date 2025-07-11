@@ -11,7 +11,7 @@ import {
   updateUserEmailPreferences,
 } from "@/lib/email/preferences";
 import { scheduleInvalidateEmailPreferenceCaches } from "@/lib/cache";
-import type { EmailPreferences, UpdateEmailPreferencesInput } from "@/types/auth";
+import type { UpdateEmailPreferencesInput } from "@/types/auth";
 import { z } from "zod";
 
 /**

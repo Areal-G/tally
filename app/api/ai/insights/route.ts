@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
         "AI service is temporarily unavailable",
         502,
         { code: "LLM_UPSTREAM", provider: result.provider, status: result.status },
-        { reportToSentry: true },
+        { report: true },
       );
     }
 

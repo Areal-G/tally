@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // REQ-0211 — same gate as OrderDetailActionBar / admin Shipping card
+    // Same gate as OrderDetailActionBar / admin Shipping card
     if (!canGenerateShippingLabel(order)) {
       return NextResponse.json(
         {
@@ -166,7 +166,7 @@ export async function POST(request: NextRequest) {
         phone?: string;
       } | null;
 
-      // REQ-0211 — test key: silent US to-address; live: order/request to
+      // Test key: silent US to-address; live: order/request to
       const { addressFrom, addressTo: shipmentToAddress } =
         resolveShippoLabelAddresses({
           testMode,
@@ -268,7 +268,7 @@ export async function POST(request: NextRequest) {
 
       const shipment = await shippo.shipments.create(shipmentPayload);
 
-      // REQ-0211 — test key prefers USPS; UPS/FedEx need carrier accounts
+      // Test key prefers USPS; UPS/FedEx need carrier accounts
       const selectedRate = selectShippoRateForLabel(shipment.rates, carrier, {
         testMode,
         service,

@@ -2,7 +2,7 @@ import { Shield, Store, ShoppingBag } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { DEMO_PASSWORD, DEMO_SEED_USERS, type DemoRoleKey } from "./demo-seed-users";
 
-/** Demo test-account keys for login role Select (REQ-0030). */
+/** Demo test-account keys for login role Select. */
 export type TestAccountRoleKey = DemoRoleKey;
 
 /** Credentials for quick demo login — sourced from demo-seed-users.ts. */

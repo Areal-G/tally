@@ -1,5 +1,5 @@
 /**
- * REQ-0141 / REQ-0142 — batch product counts (+ optional supplier User.email)
+ * Batch product counts (+ optional supplier User.email)
  * for category/supplier lists. Soft-deleted products excluded via mergeProductListWhere.
  * Counts are scoped to the viewer's catalog (ownerUserId) so % matches catalogProductTotal.
  */

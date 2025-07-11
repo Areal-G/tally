@@ -1,6 +1,6 @@
 /**
  * Shared import history detail response transform — used by API GET and SSR prefetch.
- * REQ-0024: single source of truth for import history detail JSON shape.
+ * Single source of truth for import history detail JSON shape.
  */
 
 import type { ImportHistoryForPage, ImportHistoryErrorItem } from "@/types";

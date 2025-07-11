@@ -28,7 +28,7 @@ import type {
   WarehouseStockSummary,
 } from "@/types";
 
-/** Shared queryFn for useStockByProduct + prefetch (REQ-0110). */
+/** Shared queryFn for useStockByProduct + prefetch. */
 export async function fetchStockByProduct(
   productId: string,
 ): Promise<StockAllocation[]> {
@@ -53,7 +53,7 @@ function findCachedAllocation(
   allocationId: string,
   scope?: { productId?: string; warehouseId?: string },
 ): StockAllocation | undefined {
-  // REQ-0219 — QueryKey[] so byProduct + byWarehouse tuples both push (Vercel tsc)
+  // QueryKey[] so byProduct + byWarehouse tuples both push (Vercel tsc)
   const keys: QueryKey[] = [];
   if (scope?.productId) {
     keys.push(queryKeys.stockAllocation.byProduct(scope.productId));
@@ -162,7 +162,7 @@ export function useCreateStockAllocation() {
         byProduct: queryKeys.stockAllocation.byProduct,
         byWarehouse: queryKeys.stockAllocation.byWarehouse,
       });
-      // REQ-0218 — list Stock share % from summary
+      // List Stock share % from summary
       if (warehouseId) {
         patchWarehouseStockSummaryCaches(
           queryClient,
@@ -194,7 +194,7 @@ export function useCreateStockAllocation() {
 }
 
 /**
- * Update stock allocation quantity by row id (REQ-0102 — edit warehouse row).
+ * Update stock allocation quantity by row id (edit warehouse row).
  */
 export function useUpdateStockAllocation() {
   const queryClient = useQueryClient();
@@ -323,7 +323,7 @@ export function useCreateStockTransfer() {
       return response.data;
     },
     onSuccess: (data: StockTransfer) => {
-      // REQ-0218 — patch both warehouse/product allocation sides + summary share %
+      // Patch both warehouse/product allocation sides + summary share %
       const destHadProduct = queryClient
         .getQueryData<StockAllocation[]>(
           queryKeys.stockAllocation.byWarehouse(data.toWarehouseId),

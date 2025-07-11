@@ -1,5 +1,5 @@
 /**
- * REQ-0086 — map Prisma user row to catalog detail party snapshot (category + supplier SSR).
+ * Map Prisma user row to catalog detail party snapshot (category + supplier SSR).
  */
 
 import type { CatalogDetailPartySnapshot } from "@/types/catalog-detail-lists";

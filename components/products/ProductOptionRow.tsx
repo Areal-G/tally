@@ -1,22 +1,13 @@
 /**
- * REQ-0048 — inline product thumb + label for order Select (matches ProductTableColumns).
- * REQ-0059 — ProductThumb extracted for reuse on detail-page line items / allocation rows.
- * REQ-0179 — DialogProductOptionRow for Select densify (no Links inside SelectItem).
- * REQ-0201 — optional price/quantity icons on DialogProductOptionRow (tickets; review omits).
+ * Inline product thumb + label for order Select (matches ProductTableColumns).
+ * ProductThumb extracted for reuse on detail-page line items / allocation rows.
+ * DialogProductOptionRow for Select densify (no Links inside SelectItem).
+ * Optional price/quantity icons on DialogProductOptionRow (tickets; review omits).
  */
-import { Boxes, DollarSign, Lock, Package, Tag } from "lucide-react";
-import { SafeImage } from "@/components/ui/safe-image";
+import { Boxes, DollarSign, Lock, Tag } from "lucide-react";
 import { AvatarInlineLink } from "@/components/shared/AvatarInlineLink";
 import type { Product } from "@/types";
 import { cn } from "@/lib/utils";
-
-const thumbSize = {
-  sm: "h-8 w-8",
-  md: "h-10 w-10",
-  lg: "h-12 w-12",
-} as const;
-
-const thumbPx = { sm: 32, md: 40, lg: 48 } as const;
 
 export type ProductThumbProps = {
   name: string;
@@ -36,34 +27,9 @@ export function ProductThumb({
   size = "sm",
   className,
 }: ProductThumbProps) {
-  const dim = thumbSize[size];
-  const unoptimized = Boolean(imageUrl?.includes("ik.imagekit.io"));
-
-  return imageUrl ? (
-    <SafeImage
-      src={imageUrl}
-      alt={name}
-      width={thumbPx[size]}
-      height={thumbPx[size]}
-      className={cn(
-        dim,
-        "shrink-0 rounded-lg border border-violet-400/30 object-cover",
-        className,
-      )}
-      unoptimized={unoptimized}
-    />
-  ) : (
-    <span
-      className={cn(
-        dim,
-        "flex shrink-0 items-center justify-center rounded-lg border border-violet-400/20 bg-gray-200/80 dark:bg-gray-700/80",
-        className,
-      )}
-      aria-hidden
-    >
-      <Package className="h-4 w-4 text-gray-500 dark:text-gray-300" />
-    </span>
-  );
+  // Product pictures are intentionally hidden across the app.
+  void name; void imageUrl; void size; void className;
+  return null;
 }
 
 export type ProductOptionRowProps = {
@@ -162,7 +128,7 @@ export function productSupplierLabel(
   return typeof supplier === "string" ? supplier : supplier.name;
 }
 
-/** REQ-0203 — supplier avatar for DialogProductOptionRow densify (Allocate/Transfer). */
+/** Supplier avatar for DialogProductOptionRow densify (Allocate/Transfer). */
 export type ProductSupplierSource = {
   supplierId?: string | null;
   supplierImage?: string | null;
@@ -193,10 +159,10 @@ export type DialogProductOptionRowProps = {
   name: string;
   imageUrl?: string | null;
   sku?: string | null;
-  /** REQ-0201 — optional; tickets pass, product review omits */
+  /** Optional; tickets pass, product review omits */
   price?: number;
   quantity?: number;
-  /** REQ-0187 — catalog reserved; muted · reserved N after stock (Order picker) */
+  /** Catalog reserved; muted · reserved N after stock (Order picker) */
   reservedQuantity?: number | null;
   categoryName?: string | null;
   ownerId?: string | null;
@@ -211,7 +177,7 @@ export type DialogProductOptionRowProps = {
 };
 
 /**
- * REQ-0179 — Select-safe densify row (no Link / CopyableText):
+ * Select-safe densify row (no Link / CopyableText):
  * thumb · name text-sm · sku muted xs · (optional) price · stock · reserved
  * Tag category · owner avatar · supplier avatar
  */
@@ -357,7 +323,7 @@ export function DialogProductOptionRow({
               </span>
             ) : null}
             {supplierId && supplierLabel ? (
-              <AvatarInlineLink
+              <AvatarInlineLink showAvatar={false}
                 seed={supplierId}
                 image={supplierImage}
                 label={supplierLabel}

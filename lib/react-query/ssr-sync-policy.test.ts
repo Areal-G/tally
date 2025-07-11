@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   listHasFresherStatusBadges,
+  listHasLowerAllocationQuantities,
   mergeDensifyOnly,
   mergeSsrIntoCache,
   resolveSsrSyncAction,
@@ -26,7 +27,7 @@ describe("serverHasRicherDensify", () => {
     ).toBe(false);
   });
 
-  // REQ-0218 — catalog calculated densify keys
+  // Catalog calculated densify keys
   it("detects missing productInsights / committedQuantity / productCount", () => {
     expect(
       serverHasRicherDensify(
@@ -56,8 +57,9 @@ describe("resolveSsrSyncAction", () => {
     ).toBe("refetch");
   });
 
-  // REQ-0136 — never apply SSR while invalidated/fetching (prod badge revert)
-  it("refetches richer SSR densify while fetching instead of apply", () => {
+  // Never apply full SSR while invalidated/fetching (prod badge revert).
+  // Densify-only gap-fill is safe (status/qty untouched) when SSR richer.
+  it("applies densify-only for richer SSR while invalidated/fetching", () => {
     expect(
       resolveSsrSyncAction(
         {
@@ -70,7 +72,60 @@ describe("resolveSsrSyncAction", () => {
         { id: "1", orderNumber: "ORD-1" },
         { fetchStatus: "fetching", isInvalidated: true },
       ),
+    ).toBe("applyDensifyOnly");
+  });
+
+  it("refetches when invalidated with densify parity (no richer SSR)", () => {
+    expect(
+      resolveSsrSyncAction(
+        { id: "1", creator: { id: "u1", email: "a@b.com" } },
+        { id: "1", creator: { id: "u1", email: "a@b.com" } },
+        { isInvalidated: true },
+      ),
     ).toBe("refetch");
+  });
+
+  // Warehouse stock flash: apply lower SSR qty while invalidated
+  it("applies when invalidated and SSR allocation qty is lower than cache", () => {
+    expect(
+      resolveSsrSyncAction(
+        [{ id: "a1", quantity: 10, productId: "p1", warehouseId: "w1" }],
+        [{ id: "a1", quantity: 40, productId: "p1", warehouseId: "w1" }],
+        { isInvalidated: true },
+      ),
+    ).toBe("apply");
+  });
+
+  it("refetches when invalidated and SSR allocation qty is higher (keep patch)", () => {
+    expect(
+      resolveSsrSyncAction(
+        [{ id: "a1", quantity: 40, productId: "p1", warehouseId: "w1" }],
+        [{ id: "a1", quantity: 10, productId: "p1", warehouseId: "w1" }],
+        { isInvalidated: true },
+      ),
+    ).toBe("refetch");
+  });
+
+  it("detects string supplier as thinner than SSR object densify", () => {
+    expect(
+      serverHasRicherDensify(
+        { id: "1", supplier: { id: "s1", name: "Sup", email: "s@x.com" } },
+        { id: "1", supplier: "Sup" },
+      ),
+    ).toBe(true);
+  });
+
+  it("mergeDensifyOnly upgrades string supplier to object", () => {
+    const merged = mergeDensifyOnly(
+      { id: "1", supplier: { id: "s1", name: "Sup", email: "s@x.com" }, quantity: 10 },
+      { id: "1", supplier: "Sup", quantity: 10 },
+    );
+    expect(merged.supplier).toEqual({
+      id: "s1",
+      name: "Sup",
+      email: "s@x.com",
+    });
+    expect(merged.quantity).toBe(10);
   });
 
   it("skips when cached array is longer than SSR snapshot", () => {
@@ -79,7 +134,7 @@ describe("resolveSsrSyncAction", () => {
     ).toBe("skip");
   });
 
-  it("skips when cached updatedAt is newer than SSR (REQ-0122 back-nav guard)", () => {
+  it("skips when cached updatedAt is newer than SSR (back-nav guard)", () => {
     expect(
       resolveSsrSyncAction(
         { id: "1", updatedAt: "2026-01-01T00:00:00.000Z" },
@@ -100,7 +155,7 @@ describe("resolveSsrSyncAction", () => {
     ).toBe("skip");
   });
 
-  // REQ-0202 / REQ-0136 Fix B — equal updatedAt but SSR densify richer → gap-fill only
+  // Fix B — equal updatedAt but SSR densify richer → gap-fill only
   it("applies densify-only when updatedAt equal but SSR has densify cache lacks", () => {
     const at = "2026-01-02T00:00:00.000Z";
     expect(
@@ -146,7 +201,7 @@ describe("resolveSsrSyncAction", () => {
     ).toBe("apply");
   });
 
-  it("skips same-length lists without updatedAt (REQ-0133 post-CRUD guard)", () => {
+  it("skips same-length lists without updatedAt (post-CRUD guard)", () => {
     expect(
       resolveSsrSyncAction(
         [{ id: "1", name: "old" }],
@@ -162,7 +217,7 @@ describe("resolveSsrSyncAction", () => {
     ).toBe("apply");
   });
 
-  it("skips entity objects without updatedAt when cache exists (REQ-0133)", () => {
+  it("skips entity objects without updatedAt when cache exists", () => {
     expect(resolveSsrSyncAction({ id: "1" }, { id: "2" }, {})).toBe("skip");
   });
 
@@ -186,7 +241,7 @@ describe("resolveSsrSyncAction", () => {
     ).toBe("skip");
   });
 
-  // REQ-0136 idle harden — equal updatedAt + linked badge drift: keep cache (patch+refetch)
+  // Idle harden — equal updatedAt + linked badge drift: keep cache (patch+refetch)
   it("skips list when linkedOrderStatus differs but updatedAt equal", () => {
     const at = "2026-01-02T00:00:00.000Z";
     expect(
@@ -299,7 +354,7 @@ describe("listHasFresherStatusBadges", () => {
   });
 });
 
-// REQ-0136 Fix B — merge helpers must never let a stale/thin SSR object clobber
+// Fix B — merge helpers must never let a stale/thin SSR object clobber
 // cached-only fields, even when the resolver decided to "apply".
 describe("mergeSsrIntoCache", () => {
   it("returns serverData as-is when cache is undefined", () => {
@@ -360,5 +415,25 @@ describe("mergeDensifyOnly", () => {
         { id: "1", status: "paid", paymentStatus: "paid" },
       ),
     ).toEqual({ id: "1", status: "paid", paymentStatus: "paid" });
+  });
+});
+
+describe("listHasLowerAllocationQuantities", () => {
+  it("detects SSR shrink vs cache", () => {
+    expect(
+      listHasLowerAllocationQuantities(
+        [{ id: "a1", quantity: 10 }],
+        [{ id: "a1", quantity: 40 }],
+      ),
+    ).toBe(true);
+  });
+
+  it("rejects when SSR is higher (patched cache fresher)", () => {
+    expect(
+      listHasLowerAllocationQuantities(
+        [{ id: "a1", quantity: 40 }],
+        [{ id: "a1", quantity: 10 }],
+      ),
+    ).toBe(false);
   });
 });

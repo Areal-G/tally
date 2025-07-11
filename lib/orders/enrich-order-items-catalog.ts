@@ -1,5 +1,5 @@
 /**
- * REQ-0071 — batch-resolve category/supplier display names for order line items.
+ * Batch-resolve category/supplier display names for order line items.
  * Product model stores categoryId/supplierId only (no Prisma relations).
  */
 

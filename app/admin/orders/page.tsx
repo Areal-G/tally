@@ -7,7 +7,7 @@ import {
 import { getDashboardForAdmin } from "@/lib/server/dashboard-data";
 import AdminCombinedOrdersContent from "@/components/admin/AdminCombinedOrdersContent";
 
-/** REQ-0025 — blocking SSR prefetch (no Suspense shell flash, no double client fetch). */
+/** Blocking SSR prefetch (no Suspense shell flash, no double client fetch). */
 export const dynamic = "force-dynamic";
 
 export default async function AdminOrdersPage() {

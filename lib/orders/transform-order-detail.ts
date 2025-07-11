@@ -1,6 +1,6 @@
 /**
  * Shared order detail response transform — used by API GET and SSR prefetch.
- * REQ-0024: single source of truth for order detail JSON shape.
+ * Single source of truth for order detail JSON shape.
  */
 
 import type { Order } from "@/types";
@@ -58,12 +58,11 @@ export type OrderDetailEnrichment = {
     createdAt?: string;
     dueDate?: string;
     amountDue?: number;
-    /** REQ-0152 */
     amountPaid?: number;
     total?: number;
     status?: string;
   } | null;
-  /** REQ-0096 — audit user snapshots from createdBy / updatedBy */
+  /** Audit user snapshots from createdBy / updatedBy */
   creator?: Order["creator"];
   updater?: Order["updater"];
 };

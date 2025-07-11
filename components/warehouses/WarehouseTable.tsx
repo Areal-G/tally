@@ -83,7 +83,7 @@ export const WarehouseTable = React.memo(function WarehouseTable({
 
   return (
     <div className="poppins mt-0">
-      <div className="rounded-[28px] border border-sky-400/20 dark:border-white/10 shadow-[0_30px_80px_rgba(2,132,199,0.25)] dark:shadow-[0_30px_80px_rgba(2,132,199,0.15)] bg-gradient-to-br from-white/20 via-white/15 to-white/10 dark:from-white/5 dark:via-white/5 dark:to-white/5 backdrop-blur-md overflow-hidden">
+      <div className="rounded-lg border border-sky-400/20 dark:border-white/10 bg-white/20 dark:bg-white/5 overflow-hidden">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -161,7 +161,7 @@ export const WarehouseTable = React.memo(function WarehouseTable({
             size="sm"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
-            className="h-10 rounded-[28px] border border-sky-400/30 dark:border-sky-400/30"
+            className="h-10 rounded-lg border border-sky-400/30 dark:border-sky-400/30"
           >
             <BiFirstPage />
           </Button>
@@ -170,7 +170,7 @@ export const WarehouseTable = React.memo(function WarehouseTable({
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
-            className="h-10 rounded-[28px] border border-sky-400/30 dark:border-sky-400/30"
+            className="h-10 rounded-lg border border-sky-400/30 dark:border-sky-400/30"
           >
             <GrFormPrevious />
           </Button>
@@ -182,7 +182,7 @@ export const WarehouseTable = React.memo(function WarehouseTable({
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
-            className="h-10 rounded-[28px] border border-sky-400/30 dark:border-sky-400/30"
+            className="h-10 rounded-lg border border-sky-400/30 dark:border-sky-400/30"
           >
             <GrFormNext />
           </Button>
@@ -191,7 +191,7 @@ export const WarehouseTable = React.memo(function WarehouseTable({
             size="sm"
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
-            className="h-10 rounded-[28px] border border-sky-400/30 dark:border-sky-400/30"
+            className="h-10 rounded-lg border border-sky-400/30 dark:border-sky-400/30"
           >
             <BiLastPage />
           </Button>

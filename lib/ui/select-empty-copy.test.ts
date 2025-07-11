@@ -5,7 +5,7 @@ import {
   selectEmptyPlaceholder,
 } from "@/lib/ui/select-empty-copy";
 
-describe("select-empty-copy (REQ-0217)", () => {
+describe("select-empty-copy", () => {
   it("builds entity-specific empty copy", () => {
     expect(selectEmptyPlaceholder("category")).toBe("No categories found");
     expect(selectEmptyMessage("supplier")).toBe("No suppliers found.");

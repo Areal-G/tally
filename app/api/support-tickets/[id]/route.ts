@@ -101,7 +101,7 @@ export async function PUT(
         { status: 404 },
       );
     }
-    // REQ-0190 — admin may update any ticket (reassign); others: creator or assignee
+    // Admin may update any ticket (reassign); others: creator or assignee
     const sessionId = session.id ?? "";
     const sessionRole = session.role ?? "";
     if (
@@ -131,11 +131,11 @@ export async function PUT(
 
     const data = parsed.data;
     const updatePayload: UpdateSupportTicketInput = {};
-    // REQ-0185 — edit dialog subject/description
+    // Edit dialog subject/description
     if (data.subject != null) updatePayload.subject = data.subject;
     if (data.description != null) updatePayload.description = data.description;
     if (data.priority != null) updatePayload.priority = data.priority;
-    // REQ-0195 — only admin may change workflow status; non-admin body.status ignored
+    // Only admin may change workflow status; non-admin body.status ignored
     const nextStatus = resolveStatusUpdate(
       { id: sessionId, role: sessionRole },
       data.status,
@@ -143,14 +143,14 @@ export async function PUT(
     if (nextStatus !== undefined) {
       updatePayload.status = nextStatus;
     }
-    // REQ-0190 — only admin may change Send-to; non-admin body field ignored
+    // Only admin may change Send-to; non-admin body field ignored
     const nextAssignedTo = resolveAssignedToUpdate(
       { id: sessionId, role: sessionRole },
       data.assignedToId,
     );
     if (nextAssignedTo !== undefined) {
       updatePayload.assignedToId = nextAssignedTo;
-      // REQ-0197 — clear productId when new Send-to does not own Related product
+      // Clear productId when new Send-to does not own Related product
       let productOwnerUserId: string | null = null;
       if (existing.productId) {
         const linked = await prisma.product.findUnique({
@@ -271,7 +271,7 @@ export async function DELETE(
         { status: 404 },
       );
     }
-    // REQ-0191 — admin OR creator OR assignee (parity with PUT)
+    // Admin OR creator OR assignee (parity with PUT)
     const sessionId = session.id ?? "";
     const sessionRole = session.role ?? "";
     if (

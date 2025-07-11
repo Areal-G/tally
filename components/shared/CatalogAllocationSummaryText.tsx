@@ -1,5 +1,5 @@
 /**
- * REQ-0138 — colored, capitalized catalog allocation summary for product detail warehouse header.
+ * Colored, capitalized catalog allocation summary for product detail warehouse header.
  */
 "use client";
 

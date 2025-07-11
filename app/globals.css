@@ -2,80 +2,138 @@
 @tailwind components;
 @tailwind utilities;
 
-.poppins {
-  font-family: var(--font-poppins);
+/* UI font — Manrope, shared by the whole Tally design system. */
+.poppins,
+html,
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", var(--font-manrope), "Segoe UI", sans-serif;
 }
 
 @layer base {
+  /* Tally design system: lavender-gray canvas, white cards, violet→blue→teal brand. */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --background: 231 47% 97%; /* #f4f5fb */
+    --foreground: 234 34% 12%; /* #141629 */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 234 34% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 0 72.2% 50.6%;
-    --primary-foreground: 0 85.7% 97.3%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 72.2% 50.6%;
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 98%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 9%;
-    --radius: 0.5rem;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --popover-foreground: 234 34% 12%;
+    --primary: 246 85% 62%; /* #5b4cf0 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 231 58% 95%; /* #eceefa */
+    --secondary-foreground: 234 34% 12%;
+    --muted: 231 58% 95%;
+    --muted-foreground: 229 13% 42%; /* #5c6178 */
+    --accent: 231 58% 95%;
+    --accent-foreground: 234 34% 12%;
+    --destructive: 345 74% 54%; /* #e0335a */
+    --destructive-foreground: 0 0% 100%;
+    --border: 232 33% 91%;
+    --input: 232 33% 91%;
+    --ring: 246 85% 62%;
+    --success: 162 82% 34%; /* #0f9d74 */
+    --success-foreground: 0 0% 100%;
+    --warning: 31 89% 45%; /* #d9730d */
+    --warning-foreground: 0 0% 100%;
+    --radius: 0.875rem;
+    --chart-1: 246 85% 62%;
+    --chart-2: 222 100% 59%;
+    --chart-3: 179 85% 35%;
+    --chart-4: 38 92% 50%;
+    --chart-5: 346 83% 65%;
+
+    /* Raw money tokens */
+    --bg-main: #f4f5fb;
+    --bg-secondary: #ffffff;
+    --bg-elevated: #eceefa;
+    --text-primary: #141629;
+    --text-secondary: #5c6178;
+    --border-subtle: rgba(40, 44, 90, 0.1);
+    --accent-blue: #2f6bff;
+    --accent-purple: #5b4cf0;
+    --accent-pink: #f0597a;
+    --accent-teal: #0ea5a4;
+    --accent-amber: #f59e0b;
+    --status-positive: #0f9d74;
+    --status-warning: #d9730d;
+    --status-negative: #e0335a;
+    --brand-gradient: linear-gradient(135deg, #5b4cf0 0%, #3d6bff 52%, #12b5c9 100%);
+    --tint-violet: rgba(91, 76, 240, 0.1);
+    --tint-emerald: rgba(16, 185, 129, 0.12);
+    --tint-sky: rgba(47, 107, 255, 0.1);
+    --tint-amber: rgba(245, 158, 11, 0.14);
+    --tint-rose: rgba(240, 89, 122, 0.11);
+    --glow-1: rgba(91, 76, 240, 0.1);
+    --glow-2: rgba(18, 181, 201, 0.08);
+    --card-bg: #ffffff;
+    --sidebar-bg: rgba(250, 250, 255, 0.94);
+    --card-shadow: 0 1px 2px rgba(30, 27, 75, 0.04), 0 18px 48px -36px rgba(30, 27, 75, 0.3);
+    --card-shadow-hover: 0 2px 4px rgba(30, 27, 75, 0.05), 0 24px 60px -36px rgba(91, 76, 240, 0.35);
   }
 
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 72.2% 50.6%;
-    --primary-foreground: 0 85.7% 97.3%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 72.2% 50.6%;
-    --success: 142 70% 45%;
-    --success-foreground: 0 0% 98%;
-    --warning: 38 92% 55%;
-    --warning-foreground: 0 0% 9%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
+    --background: 232 41% 7%; /* #0b0d1a */
+    --foreground: 233 47% 96%; /* #f2f3fb */
+    --card: 232 37% 12%; /* #131629 */
+    --card-foreground: 233 47% 96%;
+    --popover: 232 37% 12%;
+    --popover-foreground: 233 47% 96%;
+    --primary: 246 100% 77%; /* #9488ff */
+    --primary-foreground: 232 41% 7%;
+    --secondary: 231 33% 16%; /* #1c2038 */
+    --secondary-foreground: 233 47% 96%;
+    --muted: 231 33% 16%;
+    --muted-foreground: 229 20% 67%; /* #9ba1bd */
+    --accent: 231 33% 16%;
+    --accent-foreground: 233 47% 96%;
+    --destructive: 346 95% 71%;
+    --destructive-foreground: 232 41% 7%;
+    --border: 232 30% 18%;
+    --input: 232 30% 18%;
+    --ring: 246 100% 77%;
+    --success: 158 64% 52%;
+    --success-foreground: 232 41% 7%;
+    --warning: 43 96% 56%;
+    --warning-foreground: 232 41% 7%;
+    --chart-1: 246 100% 77%;
+    --chart-2: 222 100% 72%;
+    --chart-3: 172 66% 50%;
+    --chart-4: 43 96% 56%;
+    --chart-5: 346 100% 75%;
 
+    --bg-main: #0b0d1a;
+    --bg-secondary: #131629;
+    --bg-elevated: #1c2038;
+    --text-primary: #f2f3fb;
+    --text-secondary: #9ba1bd;
+    --border-subtle: rgba(160, 168, 255, 0.12);
+    --accent-blue: #6f9bff;
+    --accent-purple: #9488ff;
+    --accent-pink: #ff7d9a;
+    --accent-teal: #2dd4bf;
+    --accent-amber: #fbbf24;
+    --status-positive: #34d399;
+    --status-warning: #fbbf24;
+    --status-negative: #fb7190;
+    --brand-gradient: linear-gradient(135deg, #6a5cff 0%, #3f6dff 52%, #14b8cc 100%);
+    --tint-violet: rgba(148, 136, 255, 0.15);
+    --tint-emerald: rgba(52, 211, 153, 0.14);
+    --tint-sky: rgba(111, 155, 255, 0.15);
+    --tint-amber: rgba(251, 191, 36, 0.14);
+    --tint-rose: rgba(255, 125, 154, 0.14);
+    --glow-1: rgba(148, 136, 255, 0.14);
+    --glow-2: rgba(45, 212, 191, 0.08);
+    --card-bg: #131629;
+    --sidebar-bg: rgba(11, 13, 26, 0.92);
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 20px 48px -36px rgba(0, 0, 0, 0.85);
+    --card-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.3), 0 26px 64px -36px rgba(106, 92, 255, 0.45);
+  }
   * {
     @apply border-border;
   }
 
   body {
-    @apply text-foreground;
+    @apply bg-background text-foreground;
   }
 
   /*
@@ -103,7 +161,7 @@
   }
 
   /*
-   * REQ-0033 / REQ-0216 — auth routes scroll on document; reserve gutter so Role Select
+   * Auth routes scroll on document; reserve gutter so Role Select
    * RemoveScroll does not change layout width (Firefox classic scrollbar).
    */
   html:has(.auth-page-root) {
@@ -156,7 +214,7 @@
 }
 
 /*
- * REQ-0216 — Beat react-remove-scroll-bar's injected stylesheet.
+ * Beat react-remove-scroll-bar's injected stylesheet.
  * Must stay OUTSIDE @layer (unlayered beats @layer base) and use higher specificity
  * than `body[data-scroll-locked]` so margin-right:gap !important cannot win.
  * Auth: gutter reserved above; App shell: cancel false gap from document lock.
@@ -195,7 +253,7 @@ html .with-scroll-bars-hidden {
   animation: fadeIn 0.2s ease-out forwards;
 }
 
-/* REQ-0030 — auth page entrance (CSS-only; no hydration mismatch) */
+/* Auth page entrance (CSS-only; no hydration mismatch) */
 @keyframes authEnter {
   from {
     opacity: 0;
@@ -220,7 +278,7 @@ html .with-scroll-bars-hidden {
   }
 }
 
-/* REQ-0032 — viewport illustration zoom + horizontal nudge (CSS-only) */
+/* Viewport illustration zoom + horizontal nudge (CSS-only) */
 @keyframes authBgFloat {
   0%,
   100% {
@@ -244,4 +302,142 @@ html .with-scroll-bars-hidden {
     animation: none;
     transform: none;
   }
+}
+
+/* ======================================================================
+ * Tally design system
+ * ==================================================================== */
+
+/* Soft brand wash behind the app */
+body {
+  background:
+    radial-gradient(1200px 520px at 85% -10%, var(--glow-1), transparent 60%),
+    radial-gradient(900px 480px at -10% 110%, var(--glow-2), transparent 60%),
+    var(--bg-main);
+  background-attachment: fixed;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: color-mix(in srgb, var(--accent-purple) 24%, transparent); }
+
+.money-surface {
+  border: 1px solid var(--border-subtle);
+  background: var(--card-bg);
+  border-radius: 1.5rem;
+  box-shadow: var(--card-shadow);
+}
+.money-interactive-surface { transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease; }
+.money-interactive-surface:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent-purple) 25%, var(--border-subtle));
+  box-shadow: var(--card-shadow-hover);
+}
+
+.money-brand-fill { background: var(--brand-gradient); color: #ffffff; }
+.money-brand-shadow { box-shadow: 0 14px 32px -16px rgba(91, 76, 240, 0.6); }
+
+.money-nav-active {
+  background: var(--brand-gradient) !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 24px -14px rgba(91, 76, 240, 0.7);
+}
+
+.money-primary-action {
+  background: var(--brand-gradient) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  box-shadow: 0 12px 28px -14px rgba(91, 76, 240, 0.65);
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+.money-primary-action:hover:not(:disabled) { transform: translateY(-1px); opacity: 0.92; }
+
+.money-secondary-action {
+  border: 1px solid var(--border-subtle) !important;
+  background: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+.money-secondary-action:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--text-primary) 22%, var(--border-subtle)) !important;
+  background: var(--bg-elevated) !important;
+}
+
+.money-tool-button {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 40px; min-height: 40px; border-radius: 999px; color: var(--text-secondary);
+}
+.money-tool-button:hover { background: var(--bg-elevated); color: var(--text-primary); }
+
+/* Stat cards: accent bar + tinted round icon, rotating per card in a row */
+.money-stat { position: relative; overflow: hidden; }
+.money-stat::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+  background: var(--stat-accent, var(--accent-purple)); opacity: 0.85;
+}
+.money-stat .money-stat-icon { background: var(--stat-tint, var(--tint-violet)); color: var(--stat-accent, var(--accent-purple)); }
+.money-stat:nth-child(4n + 1) { --stat-accent: var(--accent-purple); --stat-tint: var(--tint-violet); }
+.money-stat:nth-child(4n + 2) { --stat-accent: var(--status-positive); --stat-tint: var(--tint-emerald); }
+.money-stat:nth-child(4n + 3) { --stat-accent: var(--accent-blue); --stat-tint: var(--tint-sky); }
+.money-stat:nth-child(4n + 4) { --stat-accent: var(--accent-amber); --stat-tint: var(--tint-amber); }
+
+.money-content { animation: money-enter 220ms ease-out; }
+.money-content :is(td, .money-stat) { font-variant-numeric: tabular-nums; }
+
+/*
+ * The floating action rail is fixed to the right edge from md up (56px
+ * buttons + 16px inset). When a page renders it, the content keeps 5.5rem of
+ * right padding so cards never sit underneath it. (Measured against the
+ * viewport, a give-back for wide screens misfired: the sidebar shifts the
+ * content column, so the rail overlapped at 1440px and swallowed half the
+ * width on tablets.)
+ */
+@media (min-width: 768px) {
+  .money-content:has([data-fab-rail]) {
+    padding-right: 5.5rem;
+  }
+}
+@keyframes money-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* Tables */
+#main-content table thead tr { background: var(--bg-elevated); }
+#main-content table th {
+  font-size: 0.68rem; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text-secondary);
+}
+#main-content table tbody tr { transition: background-color 160ms ease; }
+#main-content table tbody tr:hover { background: color-mix(in srgb, var(--accent-purple) 5%, var(--card-bg)); }
+
+:is(button, a, input, select, textarea, summary, [role="combobox"]):focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 3px;
+}
+
+/* Recharts — shared Tally chrome for every chart */
+.recharts-cartesian-grid line { stroke: var(--border-subtle); stroke-dasharray: 4 4; }
+.recharts-cartesian-grid-vertical line { stroke-opacity: 0; }
+.recharts-cartesian-axis-line, .recharts-cartesian-axis-tick-line { stroke: var(--border-subtle); }
+.recharts-cartesian-axis-tick-value { fill: var(--text-secondary); font-size: 12px; }
+.recharts-default-tooltip {
+  background: var(--card-bg) !important; border: 1px solid var(--border-subtle) !important;
+  border-radius: 14px; box-shadow: var(--card-shadow); font-size: 12px;
+}
+.recharts-tooltip-label { color: var(--text-primary); font-weight: 600; }
+.recharts-legend-item-text { color: var(--text-secondary) !important; }
+.recharts-area-area { fill-opacity: 0.16; }
+.recharts-area-curve { stroke-width: 2.5px; }
+.recharts-pie-sector path { stroke: var(--card-bg); stroke-width: 2px; }
+.dash-gradient-area .recharts-area-area { fill-opacity: 1; }
+.dash-donut .recharts-pie-sector path { stroke: none; }
+
+/* Printable label sheet (/labels): print only the sheet, no app chrome */
+@media print {
+  body:has(.label-print-area) * { visibility: hidden !important; }
+  body:has(.label-print-area) .label-print-area,
+  body:has(.label-print-area) .label-print-area * { visibility: visible !important; }
+  body:has(.label-print-area) .label-print-area {
+    position: absolute; left: 0; top: 0; width: 100%; padding: 0; border-radius: 0;
+  }
+  .label-card { break-inside: avoid; }
+  @page { margin: 10mm; }
 }

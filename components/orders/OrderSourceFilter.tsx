@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import {
   filterCommandPopoverClass,
-  FILTER_COMMAND_INPUT_WRAPPER_CLASS,
   READABLE_POPOVER_ITEM_CLASS,
 } from "@/lib/ui/popover-readability-styles";
 
@@ -71,7 +70,7 @@ export function OrderSourceDropDown({
       <PopoverTrigger asChild>
         <Button
           variant="secondary"
-          className="h-10 rounded-[28px] border border-teal-400/30 dark:border-teal-400/30 bg-gradient-to-r from-teal-500/25 via-teal-500/15 to-teal-500/10 dark:from-teal-500/25 dark:via-teal-500/15 dark:to-teal-500/10 text-gray-700 dark:text-white shadow-[0_10px_30px_rgba(20,184,166,0.2)] backdrop-blur-md transition duration-200 hover:border-teal-300/40"
+          className="h-10 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 transition duration-200 hover:border-slate-300"
         >
           <LayoutGrid className="h-4 w-4 mr-1" />
           {getButtonLabel()}

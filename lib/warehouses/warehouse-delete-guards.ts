@@ -1,5 +1,5 @@
 /**
- * REQ-0102 — block warehouse delete when stock commitments exist.
+ * Block warehouse delete when stock commitments exist.
  */
 
 import { prisma } from "@/prisma/client";

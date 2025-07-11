@@ -1,5 +1,5 @@
 /**
- * REQ-0157 — Portal Total Orders KPI badges (client/supplier fulfillment model).
+ * Portal Total Orders KPI badges (client/supplier fulfillment model).
  * Pending → In progress → Shipping → Delivered → [Refunded] → [Cancelled].
  * Not store Confirmed/Cancel — portals use a different status grouping.
  * Client-safe / pure.

@@ -71,7 +71,7 @@ describe("patch-mutation-cache", () => {
     expect(qc.getQueryData(invoiceListKey)).toEqual([{ id: "i1", status: "sent" }]);
   });
 
-  // REQ-0210 — cancel patches invoice by orderId, not order.id
+  // Cancel patches invoice by orderId, not order.id
   it("patchInvoicesOnOrderCancel updates linked invoice list + detail", () => {
     const qc = new QueryClient();
     const orderListKey = ["orders", "list"] as const;
@@ -269,7 +269,7 @@ describe("patch-mutation-cache", () => {
     expect(qc.getQueryData(listKey)).toEqual([{ id: "p2" }]);
   });
 
-  // REQ-0153 — invoice money → linked order paymentStatus + invoice badge
+  // Invoice money → linked order paymentStatus + invoice badge
   it("patchLinkedOrderFromInvoiceMoney sets order partial + invoice badge", () => {
     const qc = new QueryClient();
     const orderListKey = queryKeys.orders.list();
@@ -357,7 +357,7 @@ describe("patch-mutation-cache", () => {
     ]);
   });
 
-  // REQ-0218 — transfer / summary / catalog list counts
+  // Transfer / summary / catalog list counts
   it("applyTransferQtyToAllocationRows decrements and upserts", () => {
     const rows = [
       {

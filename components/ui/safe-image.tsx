@@ -1,5 +1,5 @@
 /**
- * REQ-0038 — next/image with native img fallback when /_next/image fails (e.g. Vercel 402).
+ * Next/image with native img fallback when /_next/image fails (e.g. Vercel 402).
  * See docs/SAFE_IMAGE_REUSABLE_COMPONENT.md
  */
 "use client";

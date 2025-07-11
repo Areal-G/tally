@@ -5,7 +5,7 @@
 
 import { NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
-import { captureException } from "@/lib/monitoring/sentry";
+import { captureException } from "@/lib/monitoring/error-reporting";
 import type { ApiResponse, ApiError, ValidationError } from "@/types/api";
 
 /**
@@ -27,8 +27,8 @@ export function successResponse<T>(
 }
 
 export type ErrorResponseOptions = {
-  /** When false, 5xx responses are not sent to Sentry (expected ops failures) */
-  reportToSentry?: boolean;
+  /** When false, 5xx responses are not reported (expected ops failures) */
+  report?: boolean;
 };
 
 /**
@@ -40,7 +40,7 @@ export function errorResponse(
   details?: Record<string, unknown>,
   options?: ErrorResponseOptions,
 ): NextResponse<ApiError> {
-  const reportToSentry = options?.reportToSentry ?? true;
+  const report = options?.report ?? true;
 
   if (statusCode < 500) {
     logger.warn("API Error:", { error, statusCode, details });
@@ -48,7 +48,7 @@ export function errorResponse(
     logger.error("API Error:", { error, statusCode, details });
   }
 
-  if (statusCode >= 500 && reportToSentry) {
+  if (statusCode >= 500 && report) {
     const errorObj = new Error(error);
     captureException(errorObj, {
       statusCode,
@@ -69,7 +69,7 @@ export function errorResponse(
 }
 
 /**
- * Expected service unavailability (billing, missing config) — warn only, no Sentry.
+ * Expected service unavailability (billing, missing config) — warn only, not reported.
  */
 export function serviceUnavailableResponse(
   error: string,

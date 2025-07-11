@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * REQ-0074 — shared Parties & roles card with avatar rings and per-party glow cards.
- * REQ-0127 — single inline row per party: icon label + PersonInlineRow (sky name · muted email).
- * REQ-0165/0166 — optional linkClassName override; default sky for all party names.
- * REQ-0208 — User ID + CopyableText under each party when userId present.
+ * Shared Parties & roles card with avatar rings and per-party glow cards.
+ * Single inline row per party: icon label + PersonInlineRow (sky name · muted email).
+ * Optional linkClassName override; default sky for all party names.
+ * User ID + CopyableText under each party when userId present.
  */
 
 import React from "react";
@@ -34,7 +34,7 @@ export type PartiesRolesCardProps = {
   customerLabel?: string;
   productOwners?: PartyPerson[];
   /**
-   * REQ-0209 — always reserve Ordered by / Customer / Product owner rows
+   * Always reserve Ordered by / Customer / Product owner rows
    * (order detail) so slots do not mount at different times when densify arrives.
    */
   stableOrderPartySlots?: boolean;
@@ -90,9 +90,9 @@ function PartyFieldRow({
     <div
       className={cn(
         "flex flex-wrap items-center gap-x-3 gap-y-2 p-3 rounded-xl border border-teal-200/30 dark:border-teal-400/20",
-        "bg-gradient-to-br from-teal-100/40 via-white/30 to-transparent",
-        "dark:from-teal-500/10 dark:via-white/5 dark:to-transparent",
-        "shadow-[0_8px_24px_rgba(20,184,166,0.12)] dark:shadow-[0_8px_24px_rgba(20,184,166,0.08)]",
+        " bg-teal-100/40 ",
+        "dark:bg-teal-500/10 ",
+        " ",
         className,
       )}
     >

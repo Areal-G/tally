@@ -1,8 +1,8 @@
 /**
  * Server-side data for Admin Client Portal page
  * Aggregates clients (role=client), their orders, invoices, revenue.
- * REQ-0158: filter by buyer `clientId` (not creator `userId`).
- * REQ-0177 — denser recent order/invoice product meta + Redis v4 shape guard.
+ * Filter by buyer `clientId` (not creator `userId`).
+ * Denser recent order/invoice product meta + Redis v4 shape guard.
  * Only import from server code (e.g. app/admin/client-portal/page.tsx, GET /api/client-portal).
  */
 
@@ -19,7 +19,7 @@ import type {
   ClientPortalClient,
 } from "@/types";
 
-/** REQ-0177 — reject stale Redis rows missing productPreview on recent orders. */
+/** Reject stale Redis rows missing productPreview on recent orders. */
 function hasClientPortalCatalogMeta(stats: ClientPortalStats): boolean {
   const orders = stats.recentOrders ?? [];
   if (
@@ -54,7 +54,7 @@ export async function getClientPortalForAdmin(): Promise<ClientPortalStats> {
 
   const clientIds = clientUsers.map((u) => u.id);
 
-  // REQ-0158 — buyer field, not store-owner userId (counts / clients table)
+  // Buyer field, not store-owner userId (counts / clients table)
   const orders = clientIds.length
     ? await prisma.order.findMany({
         where: { clientId: { in: clientIds } },
@@ -103,7 +103,7 @@ export async function getClientPortalForAdmin(): Promise<ClientPortalStats> {
     invoices: invoicesRevenue,
   };
 
-  // REQ-0177 — recent 10 with first-line catalog items (dashboard parity)
+  // Recent 10 with first-line catalog items (dashboard parity)
   const recentOrderRows = clientIds.length
     ? await prisma.order.findMany({
         where: { clientId: { in: clientIds } },

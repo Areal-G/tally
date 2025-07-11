@@ -1,13 +1,13 @@
 /**
  * Build TanStack / API invoice list filters from UI search + status chips.
- * REQ-0159 — admin sidebar list is Self-only (no scope=store); store KPIs use dashboard.
+ * Admin sidebar list is Self-only (no scope=store); store KPIs use dashboard.
  */
 
 import type { InvoiceFilters, InvoiceStatus } from "@/types";
 
 export function buildInvoiceListFilters(options: {
   searchTerm: string;
-  /** Optional — status chips filter client-side on list pages (REQ-0045). */
+  /** Optional — status chips filter client-side on list pages. */
   selectedStatuses?: string[];
 }): InvoiceFilters | undefined {
   const filters: InvoiceFilters = {};

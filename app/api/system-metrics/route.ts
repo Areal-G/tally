@@ -7,6 +7,7 @@
  * - Node.js process information
  */
 
+import { getSessionFromRequest } from "@/utils/auth";
 import { NextRequest } from "next/server";
 import { getSystemMetrics } from "@/lib/monitoring/system-metrics";
 import { successResponse, errorResponse } from "@/lib/api/response-helpers";
@@ -18,6 +19,14 @@ import { logger } from "@/lib/logger";
  */
 export async function GET(request: NextRequest) {
   try {
+    const session = await getSessionFromRequest(request);
+    if (!session) {
+      return errorResponse("Unauthorized", 401);
+    }
+    if (session.role !== "admin") {
+      return errorResponse("Forbidden", 403);
+    }
+
     const metrics = await getSystemMetrics();
     return successResponse(metrics);
   } catch (error) {

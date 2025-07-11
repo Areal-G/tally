@@ -10,11 +10,9 @@ import {
   computeCommittedQuantity,
 } from "@/lib/products/enrich-product-committed-quantity";
 import type {
-  ProductSalesHistory,
   ProductDemandForecast,
   SalesAnomaly,
   ForecastingSummary,
-  TrendAnalysis,
 } from "@/types";
 
 // Configuration
@@ -22,20 +20,6 @@ const ANALYSIS_DAYS = 30; // Days of historical data to analyze
 const FORECAST_DAYS = 14; // Days to forecast ahead
 const ANOMALY_THRESHOLD = 2.0; // Standard deviations for anomaly detection
 const REORDER_LEAD_DAYS = 7; // Days lead time for reorder
-
-/**
- * Calculate moving average
- */
-function calculateMovingAverage(values: number[], window: number): number[] {
-  const result: number[] = [];
-  for (let i = 0; i < values.length; i++) {
-    const start = Math.max(0, i - window + 1);
-    const windowValues = values.slice(start, i + 1);
-    const avg = windowValues.reduce((a, b) => a + b, 0) / windowValues.length;
-    result.push(avg);
-  }
-  return result;
-}
 
 /**
  * Calculate standard deviation
@@ -49,49 +33,7 @@ function calculateStdDev(values: number[]): number {
   return Math.sqrt(avgSquaredDiff);
 }
 
-/**
- * Analyze trend using linear regression
- */
-function analyzeTrend(
-  dailySales: { date: string; quantity: number }[],
-): TrendAnalysis {
-  if (dailySales.length < 7) {
-    return {
-      trend: "stable",
-      percentageChange: 0,
-      periodDays: dailySales.length,
-    };
-  }
-
-  // Simple linear regression
-  const n = dailySales.length;
-  const xValues = dailySales.map((_, i) => i);
-  const yValues = dailySales.map((d) => d.quantity);
-
-  const sumX = xValues.reduce((a, b) => a + b, 0);
-  const sumY = yValues.reduce((a, b) => a + b, 0);
-  const sumXY = xValues.reduce((sum, x, i) => sum + x * (yValues[i] ?? 0), 0);
-  const sumXX = xValues.reduce((sum, x) => sum + x * x, 0);
-
-  const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-  const avgY = sumY / n;
-
-  // Calculate percentage change over the period
-  const percentageChange = avgY > 0 ? (slope * n * 100) / avgY : 0;
-
-  let trend: "increasing" | "decreasing" | "stable";
-  if (percentageChange > 10) {
-    trend = "increasing";
-  } else if (percentageChange < -10) {
-    trend = "decreasing";
-  } else {
-    trend = "stable";
-  }
-
-  return { trend, percentageChange, periodDays: n };
-}
-
-/** REQ-0171 — category/supplier fields shared by forecast + anomaly rows */
+/** Category/supplier fields shared by forecast + anomaly rows */
 type ForecastCatalogMeta = {
   categoryId?: string | null;
   categoryName?: string | null;
@@ -260,7 +202,7 @@ function generateProductForecast(
 export async function generateForecastingSummary(
   userId: string,
 ): Promise<ForecastingSummary> {
-  // Get all products for user (REQ-0171 — categoryId/supplierId for denser cells)
+  // Get all products for user (categoryId/supplierId for denser cells)
   const products = await prisma.product.findMany({
     where: mergeProductListWhere({ userId }),
     select: {
@@ -402,7 +344,7 @@ export async function generateForecastingSummary(
         : null,
     };
 
-    // Generate forecast (REQ-0170 imageUrl; REQ-0171 catalog meta)
+    // Generate forecast (imageUrl; catalog meta)
     const forecast = generateProductForecast(
       product.id,
       product.name,

@@ -1,8 +1,8 @@
 /**
  * Order Table Columns
  * Column definitions for the orders table using TanStack Table
- * REQ-0145 — Order # meta icons + product preview; Status start-align; Invoice # column
- * REQ-0161 — HelpTooltip on dense column headers (Order # / Total / Status / Payment / Invoice #)
+ * Order # meta icons + product preview; Status start-align; Invoice # column
+ * HelpTooltip on dense column headers (Order # / Total / Status / Payment / Invoice #)
  */
 
 "use client";
@@ -47,10 +47,11 @@ import {
   ORDER_TOTAL_COLUMN_TOOLTIP,
 } from "@/lib/ui/order-invoice-column-tooltips";
 import { cn } from "@/lib/utils";
+import { formatStableCurrency } from "@/lib/format";
 
-const META_MUTED = "text-xs text-gray-500 dark:text-gray-300";
+const META_MUTED = "text-xs text-gray-600 dark:text-gray-300";
 
-/** REQ-0145 — items / units / created with icons; date matches muted meta color */
+/** Items / units / created with icons; date matches muted meta color */
 function OrderCompactMeta({ order }: { order: Order }) {
   const { itemCount, unitCount } = getOrderItemUnitCounts(order.items);
   return (
@@ -139,7 +140,7 @@ type CreateOrderColumnsOptions = {
   showPlacedBy?: boolean;
   /** When true, show productOwnerName / productOwnerEmail under Order # (e.g. client view) */
   showProductOwner?: boolean;
-  /** Open InvoiceDialog create mode pre-selected with this order (REQ-0061) */
+  /** Open InvoiceDialog create mode pre-selected with this order */
   onCreateInvoice?: (order: Order) => void;
 };
 
@@ -147,7 +148,7 @@ type CreateOrderColumnsOptions = {
  * Order Table Columns Definition
  * Defines the columns for the order table with sorting and actions
  * Matches Category/Product/Supplier table pattern
- * @param onEdit - REQ-0169 optional; omit to hide Edit Order (embed tables)
+ * @param onEdit - optional; omit to hide Edit Order (embed tables)
  * @param detailHrefBase - When set (e.g. "/admin/orders"), View link uses {detailHrefBase}/{id}
  */
 export const createOrderColumns = (
@@ -163,7 +164,7 @@ export const createOrderColumns = (
   return [
     {
       accessorKey: "orderNumber",
-      // REQ-0161 — HelpTooltip sibling of sort (catalog Products pattern)
+      // HelpTooltip sibling of sort (catalog Products pattern)
       header: ({ column }) => (
         <div className="flex items-center gap-1">
           <SortableHeader column={column} label="Order #" />
@@ -217,7 +218,7 @@ export const createOrderColumns = (
             )}
             {showProductOwner && (
               <span className={META_MUTED}>
-                {/* REQ-0159 — Store · owner so client rows do not look like Admin is the customer */}
+                {/* Store · owner so client rows do not look like Admin is the customer */}
                 {formatStoreOwnerLabel(
                   order.productOwnerName,
                   order.productOwnerEmail,
@@ -227,7 +228,7 @@ export const createOrderColumns = (
                   : ""}
               </span>
             )}
-            {/* REQ-0145 — product row with icon; sky links to product detail */}
+            {/* Product row with icon; sky links to product detail */}
             {productLinks.length > 0 ? (
               <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                 <Package
@@ -236,7 +237,7 @@ export const createOrderColumns = (
                 />
                 {productLinks.map((p, i) => (
                   <span
-                    key={p.productId}
+                    key={`${p.productId}-${i}`}
                     className="inline-flex items-center gap-1 min-w-0"
                   >
                     {i > 0 ? (
@@ -281,7 +282,7 @@ export const createOrderColumns = (
         const order = row.original;
         const inv = order.invoiceForOrder;
         const paid = inv?.amountPaid ?? 0;
-        // REQ-0152 — compact paid/due under total when any amount has been paid
+        // Compact paid/due under total when any amount has been paid
         if (inv && paid > 0) {
           return (
             <PaymentMoneyBreakdown
@@ -293,7 +294,7 @@ export const createOrderColumns = (
           );
         }
         return (
-          <span className="tabular-nums">${order.total.toFixed(2)}</span>
+          <span className="tabular-nums">{formatStableCurrency(order.total)}</span>
         );
       },
     },

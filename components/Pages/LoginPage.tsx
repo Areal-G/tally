@@ -17,26 +17,24 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { setPostLoginWelcome } from "@/lib/auth/post-login-welcome";
-import { testAccounts } from "@/lib/auth/test-accounts";
+import { DEMO_ACCOUNT } from "@/lib/auth/demo-account";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { AuthInfoPanel } from "@/components/auth/AuthInfoPanel";
 import { AuthFormCard } from "@/components/auth/AuthFormCard";
 import { AuthAnimatedBlock } from "@/components/auth/AuthAnimatedBlock";
-import { LoginRoleSelect } from "@/components/auth/LoginRoleSelect";
 import {
   AUTH_FORM_ROW_STAGGER_MS,
   AUTH_FORM_STAGGER_BASE,
 } from "@/components/auth/auth-animation";
-import { Loader2, Zap } from "lucide-react";
+import { Loader2, PlayCircle, Zap } from "lucide-react";
 
 /**
  * Login page client component (uses useSearchParams for OAuth/redirect).
- * REQ-0030 — shared AuthPageShell, role Select icons, stagger animations.
+ * Shared AuthPageShell, role Select icons, stagger animations.
  */
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [selectedRole, setSelectedRole] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [isNavigatingToHome, setIsNavigatingToHome] = useState(false);
   const { login, isLoggedIn, user } = useAuth();
@@ -107,27 +105,13 @@ export default function LoginPage() {
     }
   }, [searchParams, router, toast]);
 
-  const handleRoleSelect = (value: string) => {
-    if (value === "clear") {
-      setSelectedRole("");
-      setEmail("");
-      setPassword("");
-    } else {
-      setSelectedRole(value);
-      const account = testAccounts[value as keyof typeof testAccounts];
-      if (account) {
-        setEmail(account.email);
-        setPassword(account.password);
-      }
-    }
-  };
-
   const handleGoogleSignIn = async () => {
     try {
       const redirectUrl = searchParams.get("redirect") || "/";
       const oauthUrl = `/api/auth/oauth/google?callback=${encodeURIComponent(
         redirectUrl,
       )}`;
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- API route that redirects to Google; needs a full navigation
       window.location.href = oauthUrl;
     } catch (error) {
       console.error("Error initiating Google OAuth:", error);
@@ -139,12 +123,11 @@ export default function LoginPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const signIn = async (loginEmail: string, loginPassword: string) => {
     setIsLoading(true);
 
     try {
-      const userData = await login(email, password);
+      const userData = await login(loginEmail, loginPassword);
       const userName = userData.name || userData.email.split("@")[0] || "User";
 
       navigatingFromSubmitRef.current = true;
@@ -178,6 +161,18 @@ export default function LoginPage() {
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void signIn(email, password);
+  };
+
+  /** One click into the seeded demo workspace — no typing needed. */
+  const handleTryDemo = () => {
+    setEmail(DEMO_ACCOUNT.email);
+    setPassword(DEMO_ACCOUNT.password);
+    void signIn(DEMO_ACCOUNT.email, DEMO_ACCOUNT.password);
+  };
+
   const formDisabled = isLoading || isNavigatingToHome;
 
   const formRowDelay = (row: number) =>
@@ -202,14 +197,22 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4 mb-6">
           <AuthAnimatedBlock delayMs={formRowDelay(1)} className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-white/80">
-              Test Accounts To Login With
-            </label>
-            <LoginRoleSelect
-              selectedRole={selectedRole}
-              onRoleSelect={handleRoleSelect}
+            <Button
+              type="button"
+              onClick={handleTryDemo}
+              className={cn(
+                GLASS_BUTTON_ICON_HOVER,
+                "w-full",
+                GLASS_PRIMARY_BUTTON.emerald,
+              )}
               disabled={formDisabled}
-            />
+            >
+              <PlayCircle className="mr-2 h-4 w-4" />
+              Try demo
+            </Button>
+            <p className="text-xs text-center text-gray-600 dark:text-white/70">
+              Explore a sample warehouse with products, orders and invoices.
+            </p>
           </AuthAnimatedBlock>
 
           <AuthAnimatedBlock delayMs={formRowDelay(2)} className="space-y-2">

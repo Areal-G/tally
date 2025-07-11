@@ -2,7 +2,7 @@
 
 /**
  * Shipping Management — generate Shippo label or add manual tracking.
- * REQ-0208 polish — edge-scroll shell (button glow not clipped), label icons,
+ * Polish — edge-scroll shell (button glow not clipped), label icons,
  * order line densify (thumb / category / supplier / qty / parties).
  */
 
@@ -168,12 +168,12 @@ export default function ShippingManagement({
           </Button>
         )}
       </DialogTrigger>
-      {/* overflow-visible shell — glass button glow must not clip (REQ-0208) */}
+      {/* Overflow-visible shell — glass button glow must not clip */}
       <DialogContent
         className={cn(
           DIALOG_EDGE_SCROLL_SHELL,
           "overflow-visible border-emerald-400/30 dark:border-emerald-400/30",
-          "shadow-[0_30px_80px_rgba(16,185,129,0.35)] dark:shadow-[0_30px_80px_rgba(16,185,129,0.25)]",
+          " ",
           "poppins sm:max-w-2xl",
         )}
       >
@@ -193,7 +193,12 @@ export default function ShippingManagement({
           </DialogDescription>
         </DialogHeader>
 
-        <div className={cn(DIALOG_EDGE_SCROLL_BODY, "overflow-y-auto overflow-x-visible")}>
+        <div
+          className={cn(
+            DIALOG_EDGE_SCROLL_BODY,
+            "overflow-y-auto overflow-x-visible",
+          )}
+        >
           <div className={cn(DIALOG_EDGE_SCROLL_INNER, "gap-4")}>
             {/* Order context densify */}
             <div className="rounded-xl border border-white/15 bg-white/5 p-3 space-y-3">
@@ -208,7 +213,7 @@ export default function ShippingManagement({
                 emptyMessage="No line items"
               />
             </div>
-            {/* REQ-0210 — stack parties + address so Auto/Manual tabs stay above fold */}
+            {/* Stack parties + address so Auto/Manual tabs stay above fold */}
             <div className="flex flex-col gap-2 min-w-0">
               <OrderPartiesCard order={order} dataLoading={false} />
               <OrderShippingAddressCard order={order} dataLoading={false} />
@@ -219,7 +224,7 @@ export default function ShippingManagement({
               onValueChange={(v) => setActiveTab(v as "auto" | "manual")}
               className="flex flex-col"
             >
-              <TabsList className="grid w-full grid-cols-2 h-11 p-1 rounded-lg bg-white/30 dark:bg-white/10 text-white shrink-0 border border-emerald-400/30 dark:border-white/20 shadow-[0_10px_30px_rgba(16,185,129,0.15)]">
+              <TabsList className="grid w-full grid-cols-2 h-11 p-1 rounded-lg bg-white/30 dark:bg-white/10 text-white shrink-0 border border-emerald-400/30 dark:border-white/20 ">
                 <TabsTrigger
                   value="auto"
                   className="h-9 gap-2 rounded-md data-[state=active]:border data-[state=active]:border-emerald-400 data-[state=active]:ring-2 data-[state=active]:ring-emerald-500/50 data-[state=active]:bg-background data-[state=active]:text-slate-700 dark:data-[state=active]:text-white dark:data-[state=active]:bg-white/20"
@@ -242,9 +247,9 @@ export default function ShippingManagement({
               >
                 <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 p-2">
                   <div className="flex items-start gap-2">
-                    <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                    <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
                     <p className="text-xs text-amber-700 dark:text-amber-400">
-                      {/* REQ-0211 — test keys use sandbox US addresses; UI still shows order ship-to */}
+                      {/* Test keys use sandbox US addresses; UI still shows order ship-to */}
                       Generates a Shippo label and sets status to
                       &quot;shipped&quot;. With a test API key, label purchase
                       uses sandbox US addresses (USPS); the order still shows

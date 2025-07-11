@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,8 +50,8 @@ export type AdminHistoryDetailContentProps = {
 
 /**
  * Admin History Detail — view a single import history record.
- * REQ-0075 AC4 — PageSectionHeader + GlassCard + DetailInfoRow parity.
- * REQ-0077 — footer Back uses glassDetailBackButtonClass (admin embed parity).
+ * PageSectionHeader + GlassCard + DetailInfoRow parity.
+ * Footer Back uses glassDetailBackButtonClass (admin embed parity).
  */
 export default function AdminHistoryDetailContent({
   backHref = "/admin/activity-history",
@@ -68,7 +67,7 @@ export default function AdminHistoryDetailContent({
 
   useSyncSsrQueryData(queryKeys.history.detail(id), initialRecord);
 
-  /** REQ-0120 — invalidate history list before nav (useBackWithRefresh). */
+  /** Invalidate history list before nav (useBackWithRefresh). */
   const handleBack = () => {
     navigateTo(backHref);
   };

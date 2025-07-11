@@ -1,15 +1,15 @@
 "use client";
 
 /**
- * REQ-0145 — Order table Invoice # column cell.
- * REQ-0150 — also used by Invoice table Invoice # (same density).
+ * Order table Invoice # column cell.
+ * Also used by Invoice table Invoice # (same density).
  * Line 1: # · created (muted)
  * Line 2: amount · secondary event (due / paid / cancelled / refunded / sent) · status badge
  */
 
 import Link from "next/link";
-import { Calendar, CircleDollarSign } from "lucide-react";
-import { CopyableText, ClientDate } from "@/components/shared";
+import { CircleDollarSign } from "lucide-react";
+import { CopyableText } from "@/components/shared";
 import { SemanticEventDate } from "@/components/shared/SemanticEventDate";
 import { InvoiceStatusBadge } from "@/lib/ui/semantic-badges";
 import {
@@ -17,8 +17,9 @@ import {
   type InvoiceEventSource,
 } from "@/lib/orders/invoice-event-date";
 import { cn } from "@/lib/utils";
+import { formatStableCurrency } from "@/lib/format";
 
-const META_MUTED = "text-xs text-gray-500 dark:text-gray-300";
+const META_MUTED = "text-xs text-gray-600 dark:text-gray-300";
 
 /** Minimal invoice shape for dense list cells (order.invoiceForOrder or Invoice list row). */
 export type InvoiceTableCellInvoice = InvoiceEventSource & {
@@ -63,15 +64,11 @@ export function OrderTableInvoiceCell({
             <span className={cn(META_MUTED, "shrink-0")} aria-hidden>
               ·
             </span>
-            <span
-              className={cn(
-                "inline-flex items-center gap-1 shrink-0",
-                META_MUTED,
-              )}
-            >
-              <Calendar className="h-3 w-3 shrink-0" aria-hidden />
-              <ClientDate date={invoice.createdAt} className="text-xs" />
-            </span>
+            <SemanticEventDate
+              date={invoice.createdAt}
+              kind="created"
+              mode="date"
+            />
           </>
         ) : null}
       </div>
@@ -84,8 +81,8 @@ export function OrderTableInvoiceCell({
               : "text-green-600 dark:text-green-400",
           )}
         >
-          <CircleDollarSign className="h-3 w-3 shrink-0" aria-hidden />$
-          {amountDue.toFixed(2)}
+          <CircleDollarSign className="h-3 w-3 shrink-0" aria-hidden />
+          {formatStableCurrency(amountDue)}
         </span>
         {secondary ? (
           <>

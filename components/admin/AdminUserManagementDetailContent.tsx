@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useBackWithRefresh } from "@/hooks/use-back-with-refresh";
@@ -50,7 +50,6 @@ import {
   DataSlotPulse,
   PageSectionHeader,
   SectionCardHeader,
-  GLASS_BUTTON_SHELL_RESET,
   GLASS_GHOST_BUTTON,
   glassDetailBackButtonClass,
   DETAIL_HEADER_BACK_ICON_CLASS,
@@ -74,6 +73,7 @@ import {
   getUserOverviewDescription,
   shouldShowMyActivityTip,
 } from "@/lib/ui/user-overview-copy";
+import { formatStableCurrency } from "@/lib/format";
 
 const PROTECTED_EMAILS = [
   "test@admin.com",
@@ -117,9 +117,6 @@ export default function AdminUserManagementDetailContent({
   const updateMutation = useUpdateUser();
   const deleteMutation = useDeleteUser();
   const isOwner = currentUser?.id != null && currentUser.id === id;
-  const isProtected = user
-    ? PROTECTED_EMAILS.includes((user.email ?? "").toLowerCase())
-    : false;
 
   const [name, setName] = useState("");
   const [nameTouched, setNameTouched] = useState(false);
@@ -304,7 +301,7 @@ export default function AdminUserManagementDetailContent({
                           setNameTouched(true);
                         }}
                         disabled={isUpdating || actionsDisabled}
-                        className="rounded-[28px] border-violet-200/50 dark:border-white/10"
+                        className="rounded-lg border-violet-200/50 dark:border-white/10"
                       />
                       {nameTouched && (
                         <Button
@@ -338,7 +335,7 @@ export default function AdminUserManagementDetailContent({
           {dataLoading ? (
             <DataSlotPulse
               variant="badge"
-              className="h-9 w-[140px] rounded-[28px]"
+              className="h-9 w-[140px] rounded-lg"
             />
           ) : (
             <DeferredSelectGate
@@ -364,7 +361,7 @@ export default function AdminUserManagementDetailContent({
                       userRoleBadgeClass(u!.role),
                     )}
                   >
-                    {/* REQ-0202 — SSR role label on mount (no blank SelectValue flash) */}
+                    {/* SSR role label on mount (no blank SelectValue flash) */}
                     <SelectValue>
                       <UserRoleBadge role={u!.role ?? "user"} />
                     </SelectValue>
@@ -387,7 +384,7 @@ export default function AdminUserManagementDetailContent({
           <GlassCard variant="sky">
             <SectionCardHeader
               title="Overview"
-              // REQ-0160 — role-aware blurb; KPI numbers unchanged
+              // Role-aware blurb; KPI numbers unchanged
               description={getUserOverviewDescription(u?.role)}
               icon={DollarSign}
               tone="sky"
@@ -433,7 +430,7 @@ export default function AdminUserManagementDetailContent({
                     {dataLoading ? (
                       <DataSlotPulse variant="currency" />
                     ) : (
-                      `$${(overview!.totalRevenue ?? 0).toLocaleString()}`
+                      formatStableCurrency(overview!.totalRevenue ?? 0)
                     )}
                   </p>
                   <p className={cn("text-xs", TYPO_BODY_MUTED)}>Total Revenue</p>
@@ -446,7 +443,7 @@ export default function AdminUserManagementDetailContent({
                     {dataLoading ? (
                       <DataSlotPulse variant="currency" />
                     ) : (
-                      `$${overview!.totalSpent.toLocaleString()}`
+                      formatStableCurrency(overview!.totalSpent)
                     )}
                   </p>
                   <p className={cn("text-xs", TYPO_BODY_MUTED)}>Total Spent</p>
@@ -459,7 +456,7 @@ export default function AdminUserManagementDetailContent({
                     {dataLoading ? (
                       <DataSlotPulse variant="currency" />
                     ) : (
-                      `$${overview!.totalDue.toLocaleString()}`
+                      formatStableCurrency(overview!.totalDue)
                     )}
                   </p>
                   <p className={cn("text-xs", TYPO_BODY_MUTED)}>Total Due</p>
@@ -535,7 +532,7 @@ export default function AdminUserManagementDetailContent({
           </GlassCard>
         )}
 
-        {/* REQ-0160 — own store-owner account: Self-only tip (homepage sky link pattern) */}
+        {/* Own store-owner account: Self-only tip (homepage sky link pattern) */}
         {shouldShowMyActivityTip({ isOwner, role: u?.role }) && (
           <p className={cn(TYPO_SUBTITLE, "text-gray-600 dark:text-white/70")}>
             Overview counts are store-owner scope (owned orders and catalog). For

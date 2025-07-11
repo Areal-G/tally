@@ -1,5 +1,5 @@
 /**
- * REQ-0102 — server validation for allocation upsert (POST + PUT).
+ * Server validation for allocation upsert (POST + PUT).
  * Absolute qty per warehouse; capped by unallocated catalog budget.
  */
 
@@ -29,7 +29,7 @@ export type AllocationQtyBounds = {
   currentInWarehouse: number;
 };
 
-/** REQ-0110 — shared min/max for allocate dialog + server validation. */
+/** Shared min/max for allocate dialog + server validation. */
 export function getAllocationQtyBounds(
   input: ValidateAllocationUpsertInput,
 ): AllocationQtyBounds {

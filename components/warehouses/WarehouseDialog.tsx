@@ -84,7 +84,7 @@ export default function WarehouseDialog({
       ? onEditWarehouse
       : setInternalEditing;
 
-  // REQ-0198 — sync fields on open / edit target (no queueMicrotask bounce)
+  // Sync fields on open / edit target (no queueMicrotask bounce)
   useSyncDialogOpenState(
     open,
     () => {
@@ -137,7 +137,7 @@ export default function WarehouseDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent
-        className="p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto border-teal-400/30 dark:border-teal-400/30 shadow-[0_30px_80px_rgba(20,184,166,0.35)] dark:shadow-[0_30px_80px_rgba(20,184,166,0.25)]"
+        className="p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto border-teal-400/30 dark:border-teal-400/30 "
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeaderBrand
@@ -181,7 +181,7 @@ export default function WarehouseDialog({
             <DialogFormLabel htmlFor="warehouse-type" icon={Layers} optional>
               Warehouse Type
             </DialogFormLabel>
-            {/* REQ-0186 — solid trigger / opaque items (ticket Status Select parity) */}
+            {/* Solid trigger / opaque items (ticket Status Select parity) */}
             <DeferredSelectGate
               enabled={open}
               placeholder={
@@ -207,7 +207,7 @@ export default function WarehouseDialog({
               {({ selectRemountKey }) => (
                 <Select
                   key={selectRemountKey}
-                  // REQ-0186 — always string so Radix stays controlled (never undefined)
+                  // Always string so Radix stays controlled (never undefined)
                   value={type}
                   onValueChange={setType}
                 >

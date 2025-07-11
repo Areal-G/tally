@@ -1,7 +1,7 @@
 /**
- * REQ-0190 — Support ticket update access + Send-to (assignedToId) mutation policy.
+ * Support ticket update access + Send-to (assignedToId) mutation policy.
  * Creator/assignee/admin may update ticket fields; only admin may change assignee.
- * REQ-0195 — only admin may change workflow status (non-admin body.status ignored).
+ * Only admin may change workflow status (non-admin body.status ignored).
  */
 
 import type { SupportTicketStatus } from "@/types";
@@ -41,7 +41,7 @@ export function resolveAssignedToUpdate(
 }
 
 /**
- * REQ-0195 — workflow status is admin-owned.
+ * Workflow status is admin-owned.
  * Non-admin: undefined (ignored even if body includes status).
  * Admin: pass through when provided.
  */

@@ -14,7 +14,6 @@ import React, {
 } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { PaginationType } from "@/components/shared/PaginationSelector";
 import { createInvoiceColumns } from "./InvoiceTableColumns";
 import { useAuth } from "@/contexts";
 import {
@@ -24,6 +23,7 @@ import {
   useClientPortalDashboard,
   useSupplierPortalDashboard,
 } from "@/hooks/queries";
+import { useTypedListSearch } from "@/hooks/use-typed-list-search";
 import {
   isDataSlotLoading,
   isDataSlotUnsettled,
@@ -61,9 +61,10 @@ import {
   isDefaultInvoiceListFilters,
 } from "@/lib/invoices/invoice-list-filters";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { formatStableCurrency } from "@/lib/format";
+import { EMPTY_LIST } from "@/lib/utils";
 
-const formatCurrency = (value: number) =>
-  `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const formatCurrency = formatStableCurrency;
 
 const InvoiceTable = dynamic(
   () =>
@@ -80,15 +81,15 @@ export type InvoiceListProps = {
   detailHrefBase?: string;
   /** When "clientInvoices", fetches client invoices; when "adminCombined", merge personal + client with Invoice type filter */
   dataSource?: "invoices" | "clientInvoices" | "adminCombined";
-  /** SSR-passed invoices for first-render hydration (REQ-0021) */
+  /** SSR-passed invoices for first-render hydration */
   initialInvoices?: Invoice[] | InvoiceForPage[];
-  /** SSR client-leg invoices for adminCombined (REQ-0025) */
+  /** SSR client-leg invoices for adminCombined */
   initialClientInvoices?: Invoice[] | InvoiceForPage[];
-  /** SSR dashboard stats for header cards (REQ-0025) */
+  /** SSR dashboard stats for header cards */
   initialStats?: DashboardStats | null;
   /** SSR client portal for client /invoices cards */
   initialClientPortal?: ClientPortalDashboard;
-  /** REQ-0205 — SSR supplier portal for supplier /invoices KPI cards */
+  /** SSR supplier portal for supplier /invoices KPI cards */
   initialSupplierPortal?: SupplierPortalDashboard | null;
 };
 
@@ -110,11 +111,8 @@ const InvoiceList = React.memo(
     const { user } = useAuth();
     const role = user?.role;
 
-    const [searchTerm, setSearchTerm] = useState("");
-    const [pagination, setPagination] = useState<PaginationType>({
-      pageIndex: 0,
-      pageSize: 8,
-    });
+    const { searchTerm, setSearchTerm, pagination, setPagination } =
+      useTypedListSearch();
     const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
     const [invoiceSourceFilter, setInvoiceSourceFilter] =
       useState<InvoiceSourceFilterValue>("both");
@@ -132,7 +130,7 @@ const InvoiceList = React.memo(
     const enableSupplierPortal =
       pathname === "/invoices" && role === "supplier";
 
-    // REQ-0159 — admin/user /invoices uses Self-only issuer scope (match /orders)
+    // Admin/user /invoices uses Self-only issuer scope (match /orders)
     const apiFilters = useMemo(
       () =>
         buildInvoiceListFilters({
@@ -181,7 +179,7 @@ const InvoiceList = React.memo(
     /** Client on /invoices: show client-specific invoice state cards (same data as /client portal) */
     const isClientInvoicesPage =
       pathname === "/invoices" && user?.role === "client";
-    /** REQ-0204 — supplier on /invoices: related invoices (orders with their products) */
+    /** Supplier on /invoices: related invoices (orders with their products) */
     const isSupplierInvoicesPage =
       pathname === "/invoices" && user?.role === "supplier";
     const portalDashboardQuery = useClientPortalDashboard(
@@ -247,7 +245,7 @@ const InvoiceList = React.memo(
         byId.set(inv.id, {
           ...inv,
           _source: self ? "personal" : "client",
-          // REQ-0159 — Client rows: buyer clientName first (never store owner)
+          // Client rows: buyer clientName first (never store owner)
           _displayName: self
             ? (user.name ?? "You")
             : (inv.clientName ?? inv.customerDisplay ?? "Client"),
@@ -301,7 +299,7 @@ const InvoiceList = React.memo(
     const allInvoicesRaw =
       dataSource === "adminCombined"
         ? mergedInvoicesForAdmin
-        : (invoicesQuery.data ?? []);
+        : (invoicesQuery.data ?? EMPTY_LIST);
     const allInvoices = useMemo(() => {
       if (dataSource !== "adminCombined") return allInvoicesRaw;
       if (invoiceSourceFilter === "both") return allInvoicesRaw;
@@ -321,7 +319,6 @@ const InvoiceList = React.memo(
     const handleEditInvoice = useCallback((invoice: Invoice) => {
       setEditingInvoice(invoice);
       setEditDialogOpen(true);
-      // TODO: Implement InvoiceDialog component for editing invoices
     }, []);
 
     const columns = useMemo(
@@ -340,7 +337,7 @@ const InvoiceList = React.memo(
 
     const isSearchDebouncing = searchTerm !== debouncedSearchTerm;
 
-    // REQ-0021: shell-first — only data slots pulse
+    // Shell-first — only data slots pulse
     const tableDataLoading =
       dataSource === "adminCombined"
         ? isDataSlotLoading(invoicesQueryDefault, initialInvoices) ||
@@ -390,7 +387,7 @@ const InvoiceList = React.memo(
           tone="emerald"
           title={
             isAdminCombined
-              ? "Store Invoices Management (self + client)"
+              ? "Store Invoices"
               : isClientInvoices
                 ? "Client Invoices"
                 : isClientInvoicesPage
@@ -726,7 +723,7 @@ const InvoiceList = React.memo(
           </div>
         )}
 
-        {/* REQ-0205 — Supplier /invoices state cards (same 4 as supplier /orders) */}
+        {/* Supplier /invoices state cards (same 4 as supplier /orders) */}
         {isSupplierInvoicesPage && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 items-stretch pb-6">
             <StatisticsCard

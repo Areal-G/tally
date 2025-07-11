@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * REQ-0191 — Client/supplier ticket detail: densify + chat + Edit/Delete when allowed.
- * REQ-0195 — Admin card parity (sky): Status/Priority/Messages, Ticket info, Description,
+ * Client/supplier ticket detail: densify + chat + Edit/Delete when allowed.
+ * Admin card parity (sky): Status/Priority/Messages, Ticket info, Description,
  * Related; no Internal Notes / Reassign. Non-admin user hrefs via resolveDetailAuditUserHref.
- * REQ-0196 — single GlassCard body pad (no inner p-2 sm:p-4).
- * REQ-0201 — Related Product densify (TicketRelatedProductDense).
+ * Single GlassCard body pad (no inner p-2 sm:p-4).
+ * Related Product densify (TicketRelatedProductDense).
  */
 
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/layouts/Navbar";
 import {
@@ -60,7 +60,7 @@ import {
   Boxes,
   Building2,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, EMPTY_LIST } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -123,7 +123,7 @@ export default function SupportTicketDetailContent({
   ]);
 
   const repliesQuery = useSupportTicketReplies(ticket.id, initialReplies);
-  const replies = repliesQuery.data ?? initialReplies ?? [];
+  const replies = repliesQuery.data ?? initialReplies ?? EMPTY_LIST;
   const repliesLoading = isDataSlotLoading(repliesQuery, initialReplies);
   const deleteMutation = useDeleteSupportTicket();
   const isDeleting = deleteMutation.isPending;
@@ -133,7 +133,7 @@ export default function SupportTicketDetailContent({
     !!sessionId &&
     (ticket.userId === sessionId || ticket.assignedToId === sessionId);
 
-  // REQ-0192/0195 — opening description + replies
+  // Opening description + replies
   const messageStats = useMemo(
     () => computeTicketMessageStats(ticket.userId, replies),
     [replies, ticket],
@@ -401,7 +401,7 @@ export default function SupportTicketDetailContent({
             </GlassCard>
           </div>
 
-          {/* REQ-0201 — Related Product densify; non-admin catalog paths */}
+          {/* Related Product densify; non-admin catalog paths */}
           {!dataLoading && hasRelated ? (
             <GlassCard variant="sky">
               <SectionCardHeader

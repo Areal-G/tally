@@ -3,9 +3,7 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { logger } from "@/lib/logger";
-import * as Sentry from "@sentry/nextjs";
-import { isSentryConfigured } from "@/lib/monitoring/sentry";
-import { isRadixPortalRemoveChildError } from "@/lib/monitoring/sentry-config";
+import { isRadixPortalRemoveChildError } from "@/lib/monitoring/dom-errors";
 
 interface Props {
   children: ReactNode;
@@ -22,7 +20,6 @@ interface State {
  * ErrorBoundary Component
  * Catches JavaScript errors anywhere in the child component tree
  * and displays a fallback UI instead of crashing the whole app.
- * Automatically sends errors to Sentry in production when configured.
  *
  * Usage:
  * <ErrorBoundary>
@@ -36,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   public static getDerivedStateFromError(error: Error): State {
-    // Radix Select portal removeChild during App Router nav — recover silently (REQ-0017)
+    // Radix Select portal removeChild during App Router nav — recover silently
     if (isRadixPortalRemoveChildError(error)) {
       return { hasError: false, error: null };
     }
@@ -44,7 +41,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Radix Select portal teardown race — skip Sentry and crash UI (Safari + Chrome)
+    // Radix Select portal teardown race — skip crash UI (Safari + Chrome)
     if (
       isRadixPortalRemoveChildError(
         error,
@@ -82,15 +79,6 @@ export class ErrorBoundary extends Component<Props, State> {
       componentStack: errorInfo.componentStack,
     });
 
-    if (isSentryConfigured()) {
-      Sentry.captureException(error, {
-        contexts: {
-          react: { componentStack: errorInfo.componentStack },
-          custom: { errorBoundary: true },
-        },
-      });
-    }
-
     // Call custom error handler if provided
     this.props.onError?.(error, errorInfo);
   }
@@ -124,6 +112,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 Try again
               </Button>
               <Button
+                // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload recovers from a crashed render tree
                 onClick={() => (window.location.href = "/")}
                 variant="outline"
               >

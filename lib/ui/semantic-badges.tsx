@@ -3,7 +3,6 @@
  * Exclude StatisticsCard summary badges (those keep outline style).
  */
 
-import React from "react";
 import {
   AlertCircle,
   AlertTriangle,
@@ -75,7 +74,7 @@ const ORDER_STATUS: Record<string, BadgeTone> = {
   cancelled: { className: GLASS_BADGE_CLASS.rose, icon: XCircle },
 };
 
-/** REQ-0187 — solid/opaque contrast for dark dialog glass (invoice picker/panel) */
+/** Solid/opaque contrast for dark dialog glass (invoice picker/panel) */
 const ORDER_STATUS_HUE: Record<string, GlassBadgeHue> = {
   pending: "orange",
   confirmed: "sky",
@@ -123,7 +122,7 @@ const TICKET_PRIORITY: Record<string, BadgeTone> = {
   urgent: { className: GLASS_BADGE_CLASS.red, icon: XCircle },
 };
 
-/** REQ-0185 — solid/opaque contrast for dark dialog Priority Select */
+/** Solid/opaque contrast for dark dialog Priority Select */
 const TICKET_PRIORITY_HUE: Record<string, GlassBadgeHue> = {
   low: "gray",
   medium: "blue",
@@ -138,7 +137,7 @@ const TICKET_STATUS: Record<string, BadgeTone> = {
   closed: { className: GLASS_BADGE_CLASS.gray, icon: XCircle },
 };
 
-/** REQ-0193 — solid/opaque contrast for dark dialog Status Select */
+/** Solid/opaque contrast for dark dialog Status Select */
 const TICKET_STATUS_HUE: Record<string, GlassBadgeHue> = {
   open: "amber",
   in_progress: "blue",
@@ -152,7 +151,7 @@ const REVIEW_STATUS: Record<string, BadgeTone> = {
   rejected: { className: GLASS_BADGE_CLASS.red, icon: XCircle },
 };
 
-/** REQ-0183 — solid/opaque contrast for dark dialog Select + light detail */
+/** Solid/opaque contrast for dark dialog Select + light detail */
 const REVIEW_STATUS_HUE: Record<string, GlassBadgeHue> = {
   pending: "amber",
   approved: "emerald",
@@ -167,7 +166,7 @@ const INVOICE_STATUS: Record<string, BadgeTone> = {
   cancelled: { className: GLASS_BADGE_CLASS.orange, icon: XCircle },
 };
 
-/** Hue keys for solid/opaque contrast variants (REQ-0150 Select trigger/items). */
+/** Hue keys for solid/opaque contrast variants (Select trigger/items). */
 const INVOICE_STATUS_HUE: Record<string, GlassBadgeHue> = {
   draft: "slate",
   sent: "sky",
@@ -236,7 +235,7 @@ const FORECAST_URGENCY: Record<string, BadgeTone> = {
 };
 
 /**
- * REQ-0139 — plain text color for reorder recommendation (Urgent / Normal / …).
+ * Plain text color for reorder recommendation (Urgent / Normal / …).
  */
 export function reorderRecommendationTextClass(
   recommendation: string | null | undefined,
@@ -285,7 +284,7 @@ export type SemanticBadgeProps = {
   /** `compact` = tables/portal rows; `detail` = entity detail cards */
   size?: "compact" | "detail";
   /**
-   * REQ-0150 — Select trigger uses `solid` (white on hue);
+   * Select trigger uses `solid` (white on hue);
    * dropdown items use `opaque` (readable, resists SelectItem focus inherit).
    */
   contrast?: SemanticBadgeContrast;
@@ -480,7 +479,7 @@ export function ActiveInactiveBadge({
   );
 }
 
-/** Hue map for solid/opaque Select contrast (REQ-0186) — mirrors glass tones. */
+/** Hue map for solid/opaque Select contrast — mirrors glass tones. */
 const WAREHOUSE_TYPE_HUE: Record<string, GlassBadgeHue> = {
   main: "sky",
   secondary: "teal",
@@ -492,7 +491,7 @@ const WAREHOUSE_TYPE_HUE: Record<string, GlassBadgeHue> = {
 
 /**
  * Warehouse type badge (main, secondary, distribution, …).
- * Default `glass` for tables/detail; `solid`/`opaque` for dialog Select (REQ-0186).
+ * Default `glass` for tables/detail; `solid`/`opaque` for dialog Select.
  */
 export function WarehouseTypeBadge({
   type,
@@ -559,7 +558,7 @@ export function TicketStatusBadge({
 }: SemanticBadgeProps) {
   const base = resolveTone(TICKET_STATUS, status);
   const hue = TICKET_STATUS_HUE[normalizeKey(status)] ?? "amber";
-  // REQ-0193 — glass default (lists/detail); solid/opaque for dark Select
+  // Glass default (lists/detail); solid/opaque for dark Select
   const tone: BadgeTone =
     contrast === "solid"
       ? { icon: base.icon, className: SOLID_BADGE_CLASS[hue] }
@@ -671,7 +670,7 @@ export function productStockLabelFromAvailable(available: number): string {
 }
 
 /**
- * REQ-0138 — text color for available qty (same thresholds as productStockLabelFromAvailable).
+ * Text color for available qty (same thresholds as productStockLabelFromAvailable).
  * Available >20 emerald · Stock Low >0 orange · Stock Out red.
  */
 export function productStockAvailableTextClass(available: number): string {
@@ -702,7 +701,7 @@ export function ProductStockFromQuantityBadge({
   );
 }
 
-/** REQ-0098 — admin order/invoice table Self vs Client source */
+/** Admin order/invoice table Self vs Client source */
 export function AdminOrderSourceBadge({
   source,
   className,
@@ -725,7 +724,7 @@ export function AdminOrderSourceBadge({
   );
 }
 
-/** REQ-0098 — forecast reorder urgency (low/medium/high/critical) */
+/** Forecast reorder urgency (low/medium/high/critical) */
 export function ForecastUrgencyBadge({
   urgency,
   className,
@@ -746,7 +745,7 @@ export function ForecastUrgencyBadge({
   );
 }
 
-/** REQ-0098 — low-stock alert quantity pill e.g. "10 left" */
+/** Low-stock alert quantity pill e.g. "10 left" */
 export function StockQuantityLeftBadge({
   quantity,
   className,
@@ -772,7 +771,7 @@ export function StockQuantityLeftBadge({
   );
 }
 
-/** REQ-0098 — business insights inventory health row */
+/** Business insights inventory health row */
 export function InventoryHealthBadge({
   lowStockItems,
   className,
@@ -795,7 +794,7 @@ export function InventoryHealthBadge({
   );
 }
 
-/** REQ-0098 — notification dropdown unread "New" pill */
+/** Notification dropdown unread "New" pill */
 export function NotificationNewBadge({
   className,
   size = "compact",

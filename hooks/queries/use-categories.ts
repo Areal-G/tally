@@ -14,6 +14,7 @@ import {
   patchListCaches,
   removeFromListCaches,
 } from "@/lib/react-query";
+import { mergeCatalogMutationIntoDetail } from "@/lib/catalog/merge-catalog-mutation-densify";
 import { useToast } from "@/hooks/use-toast";
 import type {
   Category,
@@ -73,11 +74,11 @@ export function useCreateCategory() {
     },
     onSuccess: (newCategory) => {
       if (newCategory.id) {
-        // REQ-0218 — merge so thin create never wipes densify if detail was warmed
+        // Merge so thin create never wipes densify if detail was warmed
         patchDetailCacheMerge<Category>(
           queryClient,
           queryKeys.categories.detail(newCategory.id),
-          (old) => (old ? { ...old, ...newCategory } : newCategory),
+          (old) => mergeCatalogMutationIntoDetail(old, newCategory),
         );
         patchListCaches(queryClient, queryKeys.categories.all, newCategory, {
           prependIfMissing: true,
@@ -115,12 +116,11 @@ export function useUpdateCategory() {
     },
     onSuccess: (updatedCategory) => {
       if (updatedCategory.id) {
-        // REQ-0218 — thin PUT must not wipe categoryInsights / products / statistics
+        // Thin PUT must not wipe categoryInsights / products / statistics
         patchDetailCacheMerge<Category>(
           queryClient,
           queryKeys.categories.detail(updatedCategory.id),
-          (old) =>
-            old ? { ...old, ...updatedCategory } : updatedCategory,
+          (old) => mergeCatalogMutationIntoDetail(old, updatedCategory),
         );
         patchListCaches(queryClient, queryKeys.categories.all, updatedCategory);
       }

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0114/0117 — shared dialog field labels (icon + label on one row).
+ * Shared dialog field labels (icon + label on one row).
  * Use wrapperClassName for mb-* spacing; never pass `block` on className (kills flex).
  */
 

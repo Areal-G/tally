@@ -1,9 +1,9 @@
 /**
- * REQ-0152 / REQ-0209 — Derive order paymentStatus from invoice money fields.
+ * Derive order paymentStatus from invoice money fields.
  * unpaid (paid<=0) | partial (0 < paid < total) | paid (paid >= total).
  * Does not invent an invoice "partial" status — money fields carry mid-pay.
- * REQ-0209 — first money (partial or paid) while pending → confirm + fulfill once.
- * REQ-0215 — cent-safe compare so partial→remainder settle promotes paid (no float stuck sent/partial).
+ * First money (partial or paid) while pending → confirm + fulfill once.
+ * Cent-safe compare so partial→remainder settle promotes paid (no float stuck sent/partial).
  */
 
 import { prisma } from "@/prisma/client";
@@ -30,7 +30,7 @@ export function deriveOrderPaymentStatus(
 }
 
 /**
- * REQ-0209 — When first money lands on a pending order, bump fulfillment to confirmed
+ * When first money lands on a pending order, bump fulfillment to confirmed
  * and fulfill reserved stock once. Partial → paid later must not fulfill again.
  */
 export function shouldConfirmAndFulfillOnPaymentSync(args: {
@@ -52,7 +52,7 @@ export type SyncOrderPaymentFromInvoiceInput = {
 /**
  * Sync linked order.paymentStatus from invoice money.
  * Skips refunded orders.
- * REQ-0209 — pending + (partial|paid) → status confirmed + fulfillPendingOrderLines once.
+ * Pending + (partial|paid) → status confirmed + fulfillPendingOrderLines once.
  * Returns the payment status written, or null if skipped.
  */
 export async function syncOrderPaymentStatusFromInvoice(
@@ -118,7 +118,7 @@ export async function syncOrderPaymentStatusFromInvoice(
  * Apply a Stripe charge amount onto invoice money (incremental).
  * Returns next amountPaid / amountDue / status for prisma update.
  * When not fully paid, caller should clear paidAt (set null).
- * REQ-0215 — cent-safe fullyPaid; clamp amountDue to 0 when settled.
+ * Cent-safe fullyPaid; clamp amountDue to 0 when settled.
  */
 export function applyIncrementalInvoicePayment(args: {
   priorAmountPaid: number;
@@ -147,7 +147,7 @@ export function applyIncrementalInvoicePayment(args: {
   if (fullyPaid) {
     status = "paid";
   } else if (newPaidCents > 0) {
-    // REQ-0211 — any money: draft→sent; keep overdue; never revive cancelled
+    // Any money: draft→sent; keep overdue; never revive cancelled
     if (args.priorStatus === "cancelled") {
       status = "cancelled";
     } else if (args.priorStatus === "overdue") {
@@ -160,7 +160,7 @@ export function applyIncrementalInvoicePayment(args: {
 }
 
 /**
- * REQ-0211 / REQ-0215 — Recompute invoice status from current money (chargeAmount 0).
+ * Recompute invoice status from current money (chargeAmount 0).
  * Promotes draft→sent on mid-pay; sent/overdue/draft → paid when fully settled.
  */
 export function resolveInvoiceStatusAfterMoney(args: {

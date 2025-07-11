@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * AllocateStockDialog — assign product quantity to a warehouse (REQ-0066).
+ * AllocateStockDialog — assign product quantity to a warehouse.
  * Shell matches CategoryDialog (edge scroll + outer glow).
  */
 
@@ -54,10 +54,10 @@ import {
 } from "@/components/products/ProductOptionRow";
 import { useCreateStockAllocation, useProducts, useStockByProduct, useUpdateStockAllocation } from "@/hooks/queries";
 import { getAllocationQtyBounds } from "@/lib/stock-allocation/validate-allocation-quantity";
-import type { Product, StockAllocation } from "@/types";
+import type { StockAllocation } from "@/types";
 import { cn } from "@/lib/utils";
 
-const ALLOCATE_DIALOG_CONTENT_CLASS = `${DIALOG_EDGE_SCROLL_SHELL} poppins border-violet-400/30 dark:border-violet-400/30 shadow-[0_30px_80px_rgba(139,92,246,0.35)] dark:shadow-[0_30px_80px_rgba(139,92,246,0.25)]`;
+const ALLOCATE_DIALOG_CONTENT_CLASS = `${DIALOG_EDGE_SCROLL_SHELL} poppins border-violet-400/30 dark:border-violet-400/30 `;
 
 export type AllocateStockDialogProps = {
   open: boolean;
@@ -86,10 +86,11 @@ export default function AllocateStockDialog({
   const activeProductId = isEditMode
     ? (editAllocation?.productId ?? "")
     : productId;
+  // Warm stock as soon as product known (edit opens with densify already on row)
   const { data: productAllocations = [] } = useStockByProduct(
     activeProductId,
     undefined,
-    { enabled: open && !!activeProductId },
+    { enabled: !!activeProductId },
   );
   const createMutation = useCreateStockAllocation();
   const updateMutation = useUpdateStockAllocation();
@@ -98,6 +99,12 @@ export default function AllocateStockDialog({
     () => products.find((p) => p.id === activeProductId),
     [products, activeProductId],
   );
+
+  // Instant hint from edit row densify before byProduct fetch settles
+  const catalogTotal =
+    selectedProduct?.quantity ?? editAllocation?.product?.quantity;
+  const densifyAllocated = editAllocation?.product?.allocatedTotal;
+  const densifyUnallocated = editAllocation?.product?.unallocated;
 
   const allocationRows = useMemo(
     () =>
@@ -114,21 +121,45 @@ export default function AllocateStockDialog({
       : 0;
 
   const allocationBounds = useMemo(() => {
-    if (!selectedProduct) return null;
+    const catalogQty = catalogTotal;
+    if (catalogQty == null) return null;
+    if (allocationRows.length === 0 && densifyAllocated != null) {
+      return getAllocationQtyBounds({
+        catalogQty,
+        allocations: [
+          {
+            warehouseId,
+            quantity: Number(editAllocation?.quantity ?? densifyAllocated),
+          },
+        ],
+        targetWarehouseId: warehouseId,
+        newAbsoluteQty: 0,
+        rowReserved,
+      });
+    }
     return getAllocationQtyBounds({
-      catalogQty: selectedProduct.quantity,
+      catalogQty,
       allocations: allocationRows,
       targetWarehouseId: warehouseId,
       newAbsoluteQty: 0,
       rowReserved,
     });
-  }, [allocationRows, rowReserved, selectedProduct, warehouseId]);
+  }, [
+    allocationRows,
+    catalogTotal,
+    densifyAllocated,
+    editAllocation?.quantity,
+    rowReserved,
+    warehouseId,
+  ]);
 
   const maxProductStock = allocationBounds?.maxQty ?? 0;
-  const allocatedTotal = allocationRows.reduce(
-    (sum, row) => sum + row.quantity,
-    0,
-  );
+  const allocatedTotal =
+    allocationRows.length > 0
+      ? allocationRows.reduce((sum, row) => sum + row.quantity, 0)
+      : Number(densifyAllocated ?? 0);
+  const unallocatedRemaining =
+    allocationBounds?.unallocated ?? densifyUnallocated;
   const qtyValidation = getStockQuantityValidation(
     quantity,
     maxProductStock,
@@ -215,7 +246,7 @@ export default function AllocateStockDialog({
                 <DialogFormLabel icon={Package} required>
                   Product
                 </DialogFormLabel>
-                {/* REQ-0199 — modal Combobox; ghost trigger (no outline→white hover) */}
+                {/* Modal Combobox; ghost trigger (no outline→white hover) */}
                 <Popover open={pickerOpen} onOpenChange={setPickerOpen} modal>
                   <PopoverTrigger asChild>
                     <Button
@@ -319,9 +350,9 @@ export default function AllocateStockDialog({
                   value={quantity}
                   onChange={setQuantity}
                   maxAvailable={maxProductStock}
-                  catalogTotal={selectedProduct?.quantity}
+                  catalogTotal={catalogTotal}
                   allocatedTotal={allocatedTotal}
-                  unallocatedRemaining={allocationBounds?.unallocated}
+                  unallocatedRemaining={unallocatedRemaining}
                   minReserved={rowReserved}
                   mode="allocate"
                   disabled={isPending || !activeProductId}

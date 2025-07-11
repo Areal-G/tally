@@ -1,6 +1,6 @@
 /**
  * Decrement warehouse stock allocations when product-level stock is sold.
- * REQ-0068: when warehouseId is set on the line, fulfill that pick; otherwise
+ * When warehouseId is set on the line, fulfill that pick; otherwise
  * greedily deduct from the largest available allocation (legacy / no pick).
  */
 
@@ -11,7 +11,7 @@ import { fulfillAllocationFromPick } from "@/lib/products/stock-allocation-order
 export interface DecrementStockAllocationItem {
   productId: string;
   quantity: number;
-  /** REQ-0068 — explicit warehouse pick from OrderItem */
+  /** Explicit warehouse pick from OrderItem */
   warehouseId?: string | null;
 }
 

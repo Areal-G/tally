@@ -29,7 +29,7 @@ describe("cacheKeyDomain", () => {
   });
 });
 
-describe("setCache stale re-warm guard (REQ-0133)", () => {
+describe("setCache stale re-warm guard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.resetModules();

@@ -1,5 +1,5 @@
 /**
- * REQ-0085 — aggregate available/reserved units from stock allocation rows.
+ * Aggregate available/reserved units from stock allocation rows.
  * Used by product insights enrich (SSR + client) and warehouse insights compute.
  */
 

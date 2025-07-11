@@ -1,15 +1,15 @@
+"use client";
+
 /**
  * Statistics Card Component
  * Glassmorphism card component for displaying warehouse statistics
- * Supports light/dark mode with colored variants (sky, emerald, amber, rose)
+ * Neutral card in light/dark mode; variant prop kept for API compat (calm theme)
  */
 
-import React from "react";
+import React, { useState } from "react";
 import { LucideIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { DataSlotPulse } from "@/components/shared/DataSlotPulse";
-import { TYPO_STAT_VALUE, TYPO_SUBTITLE } from "@/lib/ui/typography-scale";
 
 /**
  * Color variant types for statistics cards
@@ -66,7 +66,7 @@ interface StatisticsCardProps {
    */
   className?: string;
   /**
-   * When true, main value shows inline pulse (title/icon/description stay visible — REQ-0021)
+   * When true, main value shows inline pulse (title/icon/description stay visible —)
    */
   valueLoading?: boolean;
   /**
@@ -74,87 +74,13 @@ interface StatisticsCardProps {
    */
   badgeValuesLoading?: boolean;
   /**
-   * REQ-0171 — drop min-h-[210px] + tighter icon (forecast KPIs only)
+   * Drop min-h-[210px] + tighter icon (forecast KPIs only)
    */
   compact?: boolean;
 }
 
-/**
- * Color configuration for each variant
- */
-const variantConfig: Record<
-  CardVariant,
-  {
-    border: string;
-    gradient: string;
-    shadow: string;
-    hoverBorder: string;
-  }
-> = {
-  sky: {
-    border: "border-sky-400/30",
-    gradient: "bg-gradient-to-br from-sky-500/25 via-sky-500/10 to-sky-500/5",
-    shadow:
-      "shadow-[0_30px_80px_rgba(2,132,199,0.35)] dark:shadow-[0_30px_80px_rgba(2,132,199,0.25)]",
-    hoverBorder: "hover:border-sky-300/50",
-  },
-  emerald: {
-    border: "border-emerald-400/30",
-    gradient:
-      "bg-gradient-to-br from-emerald-500/25 via-emerald-500/10 to-emerald-500/5",
-    shadow:
-      "shadow-[0_30px_80px_rgba(16,185,129,0.35)] dark:shadow-[0_30px_80px_rgba(16,185,129,0.25)]",
-    hoverBorder: "hover:border-emerald-300/50",
-  },
-  amber: {
-    border: "border-amber-400/30",
-    gradient:
-      "bg-gradient-to-br from-amber-500/30 via-amber-500/15 to-amber-500/5",
-    shadow:
-      "shadow-[0_30px_80px_rgba(245,158,11,0.25)] dark:shadow-[0_30px_80px_rgba(245,158,11,0.2)]",
-    hoverBorder: "hover:border-amber-300/60",
-  },
-  rose: {
-    border: "border-rose-400/30",
-    gradient:
-      "bg-gradient-to-br from-rose-500/25 via-rose-500/10 to-rose-500/5",
-    shadow:
-      "shadow-[0_30px_80px_rgba(225,29,72,0.35)] dark:shadow-[0_30px_80px_rgba(225,29,72,0.25)]",
-    hoverBorder: "hover:border-rose-300/50",
-  },
-  violet: {
-    border: "border-violet-400/30",
-    gradient:
-      "bg-gradient-to-br from-violet-500/25 via-violet-500/10 to-violet-500/5",
-    shadow:
-      "shadow-[0_30px_80px_rgba(139,92,246,0.35)] dark:shadow-[0_30px_80px_rgba(139,92,246,0.25)]",
-    hoverBorder: "hover:border-violet-300/50",
-  },
-  blue: {
-    border: "border-blue-400/30",
-    gradient:
-      "bg-gradient-to-br from-blue-500/25 via-blue-500/10 to-blue-500/5",
-    shadow:
-      "shadow-[0_30px_80px_rgba(59,130,246,0.35)] dark:shadow-[0_30px_80px_rgba(59,130,246,0.25)]",
-    hoverBorder: "hover:border-blue-300/50",
-  },
-  orange: {
-    border: "border-orange-400/30",
-    gradient:
-      "bg-gradient-to-br from-orange-500/25 via-orange-500/10 to-orange-500/5",
-    shadow:
-      "shadow-[0_30px_80px_rgba(249,115,22,0.35)] dark:shadow-[0_30px_80px_rgba(249,115,22,0.25)]",
-    hoverBorder: "hover:border-orange-300/50",
-  },
-  teal: {
-    border: "border-teal-400/30",
-    gradient:
-      "bg-gradient-to-br from-teal-500/25 via-teal-500/10 to-teal-500/5",
-    shadow:
-      "shadow-[0_30px_80px_rgba(20,184,166,0.35)] dark:shadow-[0_30px_80px_rgba(20,184,166,0.25)]",
-    hoverBorder: "hover:border-teal-300/50",
-  },
-};
+/** Chips shown before the rest collapse behind "+N more". */
+const MAX_VISIBLE_BADGES = 4;
 
 /**
  * StatisticsCard component
@@ -165,14 +91,19 @@ export function StatisticsCard({
   value,
   description,
   icon: Icon,
-  variant = "sky",
   badges = [],
   className,
   valueLoading = false,
   badgeValuesLoading = false,
   compact = false,
 }: StatisticsCardProps) {
-  const config = variantConfig[variant];
+  const [showAllBadges, setShowAllBadges] = useState(false);
+  const visibleBadges =
+    showAllBadges || badges.length <= MAX_VISIBLE_BADGES + 1
+      ? badges
+      : badges.slice(0, MAX_VISIBLE_BADGES);
+  const hiddenCount = badges.length - visibleBadges.length;
+
   const displayValue = valueLoading ? (
     <DataSlotPulse variant="metric" />
   ) : (
@@ -182,62 +113,57 @@ export function StatisticsCard({
   return (
     <article
       className={cn(
-        "group rounded-[28px] border h-full flex flex-col p-2 sm:p-4 backdrop-blur-md transition min-w-0 overflow-visible",
-        // REQ-0171 — compact omits tall min-height (forecast KPIs)
-        !compact && "min-h-[210px]",
-        config.border,
-        config.gradient,
-        config.shadow,
-        config.hoverBorder,
+        // Tally stat card: surface + rotating accent bar + tinted round icon
+        "money-surface money-stat flex h-full min-w-0 flex-col p-5 sm:p-6",
+        !compact && "min-h-[124px]",
         className,
       )}
     >
-      <div className="flex flex-1 flex-col min-h-0 min-w-0 w-full overflow-visible">
-        {/* Title and icon inline so badges get full width below */}
-        <div className="flex items-center justify-between gap-2 shrink-0">
-          <p className="text-xs uppercase tracking-[0.45em] text-gray-700 dark:text-white/80 min-w-0">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[var(--text-secondary)]">
             {title}
           </p>
-          <div
-            className={cn(
-              "flex shrink-0 items-center justify-center rounded-xl border border-gray-300/30 bg-gray-100/50 shadow-inner shadow-primary/30 backdrop-blur dark:border-white/15 dark:bg-white/10",
-              compact ? "h-8 w-8" : "h-10 w-10",
-            )}
-          >
-            <Icon
-              className={cn(
-                "text-gray-700 dark:text-white",
-                compact ? "h-4 w-4" : "h-5 w-5",
-              )}
-            />
-          </div>
+          <p className="mt-3 whitespace-nowrap text-[clamp(1.25rem,2vw,1.75rem)] font-semibold leading-none tracking-[-0.045em] text-[var(--text-primary)]">
+            {displayValue}
+          </p>
+          {description && (
+            <p className="mt-2 text-xs text-[var(--text-secondary)]">{description}</p>
+          )}
         </div>
-        <p className={TYPO_STAT_VALUE}>{displayValue}</p>
-        {description && (
-          <p className={cn("mt-2", TYPO_SUBTITLE)}>{description}</p>
-        )}
-        {badges.length > 0 && (
-          <div className="mt-3 flex w-full min-w-0 flex-wrap gap-2 overflow-visible">
-            {/* REQ-0080 — neutral sub-badges; glass counters are section-title only (SectionCountBadge) */}
-            {badges.map((badge, index) => (
-              <Badge
-                key={index}
-                variant={badge.variant || "outline"}
-                className="text-xs border-gray-300/50 bg-gray-100/80 text-gray-700 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.1)] dark:border-white/10 dark:bg-white/5 dark:text-white/80"
-              >
-                <span className="font-normal">{badge.label}:</span>{" "}
-                <span className="ml-1">
-                  {badgeValuesLoading ? (
-                    <DataSlotPulse variant="badge" />
-                  ) : (
-                    badge.value
-                  )}
-                </span>
-              </Badge>
-            ))}
-          </div>
-        )}
+        <div
+          className={cn(
+            "money-stat-icon flex shrink-0 items-center justify-center rounded-full",
+            compact ? "h-9 w-9" : "h-11 w-11",
+          )}
+        >
+          <Icon className={compact ? "h-4 w-4" : "h-5 w-5"} />
+        </div>
       </div>
+      {badges.length > 0 && (
+        <div className="mt-4 flex w-full min-w-0 flex-wrap gap-1.5">
+          {visibleBadges.map((badge, index) => (
+            <span
+              key={index}
+              className="inline-flex items-center gap-1 rounded-full bg-[var(--bg-elevated)] px-2.5 py-1 text-[11px] text-[var(--text-secondary)]"
+            >
+              {badge.label}
+              <span className="font-semibold text-[var(--text-primary)]">
+                {badgeValuesLoading ? <DataSlotPulse variant="badge" /> : badge.value}
+              </span>
+            </span>
+          ))}
+          {(hiddenCount > 0 || showAllBadges) && badges.length > MAX_VISIBLE_BADGES + 1 && (
+            <button
+              type="button"
+              onClick={() => setShowAllBadges((v) => !v)}
+              className="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold text-[var(--accent-purple)] transition-colors hover:bg-[var(--tint-violet)]"
+            >
+              {showAllBadges ? "Show less" : `+${hiddenCount} more`}
+            </button>
+          )}
+        </div>
+      )}
     </article>
   );
 }

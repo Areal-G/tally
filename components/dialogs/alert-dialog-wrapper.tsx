@@ -139,7 +139,7 @@ export function AlertDialogWrapper({
     <AlertDialog
       open={open}
       onOpenChange={(next) => {
-        // Keep open while mutation pending so spinner/label stay visible (REQ-0209)
+        // Keep open while mutation pending so spinner/label stay visible
         if (!next && isLoading) return;
         onOpenChange?.(next);
       }}

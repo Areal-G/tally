@@ -20,7 +20,7 @@ export type DialogSubmitButtonProps = {
   pendingLabel: string;
   label: string;
   hue: GlassFocusHue;
-  /** REQ-0073 — optional leading icon when not pending */
+  /** Optional leading icon when not pending */
   icon?: LucideIcon;
   disabled?: boolean;
   type?: "button" | "submit";

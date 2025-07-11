@@ -4,7 +4,7 @@ import { ApiError } from "@/lib/api/errors";
 const captureException = vi.fn();
 const captureMessage = vi.fn();
 
-vi.mock("@/lib/monitoring/sentry", () => ({
+vi.mock("@/lib/monitoring/error-reporting", () => ({
   captureException,
   captureMessage,
 }));
@@ -23,7 +23,7 @@ describe("logger production 4xx guard", () => {
     (process.env as { NODE_ENV?: string }).NODE_ENV = originalEnv;
   });
 
-  it("skips Sentry for 400 Axios errors", async () => {
+  it("does not report 400 Axios errors", async () => {
     const { logger } = await import("@/lib/logger");
     const axiosError = {
       isAxiosError: true,
@@ -34,7 +34,7 @@ describe("logger production 4xx guard", () => {
     expect(captureMessage).not.toHaveBeenCalled();
   });
 
-  it("reports 500 errors to Sentry", async () => {
+  it("reports 500 errors", async () => {
     const { logger } = await import("@/lib/logger");
     const serverError = new Error("Internal server error");
     logger.error("Product operation error:", serverError);
@@ -43,10 +43,17 @@ describe("logger production 4xx guard", () => {
     });
   });
 
-  it("skips Sentry for ApiError 409 (api client interceptor path)", async () => {
+  it("does not report ApiError 409 (api client interceptor path)", async () => {
     const { logger } = await import("@/lib/logger");
     const conflict = new ApiError("Invoice already exists", 409);
     logger.error("Invoice creation error:", conflict);
+    expect(captureException).not.toHaveBeenCalled();
+  });
+
+  it("does not report production warnings", async () => {
+    const { logger } = await import("@/lib/logger");
+    logger.warn("Validation failed:", { field: "email" });
+    expect(captureMessage).not.toHaveBeenCalled();
     expect(captureException).not.toHaveBeenCalled();
   });
 });

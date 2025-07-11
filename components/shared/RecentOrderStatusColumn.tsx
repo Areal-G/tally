@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * REQ-0128 — shared recent-order right column: price/trailing + status badge + terminal statusAt.
- * REQ-0138 — clearer vertical gap between price, status, and statusAt.
- * REQ-0145 — `align` prop; semantic event icon+color for statusAt.
+ * Shared recent-order right column: price/trailing + status badge + terminal statusAt.
+ * Clearer vertical gap between price, status, and statusAt.
+ * `align` prop; semantic event icon+color for statusAt.
  */
 
 import type { ReactNode } from "react";
@@ -18,7 +18,7 @@ export type RecentOrderStatusColumnProps = {
   paymentStatus?: string;
   trailing?: ReactNode;
   className?: string;
-  /** Portal/catalog cards default end on sm+; order table uses start (REQ-0145) */
+  /** Portal/catalog cards default end on sm+; order table uses start */
   align?: "start" | "end";
 };
 

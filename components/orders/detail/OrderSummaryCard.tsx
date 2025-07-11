@@ -15,6 +15,7 @@ import type { Order } from "@/types";
 import { cn } from "@/lib/utils";
 import { DETAIL_DATA_VALUE_CLASS } from "@/lib/ui/typography-scale";
 import { GlassCard, variantConfig } from "./order-detail-primitives";
+import { formatStableCurrency } from "@/lib/format";
 
 export type OrderSummaryCardProps = {
   order?: Order;
@@ -36,7 +37,7 @@ function SummaryRow({
   loading?: boolean;
 }) {
   return (
-    <div className="flex justify-between items-center text-sm p-2 rounded-lg bg-gradient-to-r from-sky-100/40 via-sky-50/20 to-transparent dark:from-sky-500/10 dark:via-sky-500/5 dark:to-transparent">
+    <div className="flex justify-between items-center text-sm p-2 rounded-lg bg-sky-100/40 dark:bg-sky-500/10 ">
       <span className="text-gray-600 dark:text-gray-300 inline-flex items-center gap-1.5">
         <Icon className="h-3.5 w-3.5 shrink-0" />
         {label}
@@ -74,33 +75,33 @@ export function OrderSummaryCard({
           icon={Receipt}
           label="Subtotal:"
           loading={dataLoading}
-          value={`$${Number(order!.subtotal).toFixed(2)}`}
+          value={formatStableCurrency(Number(order!.subtotal))}
         />
         {!dataLoading && order!.tax != null && order!.tax > 0 && (
           <SummaryRow
             icon={Percent}
             label="Tax:"
-            value={`$${Number(order!.tax).toFixed(2)}`}
+            value={formatStableCurrency(Number(order!.tax))}
           />
         )}
         {!dataLoading && order!.shipping != null && order!.shipping > 0 && (
           <SummaryRow
             icon={Truck}
             label="Shipping:"
-            value={`$${Number(order!.shipping).toFixed(2)}`}
+            value={formatStableCurrency(Number(order!.shipping))}
           />
         )}
         {!dataLoading && order!.discount != null && order!.discount > 0 && (
           <SummaryRow
             icon={Tag}
             label="Discount:"
-            value={`-$${Number(order!.discount).toFixed(2)}`}
+            value={"-" + formatStableCurrency(Number(order!.discount))}
             valueClassName="text-rose-600 dark:text-rose-400"
           />
         )}
         <Separator className="my-2 bg-teal-200/50 dark:bg-teal-400/20" />
-        {/* REQ-0148 — Total text-sm sm:text-base (not sm:text-lg) */}
-        <div className="flex justify-between text-sm sm:text-base p-2 rounded-xl bg-gradient-to-r from-emerald-100/50 via-emerald-50/30 to-transparent dark:from-emerald-500/15 dark:via-emerald-500/10 dark:to-transparent border border-emerald-200/30 dark:border-emerald-400/20">
+        {/* Total text-sm sm:text-base (not sm:text-lg) */}
+        <div className="flex justify-between text-sm sm:text-base p-2 rounded-xl bg-emerald-100/50 dark:bg-emerald-500/15 border border-emerald-200/30 dark:border-emerald-400/20">
           <span className="text-gray-700 dark:text-white inline-flex items-center gap-1.5 font-normal">
             <CircleDollarSign className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
             Total:
@@ -109,7 +110,7 @@ export function OrderSummaryCard({
             {dataLoading ? (
               <DataSlotPulse variant="currency" />
             ) : (
-              `$${Number(order!.total).toFixed(2)}`
+              formatStableCurrency(Number(order!.total))
             )}
           </span>
         </div>

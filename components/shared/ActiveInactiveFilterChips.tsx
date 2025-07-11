@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0041 — borderless active/inactive filter chip row with dismissible badge + reset.
+ * Borderless active/inactive filter chip row with dismissible badge + reset.
  */
 import { RotateCcw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";

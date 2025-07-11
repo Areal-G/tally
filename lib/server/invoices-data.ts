@@ -62,7 +62,7 @@ export type InvoiceForPage = {
   issuedByEmail?: string | null;
   /** User who placed the linked order (for admin self/client source tagging) */
   orderUserId?: string | null;
-  /** REQ-0150 / REQ-0151 — linked order preview for dense table */
+  /** Linked order preview for dense table */
   linkedOrderNumber?: string | null;
   linkedOrderCreatedAt?: string | null;
   linkedOrderItems?: OrderItem[];
@@ -136,7 +136,6 @@ async function transformInvoicesForList(
 export async function getInvoicesForUser(
   userId: string
 ): Promise<InvoiceForPage[]> {
-  const filters = {};
   const cacheKey = cacheKeys.invoices.list({ userId, scope: "issuer" });
   const cacheReadStartedAt = Date.now();
   const cached = await getCache<InvoiceForPage[]>(cacheKey);
@@ -154,7 +153,7 @@ export async function getInvoicesForUser(
 
 /**
  * Fetch invoices for orders that contain products from the given supplier.
- * Used for role=supplier on /invoices page SSR (REQ-0075 AC2).
+ * Used for role=supplier on /invoices page SSR.
  */
 export async function getInvoicesForSupplierId(
   supplierId: string,
@@ -306,7 +305,7 @@ export async function getClientInvoicesForProductOwner(
   const orderIds = orders.map((o) => o.id);
   const invoices = await getInvoicesByOrderIds(orderIds, cacheFilters);
 
-  // REQ-0159 — customerDisplay / clientName from buyer, not store owner
+  // customerDisplay / clientName from buyer, not store owner
   const orderById = new Map(orders.map((o) => [o.id, o]));
   const buyerIds = [
     ...new Set(

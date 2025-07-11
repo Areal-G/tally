@@ -34,7 +34,6 @@ if (isServer && process.env.NODE_ENV !== "production") {
 if (isServer) {
   prisma
     .$connect()
-    .then(() => console.log("✓ Connected to the database"))
     .catch((error) => console.error("✗ Database connection error:", error));
 }
 

@@ -1,5 +1,5 @@
 /**
- * REQ-0102 — apply catalog reconcile shrink in a Prisma transaction.
+ * Apply catalog reconcile shrink in a Prisma transaction.
  */
 
 import { prisma } from "@/prisma/client";

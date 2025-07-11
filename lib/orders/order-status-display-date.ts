@@ -1,5 +1,5 @@
 /**
- * REQ-0127 — pick the most relevant timestamp for recent-order status display.
+ * Pick the most relevant timestamp for recent-order status display.
  */
 
 export type OrderStatusDateInput = {
@@ -10,6 +10,8 @@ export type OrderStatusDateInput = {
   deliveredAt?: Date | string | null;
   shippedAt?: Date | string | null;
   updatedAt?: Date | string | null;
+  /** Pending create often has null updatedAt; fall back for list Status date */
+  createdAt?: Date | string | null;
 };
 
 export type OrderStatusAtSource = OrderStatusDateInput & {
@@ -37,6 +39,7 @@ export function resolveOrderStatusAtFromSource(
     deliveredAt: source.deliveredAt,
     shippedAt: source.shippedAt,
     updatedAt: source.updatedAt,
+    createdAt: source.createdAt,
     paidAt: resolvePaidAt(source, invoiceLink),
   });
 }
@@ -48,7 +51,7 @@ function toIso(value: Date | string | null | undefined): string | undefined {
 }
 
 /**
- * Returns ISO string for Status column date under the badge (REQ-0127 / REQ-0136).
+ * Returns ISO string for Status column date under the badge.
  * Prefer event-specific timestamps; fall back to updatedAt so confirmed/processing/pending
  * (and shipped without shippedAt) still show a date after dropdown CRUD.
  */
@@ -80,7 +83,7 @@ export function resolveOrderStatusAt(
   }
 
   // pending / confirmed / processing / unknown — list Status column needs a date
-  return updatedAt;
+  return updatedAt ?? toIso(order.createdAt);
 }
 
 /** Attach computed statusAt ISO string for recent-order list rows. Strips nested invoice. */

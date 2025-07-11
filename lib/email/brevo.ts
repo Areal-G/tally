@@ -8,9 +8,7 @@ import { getEnvVar } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import type {
   BrevoApiResponse,
-  EmailRecipient,
   EmailSendResult,
-  EmailSender,
   SendEmailRequest,
 } from "./types";
 

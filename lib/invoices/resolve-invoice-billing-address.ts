@@ -1,5 +1,5 @@
 /**
- * REQ-0210 — Resolve invoice billing JSON from order addresses.
+ * Resolve invoice billing JSON from order addresses.
  * Prefer order.billingAddress; fall back to shipping when "use same for billing"
  * was checked but billing was not persisted separately.
  */

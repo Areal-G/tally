@@ -1,5 +1,5 @@
 /**
- * REQ-0035 — detect and clean Google OAuth success redirect query param.
+ * Detect and clean Google OAuth success redirect query param.
  * Callback appends ?oauth_success=true on /, /client, or /supplier.
  */
 

@@ -1,5 +1,5 @@
 /**
- * REQ-0185 — pure shape guard for supportTickets:list:v2 Redis rows.
+ * Pure shape guard for supportTickets:list:v2 Redis rows.
  */
 
 import { describe, expect, it } from "vitest";

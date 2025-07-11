@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-/** Hue tokens for list icon pills — matches auth glass palette (REQ-0031). */
+/** Hue tokens for list icon pills — matches auth glass palette. */
 export type AuthListHue = "sky" | "emerald" | "amber" | "violet" | "blue";
 
 export type AuthPanelListItem = {
@@ -29,11 +29,11 @@ export type AuthPanelCopy = {
   items: AuthPanelListItem[];
 };
 
-/** Login left panel — demo roles + platform highlights (REQ-0032: 6 items; REQ-0033: professional copy). */
+/** Login left panel — demo roles + platform highlights (6 items; professional copy). */
 export const LOGIN_AUTH_PANEL_COPY: AuthPanelCopy = {
-  sectionTitle: "Explore Role-Based Portals",
+  sectionTitle: "Explore the Platform",
   sectionLead:
-    "Select a role from the sign-in dropdown to open each workspace with a pre-configured demo account. Credentials are applied automatically when you choose a role.",
+    "Press Try demo to open a sample warehouse with products, stock levels, orders and invoices already filled in. No sign-up needed.",
   items: [
     {
       id: "administrator",
@@ -86,7 +86,7 @@ export const LOGIN_AUTH_PANEL_COPY: AuthPanelCopy = {
   ],
 };
 
-/** Register left panel — platform value list (REQ-0032: 6 items). */
+/** Register left panel — platform value list (6 items). */
 export const REGISTER_AUTH_PANEL_COPY: AuthPanelCopy = {
   sectionTitle: "Built for Modern Warehouse Teams",
   sectionLead:

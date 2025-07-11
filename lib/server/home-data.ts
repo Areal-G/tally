@@ -17,7 +17,7 @@ export type ProductForHome = {
   price: number;
   quantity: number;
   reservedQuantity: number;
-  /** REQ-0103 — display-only sum of disjoint reservation paths */
+  /** Display-only sum of disjoint reservation paths */
   committedQuantity: number;
   status: string;
   categoryId: string;
@@ -33,9 +33,14 @@ export type ProductForHome = {
   imageUrl: string | null;
   imageFileId: string | null;
   expirationDate: string | null;
-  /** REQ-0179 — owner/supplier display for list densify */
+  reorderPoint?: number | null;
+  reorderQuantity?: number | null;
+  lotNumber?: string | null;
+  barcode?: string | null;
+  /** Owner/supplier display for list densify */
   productOwnerName?: string | null;
   productOwnerImage?: string | null;
+  productOwnerEmail?: string | null;
   supplierImage?: string | null;
 };
 
@@ -51,7 +56,6 @@ export type CategoryForHome = {
   updatedAt: string | null;
   createdBy: string;
   updatedBy?: string | null;
-  /** REQ-0141 */
   productCount?: number;
   catalogProductTotal?: number;
 };
@@ -68,7 +72,6 @@ export type SupplierForHome = {
   updatedAt: string | null;
   createdBy: string;
   updatedBy?: string | null;
-  /** REQ-0141 */
   email?: string | null;
   productCount?: number;
   catalogProductTotal?: number;
@@ -88,6 +91,7 @@ export async function getProductsForUser(userId: string): Promise<ProductForHome
       (p) =>
         typeof p.committedQuantity === "number" &&
         "productOwnerImage" in p &&
+        "productOwnerEmail" in p &&
         "supplierImage" in p,
     )
   ) {
@@ -129,8 +133,13 @@ export async function getProductsForUser(userId: string): Promise<ProductForHome
         imageUrl: product.imageUrl ?? null,
         imageFileId: product.imageFileId ?? null,
         expirationDate: product.expirationDate?.toISOString() ?? null,
+        reorderPoint: product.reorderPoint ?? null,
+        reorderQuantity: product.reorderQuantity ?? null,
+        lotNumber: product.lotNumber ?? null,
+        barcode: product.barcode ?? null,
         productOwnerName: party.productOwnerName,
         productOwnerImage: party.productOwnerImage,
+        productOwnerEmail: party.productOwnerEmail,
         supplierImage: party.supplierImage,
       };
     }),
@@ -157,6 +166,7 @@ export async function getProductsBySupplierId(
       (p) =>
         typeof p.committedQuantity === "number" &&
         "productOwnerImage" in p &&
+        "productOwnerEmail" in p &&
         "supplierImage" in p,
     )
   ) {
@@ -198,8 +208,13 @@ export async function getProductsBySupplierId(
         imageUrl: product.imageUrl ?? null,
         imageFileId: product.imageFileId ?? null,
         expirationDate: product.expirationDate?.toISOString() ?? null,
+        reorderPoint: product.reorderPoint ?? null,
+        reorderQuantity: product.reorderQuantity ?? null,
+        lotNumber: product.lotNumber ?? null,
+        barcode: product.barcode ?? null,
         productOwnerName: party.productOwnerName,
         productOwnerImage: party.productOwnerImage,
+        productOwnerEmail: party.productOwnerEmail,
         supplierImage: party.supplierImage,
       };
     }),
@@ -266,7 +281,7 @@ export async function getSuppliersForUser(userId: string): Promise<(SupplierForH
     updatedBy: s.updatedBy ?? null,
     isGlobalDemo: demoUserId != null && s.userId === demoUserId,
   }));
-  // REQ-0142 — productCount scoped to list viewer catalog (userId)
+  // productCount scoped to list viewer catalog (userId)
   const enriched = await enrichSuppliersWithListFields(base, userId);
   return enriched.map((s) => ({ ...s, catalogProductTotal }));
 }

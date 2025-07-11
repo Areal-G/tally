@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * REQ-0190 / REQ-0191 — Admin Reassign Send-to (separate from Edit dialog).
+ * Admin Reassign Send-to (separate from Edit dialog).
  * Select owner → confirm AlertDialog → useUpdateSupportTicket({ assignedToId }).
- * REQ-0197 — confirm warns when Related product will clear; client may send productId: null.
+ * Confirm warns when Related product will clear; client may send productId: null.
  */
 
 import { useState } from "react";
@@ -60,7 +60,7 @@ export default function TicketReassignDialog({
   const [reassignToId, setReassignToId] = useState<string | null>(
     ticket.assignedToId ?? null,
   );
-  // REQ-0193 — reset Send-to on open during render (no effect/microtask bounce)
+  // Reset Send-to on open during render (no effect/microtask bounce)
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
     setWasOpen(open);
@@ -79,15 +79,15 @@ export default function TicketReassignDialog({
     ? "border-violet-400/30 dark:border-violet-400/30"
     : "border-sky-400/30 dark:border-sky-400/30";
   const shadowClass = isViolet
-    ? "shadow-[0_30px_80px_rgba(139,92,246,0.35)] dark:shadow-[0_30px_80px_rgba(139,92,246,0.25)]"
-    : "shadow-[0_30px_80px_rgba(2,132,199,0.35)] dark:shadow-[0_30px_80px_rgba(2,132,199,0.25)]";
+    ? " "
+    : " ";
 
   const selectedOwner = productOwners.find((po) => po.id === reassignToId);
   const targetLabel = selectedOwner
     ? selectedOwner.name?.trim() || selectedOwner.email || "selected owner"
     : "no specific owner";
 
-  // REQ-0197 — Related product clears when new owner ≠ product owner (assignee)
+  // Related product clears when new owner ≠ product owner (assignee)
   // Product owner is the Send-to; mismatch when next assignee ≠ current ticket.assignedToId
   // while product linked — or when clearing assignee. Server re-checks product.userId.
   const productSnap = {
@@ -132,7 +132,7 @@ export default function TicketReassignDialog({
         <DialogContent
           className={cn(
             "p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto",
-            "bg-gradient-to-br from-slate-800/98 to-slate-900/98 dark:from-slate-800/98 dark:to-slate-900/98",
+            " bg-slate-800/98 dark:bg-slate-800/98 ",
             borderClass,
             shadowClass,
           )}
@@ -153,7 +153,7 @@ export default function TicketReassignDialog({
             <DeferredSelectGate
               enabled={open}
               placeholder={
-                // REQ-0193 — match SelectTrigger h-auto min-h-11 (avoids bounce vs Edit dialog)
+                // Match SelectTrigger h-auto min-h-11 (avoids bounce vs Edit dialog)
                 <div
                   className={cn(
                     "flex h-auto min-h-11 w-full items-center rounded-xl px-2 py-1.5 text-sm text-white/60",

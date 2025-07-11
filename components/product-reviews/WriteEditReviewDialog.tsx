@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * REQ-0165 / REQ-0167 / REQ-0181 / REQ-0183 / REQ-0184 — Write/Edit review dialog.
- * Admin: allowStatusEdit + solid/opaque Status badges (REQ-0183).
- * REQ-0184 — edit stacks like create (Status → Rating → Comment, w-full); no 2-col grid.
- * REQ-0198 — render-phase open sync (no microtask bounce).
+ * Write/Edit review dialog.
+ * Admin: allowStatusEdit + solid/opaque Status badges.
+ * Edit stacks like create (Status → Rating → Comment, w-full); no 2-col grid.
+ * Render-phase open sync (no microtask bounce).
  */
 
 import React, { useState } from "react";
@@ -70,7 +70,7 @@ export type WriteEditReviewDialogProps = {
   /** For edit: existing review to update */
   existingReview?: ProductReview | null;
   /**
-   * REQ-0181 — when true (admin/product-owner moderation), show Status Select
+   * When true (admin/product-owner moderation), show Status Select
    * and include status in PUT. Client/author edit must leave this false.
    */
   allowStatusEdit?: boolean;
@@ -97,7 +97,7 @@ export default function WriteEditReviewDialog({
     existingReview?.status ?? "pending",
   );
 
-  // REQ-0198 — sync on open / review change (no queueMicrotask bounce)
+  // Sync on open / review change (no queueMicrotask bounce)
   useSyncDialogOpenState(
     open,
     () => {
@@ -298,9 +298,9 @@ export default function WriteEditReviewDialog({
       <DialogContent
         className={cn(
           "p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto",
-          "bg-gradient-to-br from-slate-800/98 to-slate-900/98 dark:from-slate-800/98 dark:to-slate-900/98",
+          " bg-slate-800/98 dark:bg-slate-800/98 ",
           "border-amber-400/30 dark:border-amber-400/30",
-          "shadow-[0_25px_60px_rgba(245,158,11,0.25)] dark:shadow-[0_25px_60px_rgba(245,158,11,0.2)]",
+          " ",
         )}
         onOpenAutoFocus={(e) => {
           e.preventDefault();
@@ -326,7 +326,7 @@ export default function WriteEditReviewDialog({
             </span>
           ) : null}
         </div>
-        {/* REQ-0184 — stack Status → Rating → Comment (w-full); same create/edit */}
+        {/* Stack Status → Rating → Comment (w-full); same create/edit */}
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           {statusSelect}
           {ratingBlock}

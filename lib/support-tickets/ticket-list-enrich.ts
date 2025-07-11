@@ -1,5 +1,5 @@
 /**
- * REQ-0185 — shared ticket list transform + Redis list:v2 shape guard.
+ * Shared ticket list transform + Redis list:v2 shape guard.
  */
 
 import type { SupportTicket } from "@/types";
@@ -57,7 +57,7 @@ export function transformSupportTicketListRow(
   };
 }
 
-/** True when cached list rows include REQ-0185 image densify fields. */
+/** True when cached list rows include image densify fields. */
 export function hasTicketListV2Shape(
   cached: SupportTicket[] | null,
 ): cached is SupportTicket[] {

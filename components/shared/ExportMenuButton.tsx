@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0041 — catalog export menu with muted chevron that rotates 180° when open.
+ * Catalog export menu with muted chevron that rotates 180° when open.
  */
 import { ChevronDown, Download } from "lucide-react";
 import { FiFileText, FiGrid } from "react-icons/fi";

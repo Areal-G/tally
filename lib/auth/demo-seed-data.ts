@@ -1,5 +1,5 @@
 /**
- * REQ-0088 / REQ-0091 / REQ-0092 / REQ-0137 — canonical demo seed fixtures.
+ * Canonical demo seed fixtures.
  * Accounts: reset-demo-db (default). Explore catalog: seed-demo-catalog / --with-catalog.
  */
 
@@ -24,7 +24,7 @@ export const DEMO_LOCAL_SUPPLIER_ENTITY = {
   status: true,
 } as const;
 
-/** Legacy entity name before REQ-0091 — backfilled by create-demo-accounts on existing DBs. */
+/** Legacy entity name before backfilled by create-demo-accounts on existing DBs. */
 export const LEGACY_DEMO_SUPPLIER_NAME = "Demo Supplier";
 
 /** Default email notification prefs stored on demo user rows at seed time. */
@@ -80,10 +80,10 @@ export type DemoCatalogOrderSeed = {
   notes: string;
   trackingNumber?: string;
   trackingCarrier?: string;
-  /** REQ-0152 — partial pay fixture; omit = 0 or full when invoiceStatus paid */
+  /** Partial pay fixture; omit = 0 or full when invoiceStatus paid */
   amountPaid?: number;
   /**
-   * REQ-0158 — buyer: `client` → clientId=test client; `self` → clientId=null (admin self).
+   * Buyer: `client` → clientId=test client; `self` → clientId=null (admin self).
    * Default `client` for explore fixtures.
    */
   buyerKey?: "client" | "self";
@@ -152,7 +152,7 @@ export type DemoCatalogAuditSeed = {
 
 /**
  * Connected explore catalog — opt-in via `npm run script:seed-demo-catalog`
- * or `npm run script:reset-demo-db -- --with-catalog` (REQ-0137).
+ * Or `npm run script:reset-demo-db -- --with-catalog`.
  */
 export const DEMO_CATALOG_SEED = {
   categories: [
@@ -183,7 +183,7 @@ export const DEMO_CATALOG_SEED = {
       status: true,
     },
   ] satisfies DemoCatalogWarehouseSeed[],
-  // REQ-0140 / REQ-0103 — warehouse-pick pending → product.reserved=0 (alloc owns reserve);
+  // Warehouse-pick pending → product.reserved=0 (alloc owns reserve);
   // delivered/paid fulfill snapshot already decrements catalog + alloc qty.
   products: [
     {
@@ -235,7 +235,7 @@ export const DEMO_CATALOG_SEED = {
     },
   ] satisfies DemoCatalogAllocationSeed[],
   /**
-   * REQ-0158 party matrix:
+   * Party matrix:
    * 001/002/004 = client buyer; 003 = admin self (clientId null).
    */
   orders: [
@@ -268,7 +268,7 @@ export const DEMO_CATALOG_SEED = {
       tax: 0,
       shipping: 0,
       discount: 0,
-      // REQ-0152/0153 — confirmed + partial ($100 of $3980) for Payment badge + Total breakdown QA
+      // Confirmed + partial ($100 of $3980) for Payment badge + Total breakdown QA
       status: "confirmed",
       paymentStatus: "partial",
       invoiceStatus: "sent",
@@ -409,7 +409,7 @@ export const DEMO_CATALOG_SEED = {
   systemConfigs: [
     {
       key: "company_name",
-      value: "Stockly Demo",
+      value: "Tally Demo",
       type: "string",
       label: "Company name",
       description: "Display name for invoices and emails.",
@@ -438,7 +438,7 @@ export const DEMO_CATALOG_SEED = {
       details: { orderNumber: "ORD-DEMO-002", source: "demo-seed" },
     },
   ] satisfies DemoCatalogAuditSeed[],
-  /** Street-only base; seed merges buyer name/email per order (REQ-0159). */
+  /** Street-only base; seed merges buyer name/email per order. */
   demoAddress: {
     street: "42 Explore Lane",
     city: "Austin",

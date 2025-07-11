@@ -2,7 +2,7 @@
  * Verify Demo Accounts
  *
  * Lists demo users, profile completeness, and Test Supplier entity.
- * After accounts-only reset (REQ-0092), catalog counts should be 0.
+ * After accounts-only reset, catalog counts should be 0.
  *
  * Usage:
  *   npx tsx scripts/verify-demo-accounts.ts

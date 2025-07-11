@@ -1,7 +1,7 @@
 /**
  * Server-side user detail fetch for SSR prefetch.
  * Mirrors GET /api/users/:id auth + response shape (admin-only, includes overview).
- * REQ-0024 · REQ-0158 — party-aware counts / revenue / spent.
+ * Party-aware counts / revenue / spent.
  */
 
 import { getUserById } from "@/prisma/user-admin";
@@ -26,7 +26,7 @@ export function transformUserForAdmin(r: UserRecord): UserForAdmin {
 }
 
 /**
- * REQ-0158 / REQ-0159 overview (UI copy: REQ-0160 user-overview-copy):
+ * Overview (UI copy: user-overview-copy):
  * - Counts: single OR (userId | clientId) — no double-count
  * - Spent/Due: distinct buyer only (`clientId === id` and `userId !== id`);
  *   self-orders (clientId null/owner) are not counted as spent

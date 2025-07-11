@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * REQ-0191 — Chat-style ticket replies.
- * REQ-0193 — opening description as first left bubble; title link size;
+ * Chat-style ticket replies.
+ * Opening description as first left bubble; title link size;
  * clickable author names via authorHrefForUserId.
- * REQ-0194 — w-fit max-w-[90%] + opposing left/right glow gradients.
- * REQ-0196 — no inner card pad (GlassCard body already p-2 sm:p-4).
- * REQ-0197 — Reply-to / placeholder role-aware (creator ↔ assignee/Support).
+ * W-fit max-w-[90%] + opposing left/right glow gradients.
+ * No inner card pad (GlassCard body already p-2 sm:p-4).
+ * Reply-to / placeholder role-aware (creator ↔ assignee/Support).
  * Left = ticket creator; right = staff/others.
  */
 
@@ -21,9 +21,6 @@ import {
   SectionCardHeader,
   TABLE_CATALOG_LINK_CLASS,
 } from "@/components/shared";
-import { SafeAvatarImage } from "@/components/ui/safe-avatar-image";
-import { resolveAvatarSourcesFromSeed } from "@/lib/ui/user-avatar-sources";
-import { AVATAR_RING_CLASS } from "@/lib/ui/avatar-ring-styles";
 import { GlassCard } from "@/components/orders/detail";
 import { useCreateSupportTicketReply } from "@/hooks/queries";
 import { resolveTicketReplyTarget } from "@/lib/support-tickets/ticket-reply-target";
@@ -44,14 +41,14 @@ export type SupportTicketReplyThreadProps = {
   variant?: "violet" | "sky";
   /** Admin user-management link vs plain creator name */
   creatorHref?: string | null;
-  /** REQ-0193 — resolve chat author name → profile/catalog href */
+  /** Resolve chat author name → profile/catalog href */
   authorHrefForUserId?: (userId: string) => string | undefined;
-  /** REQ-0197 — session for role-aware Reply-to */
+  /** Session for role-aware Reply-to */
   sessionUserId?: string | null;
   isAdminRole?: boolean;
 };
 
-/** REQ-0193 — card-title size override so sky name matches “Reply to” */
+/** Card-title size override so sky name matches “Reply to” */
 const TITLE_CREATOR_LINK_CLASS = cn(
   TABLE_CATALOG_LINK_CLASS,
   "text-sm sm:text-base font-medium",
@@ -76,7 +73,6 @@ function ChatBubble({
   meta: BubbleMeta;
   authorHref?: string;
 }) {
-  const avatar = resolveAvatarSourcesFromSeed(meta.userId, meta.image);
   const nameNode = authorHref ? (
     <Link
       href={authorHref}
@@ -97,7 +93,7 @@ function ChatBubble({
     >
       <div
         className={cn(
-          // REQ-0194 — hug content up to 90%; opposing glow gradients
+          // Hug content up to 90%; opposing glow gradients
           TICKET_CHAT_BUBBLE_SHELL,
           isCustomer ? TICKET_CHAT_BUBBLE_LEFT : TICKET_CHAT_BUBBLE_RIGHT,
         )}
@@ -111,22 +107,6 @@ function ChatBubble({
             isCustomer ? "justify-start" : "justify-end",
           )}
         >
-          <span
-            className={cn(
-              "relative shrink-0 overflow-hidden rounded-full",
-              AVATAR_RING_CLASS,
-            )}
-            style={{ width: 22, height: 22 }}
-          >
-            <SafeAvatarImage
-              src={avatar.src}
-              fallbackSrc={avatar.fallbackSrc}
-              alt=""
-              width={22}
-              height={22}
-              className="h-full w-full object-cover"
-            />
-          </span>
           {nameNode}
           {meta.email ? (
             <>
@@ -168,7 +148,7 @@ export default function SupportTicketReplyThread({
   const openingDescription = ticket.description?.trim() ?? "";
   const hasOpening = openingDescription.length > 0;
 
-  // REQ-0197 — creator ↔ assignee / Support (updates after reassign via patched ticket)
+  // Creator ↔ assignee / Support (updates after reassign via patched ticket)
   const replyTarget = resolveTicketReplyTarget(
     ticket,
     sessionUserId,
@@ -207,7 +187,7 @@ export default function SupportTicketReplyThread({
     !repliesLoading && replies.length === 0 && !hasOpening;
 
   return (
-    // REQ-0194 gap — overflow-visible so bubble glow is not clipped by GlassCard overflow-hidden
+    // Overflow-visible so bubble glow is not clipped by GlassCard overflow-hidden
     <GlassCard
       variant={variant === "violet" ? "violet" : "sky"}
       className="overflow-visible"
@@ -230,7 +210,7 @@ export default function SupportTicketReplyThread({
             </p>
           ) : (
             <>
-              {/* REQ-0193 — opening description = first left bubble (REQ-0192 message #1) */}
+              {/* Opening description = first left bubble (message #1) */}
               {hasOpening ? (
                 <ChatBubble
                   body={openingDescription}

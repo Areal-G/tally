@@ -1,5 +1,5 @@
 /**
- * Server-side navbar notification prefetch (REQ-0025).
+ * Server-side navbar notification prefetch.
  * Mirrors GET /api/notifications/in-app list + unread count for ShellSsr hydration.
  */
 import {

@@ -36,9 +36,9 @@ export interface DashboardRecentOrder {
   status: string;
   paymentStatus?: string;
   createdAt: string;
-  /** REQ-0128 — terminal status date for recent-order cards */
+  /** Terminal status date for recent-order cards */
   statusAt?: string;
-  /** REQ-0168 / REQ-0170 — buyer display + avatar link */
+  /** Buyer display + avatar link */
   placedById?: string | null;
   placedByName?: string | null;
   placedByEmail?: string | null;
@@ -52,7 +52,7 @@ export interface DashboardRecentOrder {
   categoryName?: string | null;
   supplierId?: string | null;
   supplierName?: string | null;
-  /** REQ-0174 — User.image via Supplier.userId for AvatarInlineLink */
+  /** User.image via Supplier.userId for AvatarInlineLink */
   supplierImage?: string | null;
 }
 
@@ -61,7 +61,7 @@ export interface DashboardRecentTicket {
   subject: string;
   status: string;
   createdAt: string;
-  /** REQ-0170 — ticket creator */
+  /** Ticket creator */
   userId?: string | null;
   userName?: string | null;
   userImage?: string | null;
@@ -73,13 +73,13 @@ export interface DashboardRecentReview {
   rating: number;
   status: string;
   createdAt: string;
-  /** REQ-0170 — reviewer + product thumb */
+  /** Reviewer + product thumb */
   userId?: string | null;
   userName?: string | null;
   userImage?: string | null;
   productId?: string | null;
   productImageUrl?: string | null;
-  /** REQ-0174 — category beside rating★ */
+  /** Category beside rating★ */
   categoryId?: string | null;
   categoryName?: string | null;
 }
@@ -92,7 +92,7 @@ export interface DashboardRecentImport {
   successRows: number;
   failedRows: number;
   createdAt: string;
-  /** REQ-0170 — importer */
+  /** Importer */
   userId?: string | null;
   userName?: string | null;
   userImage?: string | null;
@@ -119,7 +119,7 @@ export interface DashboardOrderStatusDist {
 
 /**
  * Top product by order count
- * REQ-0173 — denser Product cell meta (image, category, supplier)
+ * Denser Product cell meta (image, category, supplier)
  */
 export interface DashboardTopProduct {
   productId: string;
@@ -148,16 +148,16 @@ export interface DashboardOrderAnalytics {
   /** Sum of order totals excluding cancelled orders (store-wide). Use for Total Revenue card. */
   totalRevenueExcludingCancelled: number;
   /**
-   * REQ-0154 — Σ amountDue where amountPaid≈0 on draft/sent invoices (fully unpaid outstanding).
+   * Σ amountDue where amountPaid≈0 on draft/sent invoices (fully unpaid outstanding).
    * Not order.total for paymentStatus partial.
    */
   pendingOrderAmount: number;
   /**
-   * REQ-0154 — Σ amountPaid on fully settled invoices (status paid or amountDue≈0).
+   * Σ amountPaid on fully settled invoices (status paid or amountDue≈0).
    */
   paidOrderAmount: number;
   /**
-   * REQ-0154 — Σ amountPaid on mid-pay invoices (amountPaid>0 && amountDue>0).
+   * Σ amountPaid on mid-pay invoices (amountPaid>0 && amountDue>0).
    */
   partialOrderAmount: number;
   /** Sum of order totals where paymentStatus === 'refunded' (store-wide) */
@@ -189,7 +189,7 @@ export interface DashboardInvoiceAnalytics {
   totalExcludingCancelled?: number;
   /** Sum of cancelled invoice totals (store-wide) */
   cancelledInvoiceSum?: number;
-  /** REQ-0154 — Σ amountPaid on fully settled invoices (aligned with paidOrderAmount). */
+  /** Σ amountPaid on fully settled invoices (aligned with paidOrderAmount). */
   paidRevenue: number;
   outstandingAmount: number;
   overdueAmount: number;
@@ -197,12 +197,12 @@ export interface DashboardInvoiceAnalytics {
   /** Average invoice total excluding cancelled (totalExcludingCancelled / non-cancelled count) */
   averageInvoiceValueExcludingCancelled?: number;
   /**
-   * REQ-0154 — Count of mid-pay invoices (sent/overdue ∧ amountPaid>0 ∧ amountDue>0).
+   * Count of mid-pay invoices (sent/overdue ∧ amountPaid>0 ∧ amountDue>0).
    * Not a DB status — derived from amount fields.
    */
   partialCount?: number;
   /**
-   * REQ-0154 — Count of draft/sent invoices with amountPaid≈0 (fully unpaid).
+   * Count of draft/sent invoices with amountPaid≈0 (fully unpaid).
    * Prefer over draft+sent statusDistribution for Pending badge.
    */
   pendingCount?: number;

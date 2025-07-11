@@ -5,7 +5,6 @@
  * Dashboard for clients to view their orders, invoices, and spending
  */
 
-import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +33,8 @@ import {
   Boxes,
   ArrowRight,
   TrendingUp,
+  Tag,
+  Calendar,
 } from "lucide-react";
 import {
   Area,
@@ -59,10 +60,13 @@ import {
   ClientCompactDateTime,
   RecentOrderStatusColumn,
   SectionTitleRow,
+  DenseCatalogProductCell,
 } from "@/components/shared";
+import { ProductThumb } from "@/components/products/ProductOptionRow";
 import {
   CARD_LIST_DIVIDE_CLASS,
   CARD_LIST_META_CLASS,
+  CARD_LIST_META_ROW_CLASS,
   CARD_LIST_ROW_CLASS,
 } from "@/lib/ui/card-list-styles";
 import {
@@ -86,10 +90,11 @@ import {
   CHART_LABEL_TOP_MARGIN,
 } from "@/lib/ui/chart-point-label";
 import { buildPortalOrderStatusBadges } from "@/lib/ui/portal-order-status-badges";
+import { formatStableCurrency } from "@/lib/format";
 import type { ClientPortalDashboard, ClientCatalogOverview } from "@/types";
 import type { LucideIcon } from "lucide-react";
 
-/** REQ-0077/0078/0079/0080 — catalog subsection title + slate glass count badge */
+/** Catalog subsection title + slate glass count badge */
 function CatalogSubsectionTitle({
   icon,
   iconClassName,
@@ -123,9 +128,9 @@ function productStatusKey(status: string): string {
 }
 
 export type ClientPortalPageProps = {
-  /** REQ-0025 — SSR-passed client dashboard */
+  /** SSR-passed client dashboard */
   initialDashboard?: ClientPortalDashboard;
-  /** REQ-0026 — SSR catalog overview */
+  /** SSR catalog overview */
   initialCatalog?: ClientCatalogOverview;
 };
 
@@ -168,7 +173,7 @@ export default function ClientPortalPage({
             </h1>
             <article
               className={cn(
-                "rounded-[28px] border border-white/10 dark:border-white/20 p-2 sm:p-4 backdrop-blur-md bg-white/60 dark:bg-white/5 shadow-[0_15px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_30px_80px_rgba(255,255,255,0.08)]",
+                "rounded-lg border border-white/10 dark:border-white/20 p-2 sm:p-4 bg-white/60 dark:bg-white/5 ",
               )}
             >
               <p className="text-muted-foreground text-center">
@@ -207,7 +212,7 @@ export default function ClientPortalPage({
             }
           />
 
-          {/* Summary Cards — admin-aligned pb-6 rhythm (REQ-0074) */}
+          {/* Summary Cards — admin-aligned pb-6 rhythm */}
           <div
             className={cn(
               PAGE_STATS_GRID_CLASS,
@@ -256,13 +261,7 @@ export default function ClientPortalPage({
             />
             <StatisticsCard
               title="Total Spent"
-              value={`$${(dashboard?.totalSpent ?? 0).toLocaleString(
-                undefined,
-                {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                },
-              )}`}
+              value={formatStableCurrency(dashboard?.totalSpent ?? 0)}
               description="Total order value"
               icon={DollarSign}
               variant="emerald"
@@ -271,69 +270,48 @@ export default function ClientPortalPage({
               badges={[
                 {
                   label: "Paid",
-                  value: `$${(
-                    dashboard?.paymentBreakdown?.paid ?? 0
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`,
+                  value: formatStableCurrency(
+                    dashboard?.paymentBreakdown?.paid ?? 0,
+                  ),
                 },
                 {
                   label: "Partial",
-                  value: `$${(
-                    dashboard?.paymentBreakdown?.partial ?? 0
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`,
+                  value: formatStableCurrency(
+                    dashboard?.paymentBreakdown?.partial ?? 0,
+                  ),
                 },
                 {
                   label: "Due",
-                  value: `$${(
-                    dashboard?.paymentBreakdown?.due ?? 0
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`,
+                  value: formatStableCurrency(
+                    dashboard?.paymentBreakdown?.due ?? 0,
+                  ),
                 },
                 {
                   label: "Refund",
-                  value: `$${(
-                    dashboard?.paymentBreakdown?.refund ?? 0
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`,
+                  value: formatStableCurrency(
+                    dashboard?.paymentBreakdown?.refund ?? 0,
+                  ),
                 },
                 {
                   label: "Pending",
-                  value: `$${(
-                    dashboard?.paymentBreakdown?.pending ?? 0
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`,
+                  value: formatStableCurrency(
+                    dashboard?.paymentBreakdown?.pending ?? 0,
+                  ),
                 },
                 {
                   label: "Cancelled",
-                  value: `$${(
-                    dashboard?.paymentBreakdown?.cancelled ?? 0
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`,
+                  value: formatStableCurrency(
+                    dashboard?.paymentBreakdown?.cancelled ?? 0,
+                  ),
                 },
                 ...((dashboard?.totalOrders ?? 0) > 0
                   ? [
                       {
                         label: "Avg/Order",
-                        value: `$${(
+                        value: formatStableCurrency(
                           (dashboard?.totalSpent ?? 0) /
-                          (dashboard?.totalOrders ?? 1)
-                        ).toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}`,
+                            (dashboard?.totalOrders ?? 1),
+                        ),
                       },
                     ]
                   : []),
@@ -341,13 +319,7 @@ export default function ClientPortalPage({
             />
             <StatisticsCard
               title="Due"
-              value={`$${(dashboard?.outstandingAmount ?? 0).toLocaleString(
-                undefined,
-                {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                },
-              )}`}
+              value={formatStableCurrency(dashboard?.outstandingAmount ?? 0)}
               description="Unpaid invoice balance"
               icon={AlertCircle}
               variant="rose"
@@ -392,10 +364,10 @@ export default function ClientPortalPage({
           <div className={PAGE_SECTION_SPACING_CLASS}>
             <article
               className={cn(
-                "rounded-[28px] border border-emerald-400/20 dark:border-emerald-400/30 p-2 sm:p-4 backdrop-blur-md transition-all",
+                "rounded-lg border border-emerald-400/20 dark:border-emerald-400/30 p-2 sm:p-4 transition-all",
                 "bg-white/60 dark:bg-white/5",
-                "bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-transparent dark:from-emerald-500/25 dark:via-emerald-500/10 dark:to-emerald-500/5",
-                "shadow-[0_15px_40px_rgba(16,185,129,0.15)] dark:shadow-[0_30px_80px_rgba(16,185,129,0.25)]",
+                " bg-emerald-500/15 dark:bg-emerald-500/25 ",
+                " ",
                 "hover:border-emerald-300/40",
               )}
             >
@@ -430,16 +402,16 @@ export default function ClientPortalPage({
                     <YAxis />
                     <Tooltip
                       formatter={(value) => [
-                        `$${Number(value).toLocaleString()}`,
+                        formatStableCurrency(Number(value)),
                         "Spent",
                       ]}
                     />
                     <Area
                       type="monotone"
                       dataKey="spent"
-                      stroke="#3b82f6"
-                      fill="#3b82f633"
-                      dot={{ r: 4, fill: "#3b82f6", strokeWidth: 0 }}
+                      stroke="var(--accent-purple)"
+                      fill="var(--accent-purple)33"
+                      dot={{ r: 4, fill: "var(--accent-purple)", strokeWidth: 0 }}
                       label={createChartDotLabelRenderer(
                         dashboard!.monthlySpending.length,
                       )}
@@ -455,10 +427,10 @@ export default function ClientPortalPage({
             <article
               id="catalog"
               className={cn(
-                "rounded-[28px] border border-sky-400/20 dark:border-sky-400/30 p-2 sm:p-4 backdrop-blur-md transition-all",
+                "rounded-lg border border-sky-400/20 dark:border-sky-400/30 p-2 sm:p-4 transition-all",
                 "bg-white/60 dark:bg-white/5",
-                "bg-gradient-to-br from-sky-500/15 via-sky-500/5 to-transparent dark:from-sky-500/25 dark:via-sky-500/10 dark:to-sky-500/5",
-                "shadow-[0_15px_40px_rgba(2,132,199,0.15)] dark:shadow-[0_30px_80px_rgba(2,132,199,0.25)]",
+                " bg-sky-500/15 dark:bg-sky-500/25 ",
+                " ",
                 "hover:border-sky-300/40",
               )}
             >
@@ -536,7 +508,7 @@ export default function ClientPortalPage({
                               <TableHead>Status</TableHead>
                             </TableRow>
                           </TableHeader>
-                          <TableBodyPulseRows rows={8} columnCount={7} />
+                          <TableBodyPulseRows rows={8} columnCount={6} />
                         </Table>
                       </div>
                     </div>
@@ -582,11 +554,11 @@ export default function ClientPortalPage({
                               catalog.suppliers.map((s) => (
                                 <TableRow key={s.id}>
                                   <TableCell className="font-normal">
-                                    <AvatarInlineLink
+                                    <AvatarInlineLink showAvatar={false}
                                       seed={s.id}
                                       label={s.name}
                                       href={`/suppliers/${s.id}`}
-                                      linkClassName="font-normal"
+                                      linkClassName="text-xs font-normal"
                                     />
                                   </TableCell>
                                   <TableCell>
@@ -642,7 +614,7 @@ export default function ClientPortalPage({
                                   <TableCell className="font-normal">
                                     <Link
                                       href={`/categories/${c.id}`}
-                                      className="text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300"
+                                      className="text-xs font-normal text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300"
                                     >
                                       {c.name}
                                     </Link>
@@ -658,7 +630,7 @@ export default function ClientPortalPage({
                                         seed={c.categoryCreatorId}
                                         label={c.categoryCreatorName ?? "—"}
                                         href={`/products?ownerId=${c.categoryCreatorId}`}
-                                        linkClassName="font-normal"
+                                        linkClassName="text-xs font-normal"
                                       />
                                     ) : (
                                       "—"
@@ -687,8 +659,7 @@ export default function ClientPortalPage({
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>Product Name</TableHead>
-                              <TableHead>SKU</TableHead>
+                              <TableHead>Product</TableHead>
                               <TableHead>Category</TableHead>
                               <TableHead>Supplier</TableHead>
                               <TableHead>Product Owner</TableHead>
@@ -702,7 +673,7 @@ export default function ClientPortalPage({
                             {catalog.products.length === 0 ? (
                               <TableRow>
                                 <TableCell
-                                  colSpan={7}
+                                  colSpan={6}
                                   className="text-center text-muted-foreground py-4"
                                 >
                                   No products
@@ -711,34 +682,33 @@ export default function ClientPortalPage({
                             ) : (
                               catalog.products.map((p) => (
                                 <TableRow key={p.id}>
-                                  <TableCell className="font-normal">
-                                    <Link
-                                      href={`/products/${p.id}`}
-                                      prefetch
-                                      className="text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300"
-                                    >
-                                      {p.name}
-                                    </Link>
-                                  </TableCell>
-                                  <TableCell className="text-muted-foreground">
-                                    <CopyableText value={p.sku}>
-                                      {p.sku}
-                                    </CopyableText>
+                                  <TableCell>
+                                    <DenseCatalogProductCell
+                                      productId={p.id}
+                                      productName={p.name}
+                                      sku={p.sku}
+                                      imageUrl={p.imageUrl}
+                                      layout="stack"
+                                      productHref={(id) => `/products/${id}`}
+                                      categoryHref={(id) => `/categories/${id}`}
+                                      supplierHref={(id) => `/suppliers/${id}`}
+                                    />
                                   </TableCell>
                                   <TableCell>
                                     <Link
                                       href={`/categories/${p.categoryId}`}
-                                      className="text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300"
+                                      className="text-xs font-normal text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300"
                                     >
                                       {p.categoryName}
                                     </Link>
                                   </TableCell>
                                   <TableCell>
-                                    <AvatarInlineLink
+                                    <AvatarInlineLink showAvatar={false}
                                       seed={p.supplierId}
+                                      image={p.supplierImage}
                                       label={p.supplierName}
                                       href={`/suppliers/${p.supplierId}`}
-                                      linkClassName="font-normal"
+                                      linkClassName="text-xs font-normal"
                                     />
                                   </TableCell>
                                   <TableCell>
@@ -748,7 +718,7 @@ export default function ClientPortalPage({
                                         image={p.productOwnerImage}
                                         label={p.productOwnerName ?? "—"}
                                         href={`/products?ownerId=${p.productOwnerId}`}
-                                        linkClassName="font-normal"
+                                        linkClassName="text-xs font-normal"
                                       />
                                     ) : (
                                       "—"
@@ -781,10 +751,10 @@ export default function ClientPortalPage({
               {/* Recent Orders — glassmorphic */}
               <article
                 className={cn(
-                  "rounded-[28px] border border-sky-400/20 dark:border-sky-400/30 p-2 sm:p-4 backdrop-blur-md transition-all",
+                  "rounded-lg border border-sky-400/20 dark:border-sky-400/30 p-2 sm:p-4 transition-all",
                   "bg-white/60 dark:bg-white/5",
-                  "bg-gradient-to-br from-sky-500/15 via-sky-500/5 to-transparent dark:from-sky-500/25 dark:via-sky-500/10 dark:to-sky-500/5",
-                  "shadow-[0_15px_40px_rgba(2,132,199,0.15)] dark:shadow-[0_30px_80px_rgba(2,132,199,0.25)]",
+                  " bg-sky-500/15 dark:bg-sky-500/25 ",
+                  " ",
                   "hover:border-sky-300/40",
                 )}
               >
@@ -811,41 +781,109 @@ export default function ClientPortalPage({
                     </p>
                   ) : (
                     <ul className={CARD_LIST_DIVIDE_CLASS}>
-                      {dashboard!.recentOrders.slice(0, 5).map((order) => (
-                        <li key={order.id} className={CARD_LIST_ROW_CLASS}>
-                          <div className="min-w-0">
-                            <CopyableText
-                              value={order.orderNumber}
-                              className="max-w-full"
-                            >
-                              <Link
-                                href={`/orders/${order.id}`}
-                                prefetch
-                                className="font-normal text-xs text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 truncate block"
+                      {dashboard!.recentOrders.slice(0, 5).map((order) => {
+                        const productLabel =
+                          order.productPreview?.trim() || null;
+                        return (
+                          <li key={order.id} className={CARD_LIST_ROW_CLASS}>
+                            <div className="min-w-0 flex-1 flex flex-col gap-1.5 overflow-visible">
+                              <CopyableText
+                                value={order.orderNumber}
+                                className="max-w-full"
                               >
-                                {order.orderNumber}
-                              </Link>
-                            </CopyableText>
-                            <span className={CARD_LIST_META_CLASS}>
-                              {order.itemCount} items ·{" "}
-                              <ClientCompactDateTime
-                                date={order.createdAt}
-                                semantic="created"
-                              />
-                            </span>
-                          </div>
-                          <RecentOrderStatusColumn
-                            status={order.status}
-                            statusAt={order.statusAt}
-                            paymentStatus={order.paymentStatus}
-                            trailing={
-                              <span className="text-xs font-normal text-gray-700 dark:text-white">
-                                ${order.total.toFixed(2)}
-                              </span>
-                            }
-                          />
-                        </li>
-                      ))}
+                                <Link
+                                  href={`/orders/${order.id}`}
+                                  prefetch
+                                  className="font-normal text-xs text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 truncate block"
+                                >
+                                  {order.orderNumber}
+                                </Link>
+                              </CopyableText>
+                              {/* Densify parity with Store Overview */}
+                              <div className={CARD_LIST_META_ROW_CLASS}>
+                                {order.productId && productLabel ? (
+                                  <span className="inline-flex items-center gap-1 min-w-0">
+                                    <ProductThumb
+                                      name={productLabel}
+                                      imageUrl={order.productImageUrl}
+                                      size="sm"
+                                    />
+                                    <Link
+                                      href={`/products/${order.productId}`}
+                                      prefetch
+                                      className="text-sm font-normal text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 truncate"
+                                    >
+                                      {productLabel}
+                                    </Link>
+                                  </span>
+                                ) : productLabel ? (
+                                  <span className="truncate text-xs">
+                                    {productLabel}
+                                  </span>
+                                ) : (
+                                  <span className={CARD_LIST_META_CLASS}>
+                                    {order.itemCount} items
+                                  </span>
+                                )}
+                                {order.categoryId && order.categoryName ? (
+                                  <>
+                                    <span aria-hidden>·</span>
+                                    <Link
+                                      href={`/categories/${order.categoryId}`}
+                                      prefetch
+                                      className="inline-flex items-center gap-1 text-xs font-normal text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 min-w-0"
+                                    >
+                                      <Tag
+                                        className="h-3 w-3 shrink-0"
+                                        aria-hidden
+                                      />
+                                      <span className="truncate">
+                                        {order.categoryName}
+                                      </span>
+                                    </Link>
+                                  </>
+                                ) : null}
+                                {order.supplierId && order.supplierName ? (
+                                  <>
+                                    <span aria-hidden>·</span>
+                                    <AvatarInlineLink showAvatar={false}
+                                      seed={order.supplierId}
+                                      image={order.supplierImage}
+                                      label={order.supplierName}
+                                      href={`/suppliers/${order.supplierId}`}
+                                      size={20}
+                                      linkClassName="text-xs"
+                                      className="gap-1.5"
+                                    />
+                                  </>
+                                ) : null}
+                              </div>
+                              <div className={CARD_LIST_META_ROW_CLASS}>
+                                <span className="inline-flex items-center gap-1 min-w-0">
+                                  <Calendar
+                                    className="h-3 w-3 shrink-0 text-gray-500 dark:text-gray-400"
+                                    aria-hidden
+                                  />
+                                  <ClientCompactDateTime
+                                    date={order.createdAt}
+                                    semantic="created"
+                                  />
+                                </span>
+                              </div>
+                            </div>
+                            <RecentOrderStatusColumn
+                              status={order.status}
+                              statusAt={order.statusAt}
+                              paymentStatus={order.paymentStatus}
+                              trailing={
+                                <span className="text-xs font-normal text-gray-700 dark:text-white">
+                                  ${order.total.toFixed(2)}
+                                </span>
+                              }
+                            />
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                   <div className="mt-4">
@@ -872,10 +910,10 @@ export default function ClientPortalPage({
               {/* Recent Invoices — glassmorphic */}
               <article
                 className={cn(
-                  "rounded-[28px] border border-violet-400/20 dark:border-violet-400/30 p-2 sm:p-4 backdrop-blur-md transition-all",
+                  "rounded-lg border border-violet-400/20 dark:border-violet-400/30 p-2 sm:p-4 transition-all",
                   "bg-white/60 dark:bg-white/5",
-                  "bg-gradient-to-br from-violet-500/15 via-violet-500/5 to-transparent dark:from-violet-500/25 dark:via-violet-500/10 dark:to-violet-500/5",
-                  "shadow-[0_15px_40px_rgba(139,92,246,0.15)] dark:shadow-[0_30px_80px_rgba(139,92,246,0.25)]",
+                  " bg-violet-500/15 dark:bg-violet-500/25 ",
+                  " ",
                   "hover:border-violet-300/40",
                 )}
               >

@@ -5,7 +5,6 @@
 
 "use client";
 
-import React from "react";
 import Navbar from "@/components/layouts/Navbar";
 import CategoryList from "@/components/category/CategoryList";
 import FloatingActionButtons from "@/components/shared/FloatingActionButtons";
@@ -20,7 +19,7 @@ export type CategoriesPageProps = {
 
 /**
  * Categories page client component.
- * REQ-0021 — shell-first; SSR initialData passed to CategoryList.
+ * Shell-first; SSR initialData passed to CategoryList.
  */
 export default function CategoriesPage({
   initialCategories,

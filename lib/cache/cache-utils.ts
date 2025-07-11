@@ -26,7 +26,7 @@ function invalidationAtKey(domain: string): string {
 }
 
 /**
- * Record invalidation time for a pattern domain (REQ-0133).
+ * Record invalidation time for a pattern domain.
  * Blocks stale GET re-warm via setCache fetchedAt guard.
  */
 async function markDomainInvalidated(pattern: string): Promise<void> {
@@ -146,7 +146,7 @@ export async function setCache<T>(
 }
 
 /**
- * Read-through cache helper — records fetch start for stale re-warm guard (REQ-0133).
+ * Read-through cache helper — records fetch start for stale re-warm guard.
  */
 export async function getOrSetCache<T>(
   key: string,
@@ -235,7 +235,7 @@ export const cacheKeys = {
     all: "products:all",
     list: (filters?: Record<string, unknown>) => {
       const filterStr = filters ? JSON.stringify(filters) : "default";
-      // REQ-0179 — v3: productOwnerName/Image + supplierImage on all list rows
+      // V3: productOwnerName/Image + supplierImage on all list rows
       return `products:list:v3:${filterStr}`;
     },
     detail: (id: string) => `products:detail:${id}`,
@@ -251,7 +251,7 @@ export const cacheKeys = {
       const filterStr = filters ? JSON.stringify(filters) : "default";
       return `categories:list:${filterStr}`;
     },
-    /** Optional scope suffix (e.g. supplier:{entityId}) for role-scoped detail payloads. REQ-0029 */
+    /** Optional scope suffix (e.g. supplier:{entityId}) for role-scoped detail payloads. */
     detail: (id: string, scope?: string) =>
       scope ? `categories:detail:${id}:${scope}` : `categories:detail:${id}`,
     pattern: "categories:*",
@@ -266,7 +266,7 @@ export const cacheKeys = {
       const filterStr = filters ? JSON.stringify(filters) : "default";
       return `suppliers:list:${filterStr}`;
     },
-    /** Optional scope suffix (e.g. supplier:{entityId}) for role-scoped detail payloads. REQ-0029 */
+    /** Optional scope suffix (e.g. supplier:{entityId}) for role-scoped detail payloads. */
     detail: (id: string, scope?: string) =>
       scope ? `suppliers:detail:${id}:${scope}` : `suppliers:detail:${id}`,
     pattern: "suppliers:*",
@@ -286,7 +286,7 @@ export const cacheKeys = {
   orders: {
     all: "orders:all",
     lists: () => "orders:lists",
-    // v5 — REQ-0159 placedByName = buyer (clientId), not store owner
+    // V5 — placedByName = buyer (clientId), not store owner
     list: (filters?: Record<string, unknown>) => {
       const filterStr = filters ? JSON.stringify(filters) : "default";
       return `orders:list:v5:${filterStr}`;
@@ -314,7 +314,7 @@ export const cacheKeys = {
    */
   invoices: {
     all: "invoices:all",
-    /** REQ-0159 — v3 buyer customerDisplay/clientName (not store owner) */
+    /** V3 buyer customerDisplay/clientName (not store owner) */
     list: (filters?: Record<string, unknown>) => {
       const filterStr = filters ? JSON.stringify(filters) : "default";
       return `invoices:list:v3:${filterStr}`;
@@ -344,7 +344,7 @@ export const cacheKeys = {
     all: "supportTickets:all",
     list: (filters?: Record<string, unknown>) => {
       const filterStr = filters ? JSON.stringify(filters) : "default";
-      // REQ-0185 — v2: creatorImage + assignedToImage densify
+      // V2: creatorImage + assignedToImage densify
       return `supportTickets:list:v2:${filterStr}`;
     },
     detail: (id: string) => `supportTickets:detail:${id}`,
@@ -358,7 +358,7 @@ export const cacheKeys = {
     all: "productReviews:all",
     list: (filters?: Record<string, unknown>) => {
       const filterStr = filters ? JSON.stringify(filters) : "default";
-      // REQ-0180 — v2: productImageUrl + reviewerImage catalog densify
+      // V2: productImageUrl + reviewerImage catalog densify
       return `productReviews:list:v2:${filterStr}`;
     },
     // Unused helper (peer: orders/invoices detail) — list is the Redis surface; detail is Prisma+enrich only
@@ -370,7 +370,7 @@ export const cacheKeys = {
    * Dashboard (admin overview) cache keys — per-admin (userId) for homepage
    */
   dashboard: {
-    // REQ-0174 — v7: recent orders supplierImage + review category
+    // V7: recent orders supplierImage + review category
     overview: (userId?: string) =>
       userId
         ? `dashboard:overview:v7:${userId}`
@@ -395,8 +395,8 @@ export const cacheKeys = {
    * Admin Client Portal cache keys
    */
   clientPortal: {
-    /** REQ-0177 — v4: recent orders/invoices include productPreview catalog meta */
-    overview: "clientPortal:overview:v4",
+    /** V5: recentOrders product/supplier densify parity */
+    overview: "clientPortal:overview:v5",
     pattern: "clientPortal:*",
   },
 
@@ -404,8 +404,8 @@ export const cacheKeys = {
    * Admin Supplier Portal cache keys (per admin userId)
    */
   supplierPortal: {
-    // REQ-0178 — v4: recent orders include placedById/Name/Image
-    overview: (userId: string) => `supplierPortal:overview:v4:${userId}`,
+    // V5: recentOrders product/supplier densify parity
+    overview: (userId: string) => `supplierPortal:overview:v5:${userId}`,
     pattern: "supplierPortal:*",
   },
 

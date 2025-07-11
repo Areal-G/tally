@@ -1,6 +1,5 @@
 "use client";
 
-import { SafeImage } from "@/components/ui/safe-image";
 import Link from "next/link";
 import { Product } from "@/types";
 import { Column, ColumnDef } from "@tanstack/react-table";
@@ -9,6 +8,7 @@ import { Column, ColumnDef } from "@tanstack/react-table";
 import {
   CopyableText,
   AvatarInlineLink,
+  PersonNameEmailCell,
   TABLE_CATALOG_LINK_CLASS,
   ClientDate,
 } from "@/components/shared";
@@ -93,31 +93,14 @@ export function createProductColumns(
     {
       id: "product",
       accessorKey: "name",
-      // Plain "&" — never HTML entities in string props (SSR/client decode can diverge; REQ-0144)
+      // Plain "&" — never HTML entities in string props (SSR/client decode can diverge;)
       header: ({ column }) => (
         <SortableHeader column={column} label="Product & SKU" />
       ),
       cell: ({ row }) => {
         const product = row.original;
-        const imageUrl = product.imageUrl;
         return (
           <div className="flex items-center gap-3 min-w-0 max-w-[220px]">
-            {imageUrl ? (
-              <SafeImage
-                src={imageUrl}
-                alt={product.name}
-                width={48}
-                height={48}
-                className="h-12 w-12 shrink-0 object-cover rounded-lg border border-rose-400/30"
-                unoptimized={imageUrl.includes("ik.imagekit.io")}
-              />
-            ) : (
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-700">
-                <span className="text-[10px] text-gray-500 dark:text-gray-300">
-                  No Img
-                </span>
-              </div>
-            )}
             <div className="flex min-w-0 flex-col ">
               <Link
                 href={detailHref(detailBase, "products", product.id)}
@@ -140,7 +123,7 @@ export function createProductColumns(
     },
     {
       accessorKey: "quantity",
-      // Plain "&" in string props — never `&amp;` (SSR/client decode diverge; REQ-0144)
+      // Plain "&" in string props — never `&amp;` (SSR/client decode diverge;)
       header: ({ column }) => (
         <SortableHeader column={column} label="QR & Stock" />
       ),
@@ -150,7 +133,7 @@ export function createProductColumns(
         const available = quantity - reserved;
 
         return (
-          // REQ-0138 — QR box + qty vertically centered (match product thumb size)
+          // QR box + qty vertically centered (match product thumb size)
           <div className="flex items-center gap-2">
             <QRCodeHover
               data={JSON.stringify({
@@ -175,7 +158,7 @@ export function createProductColumns(
                 {available}
               </span>
               {reserved > 0 ? (
-                // REQ-0139 — same muted tone as SKU under product name
+                // Same muted tone as SKU under product name
                 <span className="text-xs text-muted-foreground">
                   {reserved} reserved
                 </span>
@@ -202,7 +185,7 @@ export function createProductColumns(
       cell: ({ getValue }) => `$${getValue<number>().toFixed(2)}`,
     },
     {
-      // REQ-0139 — sort by createdAt; Created / Expire labels (full words, text-xs)
+      // Sort by createdAt; Created / Expire labels (full words, text-xs)
       accessorKey: "createdAt",
       id: "dates",
       header: ({ column }) => (
@@ -287,14 +270,15 @@ export function createProductColumns(
             cell: ({ row }) => {
               const product = row.original;
               const name = product.productOwnerName ?? product.userId ?? "—";
-              // Link to product detail (supplier sees same products; ownerId filter is for client browse)
+              // Supplier densify: avatar | name | email+copy (no href — no admin user link)
               return (
-                <Link
-                  href={detailHref(detailBase, "products", product.id)}
-                  className={TABLE_CATALOG_LINK_CLASS}
-                >
-                  {name}
-                </Link>
+                <PersonNameEmailCell
+                  seed={product.userId}
+                  name={name}
+                  email={product.productOwnerEmail}
+                  image={product.productOwnerImage}
+                  avatarSize={28}
+                />
               );
             },
           } as ColumnDef<Product>,
@@ -311,7 +295,7 @@ export function createProductColumns(
                   : (product.supplier as string | undefined) || "Unknown";
               if (product.supplierId) {
                 return (
-                  <AvatarInlineLink
+                  <AvatarInlineLink showAvatar={false}
                     seed={product.supplierId}
                     label={supplierName}
                     href={detailHref(

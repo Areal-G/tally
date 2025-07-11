@@ -12,8 +12,8 @@ type AuthInfoPanelProps = {
 };
 
 /**
- * REQ-0032 — flat left column: brand + intro + staggered list rows (no outer card).
- * REQ-0033 — tighter space-y-1 stack between intro and list rows.
+ * Flat left column: brand + intro + staggered list rows (no outer card).
+ * Tighter space-y-1 stack between intro and list rows.
  */
 export function AuthInfoPanel({ variant }: AuthInfoPanelProps) {
   const { sectionTitle, sectionLead, items } = getAuthPanelCopy(variant);

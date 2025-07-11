@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * SSR shell data from root layout — notifications for navbar bell (REQ-0025).
+ * SSR shell data from root layout — notifications for navbar bell.
  * Passed as hook initialData so first paint shows badge/list without client fetch flash.
  */
 import React, { createContext, useContext } from "react";

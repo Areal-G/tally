@@ -2,10 +2,11 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const axiosInstance = axios.create({
+  // Same-origin in the browser; server-side calls use the configured app URL.
   baseURL:
-    process.env.NODE_ENV === "production"
-      ? "https://stockly-inventory.vercel.app/api" // Production URL
-      : "http://localhost:3000/api", // Localhost for development
+    typeof window !== "undefined"
+      ? "/api"
+      : `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000"}/api`,
   headers: {
     "Content-Type": "application/json",
   },

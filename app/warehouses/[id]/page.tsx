@@ -8,7 +8,7 @@ import type { Warehouse } from "@/types";
 
 type Props = { params: Promise<{ id: string }> };
 
-/** REQ-0025 — blocking SSR detail prefetch. REQ-0084 — warehouse insights + admin forecast. */
+/** Blocking SSR detail prefetch. warehouse insights + admin forecast. */
 export const dynamic = "force-dynamic";
 
 export default async function WarehouseDetailRoute({ params }: Props) {

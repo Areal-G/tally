@@ -4,7 +4,6 @@
  * Reusable for AnalyticsCard, ChartCard, and other card components
  */
 
-import React from "react";
 import { Card, CardContent, CardHeader } from "./card";
 import { Skeleton } from "./skeleton";
 

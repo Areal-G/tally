@@ -1,10 +1,12 @@
 import next from "eslint-config-next";
 
 const customRules = {
-  "@typescript-eslint/no-explicit-any": "off",
-  "react-hooks/exhaustive-deps": "off",
-  "@typescript-eslint/no-unused-vars": "off",
-  "react/no-unknown-property": "off",
+  "@typescript-eslint/no-explicit-any": "error",
+  "react-hooks/exhaustive-deps": "warn",
+  "@typescript-eslint/no-unused-vars": [
+    "error",
+    { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrors: "none", ignoreRestSiblings: true },
+  ],
   "@typescript-eslint/no-empty-interface": [
     "error",
     { allowSingleExtends: true },

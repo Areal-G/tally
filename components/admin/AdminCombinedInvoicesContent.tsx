@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import InvoiceList from "@/components/invoices/InvoiceList";
 import { PageContentWrapper } from "@/components/shared";
 import FloatingActionButtons from "@/components/shared/FloatingActionButtons";
@@ -13,7 +12,7 @@ export type AdminCombinedInvoicesContentProps = {
   initialStats?: DashboardStats | null;
 };
 
-/** Admin combined Invoices — personal + client invoices (REQ-0025 SSR). */
+/** Admin combined Invoices — personal + client invoices (SSR). */
 export default function AdminCombinedInvoicesContent({
   initialInvoices,
   initialClientInvoices,

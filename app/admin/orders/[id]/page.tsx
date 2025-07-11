@@ -10,7 +10,7 @@ type Props = {
   searchParams: Promise<{ payment?: string; session_id?: string }>;
 };
 
-/** REQ-0025 — blocking SSR detail prefetch (no Suspense shell flash). */
+/** Blocking SSR detail prefetch (no Suspense shell flash). */
 export const dynamic = "force-dynamic";
 
 export default async function AdminOrderDetailPage({
@@ -22,7 +22,7 @@ export default async function AdminOrderDetailPage({
   const { id } = await params;
   const sp = await searchParams;
 
-  // REQ-0209 — confirm before SSR detail (no Pending→Confirmed client flash)
+  // Confirm before SSR detail (no Pending→Confirmed client flash)
   const stripeReturn = await reconcileStripeReturnBeforeDetail(sp);
   if (stripeReturn.shouldRedirect) {
     redirect(`/admin/orders/${id}`);

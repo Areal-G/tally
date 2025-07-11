@@ -1,6 +1,6 @@
 /**
- * REQ-0191 — Bounded related product/order/supplier enrich for ticket detail.
- * REQ-0201 — Related product densify (image, price, stock, category, owner, supplier).
+ * Bounded related product/order/supplier enrich for ticket detail.
+ * Related product densify (image, price, stock, category, owner, supplier).
  * Pure merge helper (testable) + async Prisma load used by SSR/API transform path.
  */
 
@@ -14,7 +14,7 @@ import type { SupportTicket } from "@/types";
 export type TicketRelatedSnap = {
   relatedProductName?: string | null;
   relatedProductSku?: string | null;
-  /** REQ-0201 densify */
+  /** Densify */
   relatedProductImageUrl?: string | null;
   relatedProductPrice?: number | null;
   relatedProductQuantity?: number | null;

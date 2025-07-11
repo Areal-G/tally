@@ -6,16 +6,12 @@
 
 import axios, {
   type AxiosInstance,
-  type AxiosRequestConfig,
-  type AxiosResponse,
 } from "axios";
 import Cookies from "js-cookie";
 import { API_ENDPOINTS } from "./endpoints";
 import {
   createApiError,
-  getErrorMessage,
   isAxiosError,
-  type ApiError,
 } from "./errors";
 import type {
   Product,
@@ -100,10 +96,11 @@ export interface ApiResponse<T> {
 /** Builds Axios instance with baseURL (/api), credentials, and request/response interceptors. */
 function createAxiosInstance(): AxiosInstance {
   const instance = axios.create({
+    // Same-origin in the browser; server-side calls use the configured app URL.
     baseURL:
-      process.env.NODE_ENV === "production"
-        ? "https://stockly-inventory.vercel.app/api"
-        : "http://localhost:3000/api",
+      typeof window !== "undefined"
+        ? "/api"
+        : `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3000"}/api`,
     headers: {
       "Content-Type": "application/json",
     },
@@ -664,7 +661,7 @@ class ApiClient {
     },
 
     /**
-     * REQ-0200 — Products owned by Send-to user (Related product picker).
+     * Products owned by Send-to user (Related product picker).
      * Owner-scoped for every role — not GET /api/products viewer scope.
      */
     getOwnerProducts: async (
@@ -1116,7 +1113,7 @@ class ApiClient {
         statusText: response.statusText,
       };
     },
-    /** REQ-0209 — apply/sync after Stripe redirect when webhook is late/missing */
+    /** Apply/sync after Stripe redirect when webhook is late/missing */
     confirmSession: async (
       sessionId: string,
     ): Promise<

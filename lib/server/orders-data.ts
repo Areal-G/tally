@@ -20,7 +20,7 @@ import {
   type PartyUserRow,
 } from "@/lib/orders/order-party";
 
-/** Collect buyer user ids for list placedBy* (REQ-0159). */
+/** Collect buyer user ids for list placedBy*. */
 function collectBuyerUserIds(
   orders: ReadonlyArray<{ userId: string; clientId?: string | null }>,
 ): string[] {
@@ -41,7 +41,7 @@ async function loadPartyUserMap(
 }
 
 /**
- * Linked invoice ref per order row (REQ-0061 actions; REQ-0145 list Invoice # column).
+ * Linked invoice ref per order row (actions; list Invoice # column).
  * List map always fills createdAt/dueDate/amountDue/status; detail may omit extras.
  */
 export type InvoiceLinkFields = {
@@ -51,11 +51,11 @@ export type InvoiceLinkFields = {
   createdAt?: string;
   dueDate?: string;
   amountDue?: number;
-  /** REQ-0152 — for Order Total paid/due breakdown + Pay dialog */
+  /** For Order Total paid/due breakdown + Pay dialog */
   amountPaid?: number;
   total?: number;
   status?: string;
-  /** REQ-0145 — terminal event dates for Invoice # / Payment cells */
+  /** Terminal event dates for Invoice # / Payment cells */
   sentAt?: string | null;
   cancelledAt?: string | null;
   updatedAt?: string | null;
@@ -101,6 +101,8 @@ function orderStatusAtForListRow(
     deliveredAt?: string | null;
     cancelledAt?: string | null;
     updatedAt?: string | null;
+    /** Fallback when statusAt event stamps missing (pending first paint) */
+    createdAt?: string | null;
   },
   invoiceLink: InvoiceLinkForOrder,
 ): string | undefined {
@@ -112,6 +114,7 @@ function orderStatusAtForListRow(
       deliveredAt: order.deliveredAt,
       cancelledAt: order.cancelledAt,
       updatedAt: order.updatedAt,
+      createdAt: order.createdAt,
     },
     invoiceLink,
   );
@@ -184,9 +187,9 @@ export type OrderForPage = {
   productOwnerName?: string | null;
   /** Product owner email (for client view) */
   productOwnerEmail?: string | null;
-  /** Linked invoice when this order has one (REQ-0061 — situation-based invoice actions) */
+  /** Linked invoice when this order has one (situation-based invoice actions) */
   invoiceForOrder?: InvoiceLinkForOrder;
-  /** Terminal status timestamp for paid/shipped/delivered/cancelled rows (REQ-0129) */
+  /** Terminal status timestamp for paid/shipped/delivered/cancelled rows */
   statusAt?: string;
 };
 
@@ -253,7 +256,7 @@ export async function getOrdersForUser(
           subtotal: item.subtotal,
           createdAt: item.createdAt.toISOString(),
         })),
-        // REQ-0159 — buyer (self = owner)
+        // Buyer (self = owner)
         placedByName: buyer.name,
         placedByEmail: buyer.email,
       },
@@ -328,7 +331,7 @@ export async function getOrdersForSupplierId(
           subtotal: item.subtotal,
           createdAt: item.createdAt.toISOString(),
         })),
-        // REQ-0159 — who ordered (buyer), not store owner
+        // Who ordered (buyer), not store owner
         placedByName: buyer.name,
         placedByEmail: buyer.email,
       },
@@ -402,7 +405,7 @@ export async function getClientOrdersForProductOwner(
           subtotal: item.subtotal,
           createdAt: item.createdAt.toISOString(),
         })),
-        // REQ-0159 — Client-badge rows must show buyer, not store owner
+        // Client-badge rows must show buyer, not store owner
         placedByName: buyer.name,
         placedByEmail: buyer.email,
       },

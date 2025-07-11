@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useHistory } from "@/hooks/queries";
 import { isDataSlotLoading, queryKeys, useSyncSsrQueryData } from "@/lib/react-query";
 import { APP_SHELL_WIDTH_CLASS } from "@/lib/ui/shell-layout-styles";
@@ -20,7 +20,7 @@ import type { ImportHistoryForPage } from "@/types";
 export type HistoryListProps = {
   /** When set (e.g. "/admin/activity-history"), View links use {detailHrefBase}/{id} */
   detailHrefBase?: string;
-  /** SSR-passed history for first-render hydration (REQ-0021) */
+  /** SSR-passed history for first-render hydration */
   initialHistory?: ImportHistoryForPage[];
 };
 
@@ -47,7 +47,7 @@ export default function HistoryList({
     [detailHrefBase],
   );
 
-  // REQ-0021: shell-first — only table data slot pulses
+  // Shell-first — only table data slot pulses
   const tableDataLoading = isDataSlotLoading(historyQuery, initialHistory);
 
   return (

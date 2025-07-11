@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0198 — Sync dialog form fields during render when `open` flips true
+ * Sync dialog form fields during render when `open` flips true
  * (or content key changes while open). Same idea as TicketReassignDialog
  * wasOpen — no useEffect/queueMicrotask second paint (open bounce).
  */

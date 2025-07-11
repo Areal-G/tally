@@ -29,14 +29,18 @@ export type NextHeaderRule = {
 
 /** Rules passed to Next.js `async headers()` in next.config.ts. */
 export function buildNextProductionHeaderRules(): NextHeaderRule[] {
-  return [
+  const rules: NextHeaderRule[] = [
     {
       source: "/(.*)",
       headers: [...VERCEL_SECURITY_HEADERS],
     },
-    {
+  ];
+  // Dev chunk names are not content-hashed; caching them forever serves stale code.
+  if (process.env.NODE_ENV === "production") {
+    rules.push({
       source: "/_next/static/(.*)",
       headers: [{ key: "Cache-Control", value: NEXT_STATIC_CACHE_CONTROL }],
-    },
-  ];
+    });
+  }
+  return rules;
 }

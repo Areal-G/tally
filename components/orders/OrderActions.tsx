@@ -1,13 +1,13 @@
 /**
  * Order Actions Component
  * Provides edit and delete actions for order table rows.
- * REQ-0061: situation-based invoice actions — Create Invoice when the order
+ * Situation-based invoice actions — Create Invoice when the order
  * has none (admin/owner), View/Edit/Delete Invoice when linked.
  */
 
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Order } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,13 +34,13 @@ import { AlertDialogWrapper } from "@/components/dialogs";
 interface OrderActionsProps {
   order: Order;
   /**
-   * REQ-0169 — optional; when omitted (e.g. My Activity embed), hide Edit Order.
+   * Optional; when omitted (e.g. My Activity embed), hide Edit Order.
    * View / Cancel / invoice actions still work via links + mutation hooks.
    */
   onEdit?: (order: Order) => void;
   /** When set (e.g. "/admin/orders"), View link goes to {detailHrefBase}/{order.id} */
   detailHrefBase?: string;
-  /** Open InvoiceDialog create mode pre-selected with this order (REQ-0061) */
+  /** Open InvoiceDialog create mode pre-selected with this order */
   onCreateInvoice?: (order: Order) => void;
 }
 
@@ -89,7 +89,7 @@ export default function OrderActions({
     }
   };
 
-  // Handle Edit Order — no-op when onEdit not provided (REQ-0169 embed tables)
+  // Handle Edit Order — no-op when onEdit not provided (embed tables)
   const handleEditOrder = () => {
     if (!onEdit) return;
     try {
@@ -121,7 +121,7 @@ export default function OrderActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/5 backdrop-blur-md shadow-lg"
+          className="border border-white/10 bg-white/5 shadow-lg"
         >
           <DropdownMenuItem asChild>
             <Link
@@ -136,7 +136,7 @@ export default function OrderActions({
               View Details
             </Link>
           </DropdownMenuItem>
-          {/* REQ-0210 — hide Edit on cancelled (status/payment must not be manipulated) */}
+          {/* Hide Edit on cancelled (status/payment must not be manipulated) */}
           {onEdit != null && order.status !== "cancelled" && (
             <DropdownMenuItem
               onClick={handleEditOrder}
@@ -148,7 +148,7 @@ export default function OrderActions({
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
-          {/* REQ-0061: situation-based invoice actions */}
+          {/* Situation-based invoice actions */}
           {linkedInvoice ? (
             <>
               <DropdownMenuItem asChild>
@@ -160,7 +160,7 @@ export default function OrderActions({
                   View Invoice
                 </Link>
               </DropdownMenuItem>
-              {/* REQ-0210 — no edit/delete when order or invoice cancelled */}
+              {/* No edit/delete when order or invoice cancelled */}
               {!disableInvoiceMutations &&
                 order.status !== "cancelled" &&
                 linkedInvoice.status !== "cancelled" && (
@@ -238,7 +238,7 @@ export default function OrderActions({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Delete linked invoice confirmation (REQ-0061) */}
+      {/* Delete linked invoice confirmation */}
       {linkedInvoice && (
         <AlertDialogWrapper
           open={deleteInvoiceDialogOpen}

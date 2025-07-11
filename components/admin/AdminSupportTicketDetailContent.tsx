@@ -1,13 +1,13 @@
 "use client";
 
 /**
- * REQ-0191 — Support ticket detail (review parity): read-only Status/Priority/Messages,
+ * Support ticket detail (review parity): read-only Status/Priority/Messages,
  * densified Ticket info + Sent to, chat replies, notes header edit, footer Edit/Reassign/Delete.
- * REQ-0196 — single GlassCard body pad (no inner p-2 sm:p-4).
- * REQ-0201 — Related Product densify (TicketRelatedProductDense).
+ * Single GlassCard body pad (no inner p-2 sm:p-4).
+ * Related Product densify (TicketRelatedProductDense).
  */
 
-import React, { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useBackWithRefresh } from "@/hooks/use-back-with-refresh";
@@ -81,7 +81,7 @@ import type {
   SupportTicket,
   SupportTicketReply,
 } from "@/types";
-import { cn } from "@/lib/utils";
+import { cn, EMPTY_LIST } from "@/lib/utils";
 import {
   TicketStatusBadge,
   TicketPriorityBadge,
@@ -99,7 +99,7 @@ import { resolveDetailAuditUserHref } from "@/lib/navigation/audit-user-href";
 export type AdminSupportTicketDetailContentProps = {
   initialTicket?: SupportTicket;
   initialReplies?: SupportTicketReply[];
-  /** REQ-0191 — for footer Reassign */
+  /** For footer Reassign */
   productOwners?: ProductOwnerOption[];
 };
 
@@ -131,14 +131,14 @@ export default function AdminSupportTicketDetailContent({
   const updateMutation = useUpdateSupportTicket();
   const deleteMutation = useDeleteSupportTicket();
   const repliesQuery = useSupportTicketReplies(id, initialReplies);
-  const replies = repliesQuery.data ?? initialReplies ?? [];
+  const replies = repliesQuery.data ?? initialReplies ?? EMPTY_LIST;
   const repliesLoading = isDataSlotLoading(repliesQuery, initialReplies);
 
   const [editOpen, setEditOpen] = useState(false);
   const [reassignOpen, setReassignOpen] = useState(false);
   const [notesEditing, setNotesEditing] = useState(false);
   const [notesDraft, setNotesDraft] = useState("");
-  /** REQ-0193 — confirm before clearing internal notes */
+  /** Confirm before clearing internal notes */
   const [notesClearOpen, setNotesClearOpen] = useState(false);
 
   const sessionId = user?.id;
@@ -151,7 +151,7 @@ export default function AdminSupportTicketDetailContent({
       ticket.assignedToId === sessionId);
   const canReassign = isAdmin && productOwners.length > 0;
 
-  // REQ-0192 — opening description + replies (parity with table 1 + replyCount)
+  // Opening description + replies (parity with table 1 + replyCount)
   // Deps: full `ticket` (not ticket?.userId) so React Compiler can preserve memoization
   const messageStats = useMemo(
     () =>
@@ -217,7 +217,7 @@ export default function AdminSupportTicketDetailContent({
         ? `This will permanently delete the ticket "${ticket.subject}". This action cannot be undone.`
         : "This will permanently delete this support ticket.";
 
-  // REQ-0193 — dynamic confirm copy for clear-notes (subject + notes preview)
+  // Dynamic confirm copy for clear-notes (subject + notes preview)
   const notesPreview = (ticket?.notes ?? "").trim();
   const clearNotesDescription =
     notesPreview.length > 80
@@ -424,7 +424,7 @@ export default function AdminSupportTicketDetailContent({
                       </span>
                     )}
                   </DetailInfoRow>
-                  {/* REQ-0191 — Created | Updated same responsive row */}
+                  {/* Created | Updated same responsive row */}
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 [&>*]:flex-1 [&>*]:min-w-0">
                     <DetailInfoRow
                       icon={Calendar}
@@ -478,7 +478,7 @@ export default function AdminSupportTicketDetailContent({
           </GlassCard>
         </div>
 
-        {/* REQ-0201 — Related Product densify + optional order/supplier rows */}
+        {/* Related Product densify + optional order/supplier rows */}
         {!dataLoading && t && hasRelated ? (
           <GlassCard variant="sky">
             <SectionCardHeader
@@ -759,7 +759,7 @@ export default function AdminSupportTicketDetailContent({
                 variant="violet"
               />
             ) : null}
-            {/* REQ-0193 — clear notes confirm with subject + preview */}
+            {/* Clear notes confirm with subject + preview */}
             <AlertDialogWrapper
               open={notesClearOpen}
               onOpenChange={setNotesClearOpen}

@@ -4,7 +4,6 @@
  * Used by all TanStack table pages (products, orders, invoices, etc.).
  */
 
-import React from "react";
 import {
   Table,
   TableBody,

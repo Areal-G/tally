@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, type ReactNode } from "react";
+import { useState, useEffect, useCallback, type ReactNode } from "react";
 import {
   Dialog,
   DialogContent,

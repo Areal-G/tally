@@ -1,13 +1,12 @@
 /**
  * Product Review Table Columns
- * REQ-0180 — densify Product (thumb+SKU copy) + Reviewer (avatar+email copy)
- * REQ-0182 — Actions → ProductReviewActions MoreVertical menu
- * REQ-0189 — sky Comment link to detail; muted Created/Updated labels
+ * Densify Product (thumb+SKU copy) + Reviewer (avatar+email copy)
+ * Actions → ProductReviewActions MoreVertical menu
+ * Sky Comment link to detail; muted Created/Updated labels
  */
 
 "use client";
 
-import React from "react";
 import { Column, ColumnDef } from "@tanstack/react-table";
 import { ReviewStatusBadge } from "@/lib/ui/semantic-badges";
 import {
@@ -179,7 +178,7 @@ export function createProductReviewColumns(
     {
       id: "reviewer",
       header: "Reviewer",
-      // REQ-0185 — supplier-style avatar | sky name | muted email+copy
+      // Supplier-style avatar | sky name | muted email+copy
       cell: ({ row }) => {
         const r = row.original;
         const name =
@@ -205,7 +204,7 @@ export function createProductReviewColumns(
       header: ({ column }) => <SortableHeader column={column} label="Date" />,
       cell: ({ row }) => {
         const r = row.original;
-        // REQ-0189 — muted labels like product Created/Expire
+        // Muted labels like product Created/Expire
         return (
           <div className="flex flex-col whitespace-nowrap text-xs">
             <span>

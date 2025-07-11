@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import SupportTicketList from "./SupportTicketList";
 import { PageContentWrapper } from "@/components/shared";
 import type {
@@ -15,7 +14,7 @@ export type AdminSupportTicketsContentProps = {
   productOwners?: ProductOwnerOption[];
 };
 
-/** Admin Support Tickets — REQ-0021 initialData via props (no useLayoutEffect hydrate). */
+/** Admin Support Tickets — initialData via props (no useLayoutEffect hydrate). */
 export default function AdminSupportTicketsContent({
   initialTickets,
   initialStats,

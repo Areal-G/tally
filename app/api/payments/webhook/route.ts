@@ -1,7 +1,7 @@
 /**
  * Stripe Webhook Handler
  * POST /api/payments/webhook — handle Stripe webhook events
- * REQ-0152 / REQ-0209 — incremental amountPaid; sync unpaid|partial|paid;
+ * Incremental amountPaid; sync unpaid|partial|paid;
  * first money confirms + fulfills. Browser return also calls confirm-session (localhost without local webhook).
  */
 
@@ -15,6 +15,7 @@ import {
 } from "@/lib/stripe";
 import { prisma } from "@/prisma/client";
 import { confirmCheckoutSessionById } from "@/lib/payments/confirm-checkout-session";
+import { shouldThrowOnConfirmFailure } from "@/lib/payments/webhook-confirm-policy";
 import { invalidateOnOrderChange } from "@/lib/cache";
 
 export const runtime = "nodejs";
@@ -57,15 +58,21 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        // REQ-0209 — same idempotent path as browser confirm-session (safe if both fire)
+        // Same idempotent path as browser confirm-session (safe if both fire)
         if (session.id) {
           const result = await confirmCheckoutSessionById(session.id);
           if (!result.ok) {
-            logger.warn("Webhook confirm-session failed", {
+            // Ack non-retryable business failures (e.g. Unknown checkout type)
+            // so Stripe does not retry it in a loop
+            logger.warn("Webhook confirm-session failed (acked)", {
               error: result.error,
               sessionId: session.id,
+              metadata: session.metadata,
             });
-            throw new Error(result.error ?? "confirm-session failed");
+            if (shouldThrowOnConfirmFailure(result)) {
+              throw new Error(result.error ?? "confirm-session failed");
+            }
+            break;
           }
           logger.info(
             `Checkout completed synced order=${result.orderId} status=${result.orderStatus} pay=${result.paymentStatus} alreadyApplied=${result.alreadyApplied}`,

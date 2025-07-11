@@ -1,5 +1,5 @@
 /**
- * REQ-0155 — Shared Total Orders KPI badges (store-wide).
+ * Shared Total Orders KPI badges (store-wide).
  * Shipping = processing + shipped; Delivered is separate.
  * Client-safe / pure.
  */

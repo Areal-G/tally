@@ -5,6 +5,7 @@
  */
 
 import { z } from "zod";
+import { barcodeSchema } from "@/lib/inventory/barcode";
 import type { ProductStatus } from "@/types";
 
 const productSkuSchema = z
@@ -79,6 +80,11 @@ export const productFormSubmitSchema = productSchema.extend({
   supplierId: z.string().min(1, "Supplier is required"),
 });
 
+/** Optional stock-control fields (reorder point/quantity, lot number). */
+const reorderPointSchema = z.number().int().min(0).max(1_000_000).nullable().optional();
+const reorderQuantitySchema = z.number().int().min(1).max(1_000_000).nullable().optional();
+const lotNumberSchema = z.string().trim().max(80).nullable().optional();
+
 /**
  * API request body for POST /api/products (userId from session only)
  */
@@ -93,6 +99,10 @@ export const createProductBodySchema = z.object({
   imageUrl: optionalImageUrlSchema.optional(),
   imageFileId: z.string().optional(),
   expirationDate: optionalExpirationDateSchema.optional(),
+  reorderPoint: reorderPointSchema,
+  reorderQuantity: reorderQuantitySchema,
+  lotNumber: lotNumberSchema,
+  barcode: barcodeSchema,
 });
 
 /**
@@ -117,6 +127,10 @@ export const updateProductBodySchema = z.object({
   imageUrl: optionalImageUrlSchema.optional(),
   imageFileId: z.string().optional(),
   expirationDate: optionalExpirationDateSchema.optional(),
+  reorderPoint: reorderPointSchema,
+  reorderQuantity: reorderQuantitySchema,
+  lotNumber: lotNumberSchema,
+  barcode: barcodeSchema,
 });
 
 /**

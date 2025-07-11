@@ -1,5 +1,5 @@
 /**
- * REQ-0214 — getInvoiceByIdForClient buyer + catalog-history via order gate.
+ * getInvoiceByIdForClient buyer + catalog-history via order gate.
  */
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
@@ -21,7 +21,7 @@ import { prisma } from "@/prisma/client";
 import { getOrderByIdForClient } from "@/prisma/order";
 import { getInvoiceByIdForClient } from "@/prisma/invoice";
 
-describe("getInvoiceByIdForClient (REQ-0214)", () => {
+describe("getInvoiceByIdForClient", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

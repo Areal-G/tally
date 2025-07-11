@@ -1,5 +1,5 @@
 /**
- * REQ-0209 — Shared confirm-dialog copy for Cancel Order vs Process Refund.
+ * Shared confirm-dialog copy for Cancel Order vs Process Refund.
  * Unpaid/partial → Cancel (partial mentions Stripe refund of amount already paid).
  * Fully paid → Process Refund (cancel + full refund). Same DELETE API underneath.
  */

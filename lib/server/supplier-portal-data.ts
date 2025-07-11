@@ -2,8 +2,8 @@
  * Server-side data for Admin Supplier Portal page
  * Aggregates Supplier entities for this admin (own + Demo Supplier), their products, and related orders.
  * Only import from server code (e.g. app/admin/supplier-portal/page.tsx, GET /api/supplier-portal).
- * REQ-0177 — denser recent product/order catalog meta + Redis shape guard.
- * REQ-0178 — recent orders buyer (placedBy*) + Redis v4.
+ * Denser recent product/order catalog meta + Redis shape guard.
+ * Recent orders buyer (placedBy*) + Redis v4.
  */
 
 import { getCache, setCache, cacheKeys } from "@/lib/cache";
@@ -22,7 +22,7 @@ import type {
   SupplierPortalSupplier,
 } from "@/types";
 
-/** REQ-0177/0178 — reject stale Redis missing catalog + placedBy fields. */
+/** Reject stale Redis missing catalog + placedBy fields. */
 function hasSupplierPortalCatalogMeta(stats: SupplierPortalStats): boolean {
   const products = stats.recentProducts ?? [];
   if (
@@ -123,7 +123,7 @@ export async function getSupplierPortalForAdmin(
       })
     : [];
 
-  // Get orders for these items (REQ-0178 — userId/clientId for buyer row)
+  // Get orders for these items (userId/clientId for buyer row)
   const orderIds = [...new Set(orderItems.map((oi) => oi.orderId))];
   const orders = orderIds.length
     ? await prisma.order.findMany({
@@ -206,7 +206,7 @@ export async function getSupplierPortalForAdmin(
     totalValue: totalProductValue,
   };
 
-  // Recent products (last 10) — REQ-0177 category + committedQuantity
+  // Recent products (last 10) — category + committedQuantity
   const recentSlice = products.slice(0, 10);
   const recentEnriched = await enrichProductsWithCommittedQuantity(
     recentSlice.map((p) => ({
@@ -246,7 +246,7 @@ export async function getSupplierPortalForAdmin(
     },
   );
 
-  // Recent orders (last 10) — REQ-0177 product meta + REQ-0178 buyer
+  // Recent orders (last 10) — product meta + buyer
   const recentOrderSlice = orders.slice(0, 10);
   const buyerIds = [
     ...new Set(

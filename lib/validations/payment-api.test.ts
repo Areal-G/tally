@@ -13,7 +13,7 @@ describe("createCheckoutBodySchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("accepts optional positive amount (REQ-0152)", () => {
+  it("accepts optional positive amount", () => {
     const result = createCheckoutBodySchema.safeParse({
       type: "invoice",
       id: "507f1f77bcf86cd799439011",

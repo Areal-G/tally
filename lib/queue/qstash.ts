@@ -37,7 +37,6 @@ export function getQStashClient(): Client | null {
     const url = getEnvVar("QSTASH_URL");
     const token = getEnvVar("QSTASH_TOKEN");
     const currentSigningKey = getEnvVar("QSTASH_CURRENT_SIGNING_KEY");
-    const nextSigningKey = process.env.QSTASH_NEXT_SIGNING_KEY;
 
     if (!url || !token || !currentSigningKey) {
       return null;

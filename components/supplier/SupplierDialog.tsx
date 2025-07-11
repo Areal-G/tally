@@ -64,14 +64,14 @@ import { Supplier } from "@/types";
 import { createSupplierColumns } from "./SupplierTableColumns";
 import { Plus, Truck, X, FileText, StickyNote } from "lucide-react";
 
-const SUPPLIER_DIALOG_CONTENT_CLASS = `${DIALOG_EDGE_SCROLL_SHELL} poppins border-emerald-400/30 dark:border-emerald-400/30 shadow-[0_30px_80px_rgba(16,185,129,0.35)] dark:shadow-[0_30px_80px_rgba(16,185,129,0.25)]`;
+const SUPPLIER_DIALOG_CONTENT_CLASS = `${DIALOG_EDGE_SCROLL_SHELL} poppins border-emerald-400/30 dark:border-emerald-400/30 `;
 
 interface AddSupplierDialogProps {
   children?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   editingSupplier?: Supplier | null;
-  onEditSupplier?: (supplier: Supplier) => void;
+  onEditSupplier?: (supplier: Supplier | null) => void;
 }
 
 export default function AddSupplierDialog({
@@ -110,10 +110,6 @@ export default function AddSupplierDialog({
       ? externalEditingSupplier
       : internalEditingSupplier;
 
-  const setEditingSupplier =
-    externalEditingSupplier !== undefined && onEditSupplier
-      ? onEditSupplier
-      : setInternalEditingSupplier;
   const [newSupplierName, setNewSupplierName] = useState("");
   const [newSupplierDescription, setNewSupplierDescription] = useState("");
   const [newSupplierNotes, setNewSupplierNotes] = useState("");
@@ -154,7 +150,7 @@ export default function AddSupplierDialog({
   const updateSupplierMutation = useUpdateSupplier();
 
   const { toast } = useToast();
-  const { user, isLoggedIn } = useAuth();
+  const { user } = useAuth();
 
   // Determine loading states from mutations
   const isSubmitting = createSupplierMutation.isPending;
@@ -249,7 +245,7 @@ export default function AddSupplierDialog({
       if (externalEditingSupplier === undefined) {
         setInternalEditingSupplier(null);
       } else if (onEditSupplier) {
-        onEditSupplier(null as any);
+        onEditSupplier(null);
       }
       setNewSupplierName("");
       setNewSupplierDescription("");
@@ -270,7 +266,7 @@ export default function AddSupplierDialog({
     if (externalEditingSupplier === undefined) {
       setInternalEditingSupplier(null);
     } else if (onEditSupplier) {
-      onEditSupplier(null as any);
+      onEditSupplier(null);
     }
     setNewSupplierName("");
     setNewSupplierDescription("");
@@ -339,7 +335,11 @@ export default function AddSupplierDialog({
             {editingSupplier ? (
               <div className="mt-4">
                 <div className="pb-4">
-                  <DialogFormLabel icon={Truck} required wrapperClassName="mb-2">
+                  <DialogFormLabel
+                    icon={Truck}
+                    required
+                    wrapperClassName="mb-2"
+                  >
                     Supplier Name
                   </DialogFormLabel>
                   <Input
@@ -350,7 +350,11 @@ export default function AddSupplierDialog({
                   />
                 </div>
                 <div className="pb-4">
-                  <DialogFormLabel icon={FileText} optional wrapperClassName="mb-2">
+                  <DialogFormLabel
+                    icon={FileText}
+                    optional
+                    wrapperClassName="mb-2"
+                  >
                     Description
                   </DialogFormLabel>
                   <Textarea
@@ -363,7 +367,11 @@ export default function AddSupplierDialog({
                   />
                 </div>
                 <div className="pb-4">
-                  <DialogFormLabel icon={StickyNote} optional wrapperClassName="mb-2">
+                  <DialogFormLabel
+                    icon={StickyNote}
+                    optional
+                    wrapperClassName="mb-2"
+                  >
                     Notes
                   </DialogFormLabel>
                   <Textarea
@@ -382,7 +390,7 @@ export default function AddSupplierDialog({
                     onCheckedChange={(checked) =>
                       setNewSupplierStatus(checked === true)
                     }
-                    className="mt-0.5 shrink-0 border-emerald-400/30 data-[state=checked]:bg-emerald-500/70"
+                    className="shrink-0 border-emerald-400/30 data-[state=checked]:bg-emerald-500/70"
                   />
                   <Label
                     htmlFor="edit-supplier-status"
@@ -396,7 +404,10 @@ export default function AddSupplierDialog({
                   <Button
                     onClick={handleCancelEdit}
                     variant="secondary"
-                    className={cn("w-full sm:w-auto px-11 gap-2", GLASS_GHOST_BUTTON)}
+                    className={cn(
+                      "w-full sm:w-auto px-11 gap-2",
+                      GLASS_GHOST_BUTTON,
+                    )}
                   >
                     <X className="h-4 w-4 shrink-0" aria-hidden />
                     Cancel
@@ -434,7 +445,11 @@ export default function AddSupplierDialog({
                   />
                 </div>
                 <div className="pb-4">
-                  <DialogFormLabel icon={FileText} optional wrapperClassName="mb-2">
+                  <DialogFormLabel
+                    icon={FileText}
+                    optional
+                    wrapperClassName="mb-2"
+                  >
                     Description
                   </DialogFormLabel>
                   <Textarea
@@ -447,7 +462,11 @@ export default function AddSupplierDialog({
                   />
                 </div>
                 <div className="pb-4">
-                  <DialogFormLabel icon={StickyNote} optional wrapperClassName="mb-2">
+                  <DialogFormLabel
+                    icon={StickyNote}
+                    optional
+                    wrapperClassName="mb-2"
+                  >
                     Notes
                   </DialogFormLabel>
                   <Textarea
@@ -466,7 +485,7 @@ export default function AddSupplierDialog({
                     onCheckedChange={(checked) =>
                       setSupplierStatus(checked === true)
                     }
-                    className="mt-0.5 shrink-0 border-emerald-400/30 data-[state=checked]:bg-emerald-500/70"
+                    className="shrink-0 border-emerald-400/30 data-[state=checked]:bg-emerald-500/70"
                   />
                   <Label
                     htmlFor="supplier-status"
@@ -480,7 +499,10 @@ export default function AddSupplierDialog({
                   <DialogClose asChild>
                     <Button
                       variant={"secondary"}
-                      className={cn("w-full sm:w-auto px-11 gap-2", GLASS_GHOST_BUTTON)}
+                      className={cn(
+                        "w-full sm:w-auto px-11 gap-2",
+                        GLASS_GHOST_BUTTON,
+                      )}
                     >
                       <X className="h-4 w-4 shrink-0" aria-hidden />
                       Cancel

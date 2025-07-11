@@ -30,7 +30,7 @@ describe("computeCatalogInsights", () => {
     expect(insights.avgOrderValue).toBe(100);
   });
 
-  it("REQ-0140 — stock buckets use qty − committed; trend skips pending", () => {
+  it("stock buckets use qty − committed; trend skips pending", () => {
     const products = [
       {
         quantity: 50,

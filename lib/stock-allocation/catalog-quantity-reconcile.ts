@@ -1,5 +1,5 @@
 /**
- * REQ-0102 — catalog quantity updates vs warehouse allocation rows.
+ * Catalog quantity updates vs warehouse allocation rows.
  * Catalog is source of truth; shrink only unreserved warehouse qty on decrease.
  */
 
@@ -10,6 +10,8 @@ export type CatalogReconcileAllocationRow = {
   id: string;
   quantity: number;
   reservedQuantity: number;
+  /** Carried onto shrink steps for TanStack stock cache patch */
+  warehouseId?: string;
 };
 
 export type CatalogQuantityReconcileInput = {

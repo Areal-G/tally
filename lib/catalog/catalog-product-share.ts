@@ -1,5 +1,5 @@
 /**
- * REQ-0141 / REQ-0142 — pure share % for category/supplier Products column (client-safe).
+ * Pure share % for category/supplier Products column (client-safe).
  */
 
 /** Hover copy for Products column header HelpTooltip. */

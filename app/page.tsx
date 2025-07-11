@@ -8,7 +8,7 @@ import {
 } from "@/lib/server/home-data";
 import { getDashboardForAdmin } from "@/lib/server/dashboard-data";
 
-/** REQ-0025 — blocking SSR prefetch (no Suspense shell flash on refresh). */
+/** Blocking SSR prefetch (no Suspense shell flash on refresh). */
 export const dynamic = "force-dynamic";
 
 export default async function HomeRoute({

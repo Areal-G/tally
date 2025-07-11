@@ -1,5 +1,5 @@
 /**
- * REQ-0200 — getOwnerProductsForSupport owner scope + soft-delete filter.
+ * getOwnerProductsForSupport owner scope + soft-delete filter.
  */
 
 import { describe, expect, it, vi, beforeEach } from "vitest";

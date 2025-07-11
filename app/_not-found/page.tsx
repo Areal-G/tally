@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 
 export const dynamic = "error"; // Ensure static rendering
 export const revalidate = 0; // Disable ISR (Incremental Static Regeneration)

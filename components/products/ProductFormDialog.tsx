@@ -1,14 +1,11 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
@@ -42,8 +39,13 @@ import ProductName from "./form-fields/NameField";
 import SKU from "./form-fields/SKUField";
 import Quantity from "./form-fields/QuantityField";
 import Price from "./form-fields/PriceField";
-import ImageField from "./form-fields/ImageField";
 import ExpirationDateField from "./form-fields/ExpirationDateField";
+import StockControlFields, {
+  EMPTY_STOCK_CONTROL,
+  parseStockControl,
+  stockControlFromProduct,
+  type StockControlValues,
+} from "./form-fields/StockControlFields";
 import { Product } from "@/types";
 import {
   productSchema,
@@ -101,6 +103,7 @@ export default function AddProductDialog({
 
   const { reset, watch } = methods;
 
+  const [stockControl, setStockControl] = useState<StockControlValues>(EMPTY_STOCK_CONTROL);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [selectedSupplier, setSelectedSupplier] = useState<string>("");
   // Inline validation errors for category/supplier — outside RHF so Zod productSchema cannot cover them
@@ -133,7 +136,7 @@ export default function AddProductDialog({
   const activeSuppliers = suppliers.filter(
     (supplier) => supplier.status !== false || supplier.id === selectedSupplier,
   );
-  // REQ-0217 — empty list copy (placeholder + open panel); skip flash while loading
+  // Empty list copy (placeholder + open panel); skip flash while loading
   const categoryInvite = resolveSelectPlaceholder("category", {
     count: activeCategories.length,
     isLoading: categoriesLoading,
@@ -151,7 +154,9 @@ export default function AddProductDialog({
   const { data: productAllocations = [] } = useStockByProduct(
     selectedProduct?.id ?? "",
     undefined,
-    { enabled: openProductDialog && !!selectedProduct },
+    // Warm as soon as edit target is set (not only while dialog open) — avoids
+    // Catalog · Allocated hint flashing in after the first stock fetch.
+    { enabled: !!selectedProduct?.id },
   );
 
   useSyncDialogOpenState(
@@ -171,6 +176,7 @@ export default function AddProductDialog({
                 .split("T")[0]
             : "",
         });
+        setStockControl(stockControlFromProduct(selectedProduct));
         setSelectedCategory(selectedProduct.categoryId || "");
         setSelectedSupplier(selectedProduct.supplierId || "");
       } else {
@@ -183,6 +189,7 @@ export default function AddProductDialog({
           imageFileId: "",
           expirationDate: "",
         });
+        setStockControl(EMPTY_STOCK_CONTROL);
         setSelectedCategory("");
         setSelectedSupplier("");
       }
@@ -255,6 +262,7 @@ export default function AddProductDialog({
           imageUrl: data.imageUrl || undefined,
           imageFileId: data.imageFileId || undefined,
           expirationDate: expirationDate || undefined,
+          ...parseStockControl(stockControl),
         });
 
         // Close dialog on success (toast is handled by mutation hook)
@@ -294,6 +302,7 @@ export default function AddProductDialog({
           imageUrl: data.imageUrl || undefined,
           imageFileId: data.imageFileId || undefined,
           expirationDate: expirationDate,
+          ...parseStockControl(stockControl),
         };
 
         if (reconcilePlan.unitsRemoved > 0) {
@@ -306,7 +315,7 @@ export default function AddProductDialog({
         await submitProductUpdate(updatePayload);
       }
     } catch (error) {
-      // Mutation onError already toasts; catch log is a dev signal (4xx skipped in prod Sentry)
+      // Mutation onError already toasts; catch log is a dev signal (4xx not reported in production)
       logger.error("Product operation error:", error);
     }
   };
@@ -315,10 +324,28 @@ export default function AddProductDialog({
   const isSubmitting =
     createProductMutation.isPending || updateProductMutation.isPending;
 
+  /** Densify fallback when stock query has not settled yet */
+  const allocationsForPreview = useMemo(() => {
+    if (productAllocations.length > 0) return productAllocations;
+    if (!selectedProduct) return [];
+    if (selectedProduct.allocatedTotal == null) return [];
+    return [
+      {
+        id: "__densify__",
+        quantity: selectedProduct.allocatedTotal,
+        reservedQuantity: Number(
+          selectedProduct.committedQuantity ??
+            selectedProduct.reservedQuantity ??
+            0,
+        ),
+      },
+    ];
+  }, [productAllocations, selectedProduct]);
+
   const formValues = watch();
   const reconcilePreview = useCatalogQuantityReconcilePreview({
     selectedProduct,
-    allocations: productAllocations,
+    allocations: allocationsForPreview,
     quantityRaw: formValues.quantity,
   });
   const isFormValid = productFormSubmitSchema.safeParse({
@@ -345,7 +372,7 @@ export default function AddProductDialog({
     <Dialog open={openProductDialog} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {children || (
-          <Button className="h-10 font-medium inline-flex items-center justify-center rounded-xl border border-rose-400/30 dark:border-rose-400/30 bg-gradient-to-r from-rose-500/40 via-rose-500/30 to-rose-500/20 dark:from-rose-500/40 dark:via-rose-500/30 dark:to-rose-500/20 text-white shadow-[0_15px_35px_rgba(225,29,72,0.35)] backdrop-blur-md transition duration-200 hover:border-rose-300/50 hover:from-rose-500/50 hover:via-rose-500/40 hover:to-rose-500/30 dark:hover:border-rose-300/50 dark:hover:from-rose-500/50 dark:hover:via-rose-500/40 dark:hover:to-rose-500/30">
+          <Button className="h-10 font-medium inline-flex items-center justify-center rounded-xl border border-rose-400/30 dark:border-rose-400/30 bg-rose-500/40 dark:bg-rose-500/40 text-white transition duration-200 hover:border-rose-300/50 hover:bg-rose-500/50 dark:hover:border-rose-300/50 dark:hover:bg-rose-500/50 ">
             +Add Product
           </Button>
         )}
@@ -353,7 +380,7 @@ export default function AddProductDialog({
       <DialogContent
         className={cn(
           DIALOG_EDGE_SCROLL_SHELL,
-          "poppins border-rose-400/30 dark:border-rose-400/30 shadow-[0_30px_80px_rgba(225,29,72,0.35)] dark:shadow-[0_30px_80px_rgba(225,29,72,0.25)]",
+          "poppins border-rose-400/30 dark:border-rose-400/30 ",
         )}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
@@ -376,8 +403,8 @@ export default function AddProductDialog({
               <Quantity />
               <Price />
               <ExpirationDateField />
-              <ImageField />
-              {selectedProduct && productAllocations.length > 0 ? (
+              <StockControlFields value={stockControl} onChange={setStockControl} />
+              {selectedProduct && allocationsForPreview.length > 0 ? (
                 <div className={DIALOG_FORM_FEEDBACK_ROW}>
                   <p className={DIALOG_FORM_HINT_TEXT}>
                     {formatCatalogAllocationSummary(
@@ -484,7 +511,7 @@ export default function AddProductDialog({
                       aria-hidden
                     >
                       {selectedSupplier ? (
-                        <AvatarInlineLink
+                        <AvatarInlineLink showAvatar={false}
                           label={
                             activeSuppliers.find(
                               (s) => s.id === selectedSupplier,
@@ -521,7 +548,7 @@ export default function AddProductDialog({
                       >
                         <SelectValue placeholder={supplierInvite}>
                           {selectedSupplier ? (
-                            <AvatarInlineLink
+                            <AvatarInlineLink showAvatar={false}
                               label={
                                 activeSuppliers.find(
                                   (s) => s.id === selectedSupplier,
@@ -555,7 +582,7 @@ export default function AddProductDialog({
                               value={supplier.id}
                               className={DIALOG_SELECT_ITEM_CLASS}
                             >
-                              <AvatarInlineLink
+                              <AvatarInlineLink showAvatar={false}
                                 label={supplier.name}
                                 seed={supplier.userId ?? supplier.id}
                                 size={22}

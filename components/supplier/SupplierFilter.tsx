@@ -17,9 +17,6 @@ import {
 import { Truck } from "lucide-react";
 import { FilterCommandCheckboxItem } from "@/lib/ui/filter-command-item";
 import { Separator } from "@/components/ui/separator";
-import { SafeAvatarImage } from "@/components/ui/safe-avatar-image";
-import { resolveAvatarSourcesFromSeed } from "@/lib/ui/user-avatar-sources";
-import { AVATAR_RING_CLASS } from "@/lib/ui/avatar-ring-styles";
 import { cn } from "@/lib/utils";
 import {
   filterCommandPopoverClass,
@@ -33,32 +30,6 @@ type SupplierFilterRow = {
   image?: string | null;
 };
 
-/** REQ-0079 — robohash avatar beside supplier name in filter dropdown */
-function SupplierFilterAvatar({
-  id,
-  image,
-  size = 20,
-}: {
-  id: string;
-  image?: string | null;
-  size?: number;
-}) {
-  const avatar = resolveAvatarSourcesFromSeed(id, image ?? null);
-  return (
-    <SafeAvatarImage
-      src={avatar.src}
-      fallbackSrc={avatar.fallbackSrc}
-      width={size}
-      height={size}
-      className={cn(
-        "rounded-full object-cover shrink-0",
-        AVATAR_RING_CLASS,
-        size === 20 ? "h-5 w-5" : undefined,
-      )}
-      alt=""
-    />
-  );
-}
 
 type SuppliersDropDownProps = {
   selectedSuppliers: string[];
@@ -96,7 +67,7 @@ export function SuppliersDropDown({
         <PopoverTrigger asChild>
           <Button
             variant={"secondary"}
-            className="h-10 w-full sm:w-auto rounded-[28px] border border-emerald-400/30 dark:border-emerald-400/30 bg-gradient-to-r from-emerald-500/25 via-emerald-500/15 to-emerald-500/10 dark:from-emerald-500/25 dark:via-emerald-500/15 dark:to-emerald-500/10 text-gray-700 dark:text-white shadow-[0_10px_30px_rgba(16,185,129,0.2)] backdrop-blur-md transition duration-200 hover:border-emerald-300/40 hover:from-emerald-500/35 hover:via-emerald-500/25 hover:to-emerald-500/15 dark:hover:border-emerald-300/40 dark:hover:from-emerald-500/35 dark:hover:via-emerald-500/25 dark:hover:to-emerald-500/15"
+            className="h-10 w-full sm:w-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors duration-150 hover:bg-slate-50 dark:hover:bg-slate-700 "
           >
             <Truck className="h-4 w-4 mr-1" aria-hidden />
             Suppliers
@@ -132,11 +103,6 @@ export function SuppliersDropDown({
                     checkboxClassName="focus:ring-emerald-500/50"
                   >
                     <div className="flex items-center gap-2 min-w-0 px-2 text-sm">
-                      <SupplierFilterAvatar
-                        id={supplier.id}
-                        image={"image" in supplier ? supplier.image : undefined}
-                        size={20}
-                      />
                       <span className="truncate">{supplier.name}</span>
                     </div>
                   </FilterCommandCheckboxItem>

@@ -34,16 +34,16 @@ export interface SupportTicket {
   assignedToName?: string | null;
   /** Assigned-to email. Present when API includes it. */
   assignedToEmail?: string | null;
-  /** REQ-0185 — creator avatar (Google or null → robohash via seed). */
+  /** Creator avatar (Google or null → robohash via seed). */
   creatorImage?: string | null;
-  /** REQ-0185 — assignee avatar. */
+  /** Assignee avatar. */
   assignedToImage?: string | null;
   /** Number of replies/messages on this ticket. Present when API includes it. */
   replyCount?: number;
-  /** REQ-0191 — related catalog/order densify on detail */
+  /** Related catalog/order densify on detail */
   relatedProductName?: string | null;
   relatedProductSku?: string | null;
-  /** REQ-0201 — Related product densify (detail / edit RO) */
+  /** Related product densify (detail / edit RO) */
   relatedProductImageUrl?: string | null;
   relatedProductPrice?: number | null;
   relatedProductQuantity?: number | null;
@@ -90,13 +90,13 @@ export interface CreateSupportTicketReplyInput {
 }
 
 export interface UpdateSupportTicketInput {
-  /** REQ-0185 — edit dialog subject/description */
+  /** Edit dialog subject/description */
   subject?: string;
   description?: string;
   status?: SupportTicketStatus;
   priority?: SupportTicketPriority;
   assignedToId?: string | null;
-  /** REQ-0197 — clear Related product on reassign mismatch (null only) */
+  /** Clear Related product on reassign mismatch (null only) */
   productId?: string | null;
   notes?: string | null;
 }
@@ -109,7 +109,7 @@ export interface SupportTicketFilters {
   search?: string;
 }
 
-/** REQ-0185 — Send-to (product owner) picker densify */
+/** Send-to (product owner) picker densify */
 export type ProductOwnerOption = {
   id: string;
   name: string;
@@ -119,7 +119,7 @@ export type ProductOwnerOption = {
 };
 
 /**
- * REQ-0200 / REQ-0201 — Related product picker row for selected Send-to owner.
+ * Related product picker row for selected Send-to owner.
  * Owner-scoped; includes party densify for DialogProductOptionRow.
  */
 export type SupportTicketOwnerProduct = {

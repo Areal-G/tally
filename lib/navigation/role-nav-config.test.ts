@@ -6,7 +6,7 @@ import {
 } from "@/lib/navigation/role-nav-config";
 import { getAdminSidebarWarmPaths } from "@/lib/navigation/admin-nav-config";
 
-describe("role-nav-config (REQ-0094)", () => {
+describe("role-nav-config", () => {
   it("returns role-scoped navbar paths", () => {
     expect(getNavPathsForRole("client")).toEqual([
       "/client",

@@ -1,13 +1,11 @@
 "use client";
 
 /**
- * REQ-0163/0164/0165/0167 — product reviews on detail + compact Order/Invoice line items.
- * REQ-0167: compact under price (right); amber glass Write; edit/delete row under rating.
+ * Product reviews on detail + compact Order/Invoice line items.
+ * Compact under price (right); amber glass Write; edit/delete row under rating.
  */
 
-import React, { useState } from "react";
-import { SafeAvatarImage } from "@/components/ui/safe-avatar-image";
-import { resolveAvatarSourcesFromSeed } from "@/lib/ui/user-avatar-sources";
+import { useState } from "react";
 import { CARD_EMPTY_MESSAGE_CLASS } from "@/lib/ui/card-empty-styles";
 import { SectionTitleRow } from "@/lib/ui/section-title-row";
 import {
@@ -68,9 +66,9 @@ export type ProductReviewsSectionProps = {
   /** Optional: show compact (e.g. inside order item row) */
   compact?: boolean;
   variant?: "amber" | "violet" | "sky";
-  /** REQ-0026 — SSR-passed reviews; skips client fetch on first paint */
+  /** SSR-passed reviews; skips client fetch on first paint */
   initialReviews?: ProductReview[];
-  /** REQ-0026 — SSR-passed eligibility for this product/order */
+  /** SSR-passed eligibility for this product/order */
   initialEligibility?: {
     eligible: boolean;
     slots: ReviewEligibilitySlot[];
@@ -81,30 +79,30 @@ const variantConfig = {
   amber: {
     border: "border-amber-400/20",
     gradient:
-      "bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent",
+      " bg-amber-500/10 ",
     shadow:
-      "shadow-[0_15px_40px_rgba(245,158,11,0.12)] dark:shadow-[0_15px_40px_rgba(245,158,11,0.08)]",
+      " ",
     iconBg:
       "border-amber-300/30 bg-amber-100/50 dark:border-amber-400/30 dark:bg-amber-500/20",
-    button: "border-amber-400/30 from-amber-500/50 to-amber-500/30 text-white",
+    button: "border-amber-400/30 bg-amber-500/50 text-white",
   },
   violet: {
     border: "border-violet-400/20",
     gradient:
-      "bg-gradient-to-br from-violet-500/10 via-violet-500/5 to-transparent",
-    shadow: "shadow-[0_15px_40px_rgba(139,92,246,0.12)]",
+      " bg-violet-500/10 ",
+    shadow: "",
     iconBg:
       "border-violet-300/30 bg-violet-100/50 dark:border-violet-400/30 dark:bg-violet-500/20",
     button:
-      "border-violet-400/30 from-violet-500/50 to-violet-500/30 text-white",
+      "border-violet-400/30 bg-violet-500/50 text-white",
   },
   sky: {
     border: "border-sky-400/20",
-    gradient: "bg-gradient-to-br from-sky-500/10 via-sky-500/5 to-transparent",
-    shadow: "shadow-[0_15px_40px_rgba(2,132,199,0.12)]",
+    gradient: " bg-sky-500/10 ",
+    shadow: "",
     iconBg:
       "border-sky-300/30 bg-sky-100/50 dark:border-sky-400/30 dark:bg-sky-500/20",
-    button: "border-sky-400/30 from-sky-500/50 to-sky-500/30 text-white",
+    button: "border-sky-400/30 bg-sky-500/50 text-white",
   },
 };
 
@@ -123,7 +121,7 @@ export default function ProductReviewsSection({
   const [editingReview, setEditingReview] = useState<ProductReview | null>(
     null,
   );
-  /** REQ-0165 — pending delete target for AlertDialog */
+  /** Pending delete target for AlertDialog */
   const [deleteTarget, setDeleteTarget] = useState<ProductReview | null>(null);
 
   const { data: reviews = [], isLoading: reviewsLoading } = useReviewsByProduct(
@@ -160,7 +158,7 @@ export default function ProductReviewsSection({
   const reviewsToShow = [...approvedReviews, ...myPendingReviews];
   const eligible = eligibility?.eligible ?? false;
   const firstSlot = eligibility?.slots?.[0];
-  // REQ-0165 — hide Write when this order already has my review (belt + eligibility patch)
+  // Hide Write when this order already has my review (belt + eligibility patch)
   const alreadyReviewedThisOrder = myReviews.some(
     (r) => !orderId || r.orderId === orderId,
   );
@@ -228,8 +226,8 @@ export default function ProductReviewsSection({
   );
 
   if (compact) {
-    // REQ-0163 — never show Loader2 in compact (SSR mismatch); wait for settled eligibility
-    // REQ-0167 — same row: stars/rating/comment left · edit+delete right (justify-between)
+    // Never show Loader2 in compact (SSR mismatch); wait for settled eligibility
+    // Same row: stars/rating/comment left · edit+delete right (justify-between)
     return (
       <>
         <div className="flex flex-col gap-1.5 w-full min-w-0">
@@ -313,7 +311,7 @@ export default function ProductReviewsSection({
   return (
     <article
       className={cn(
-        "rounded-[20px] border p-2 sm:p-4 backdrop-blur-md",
+        "rounded-xl border p-2 sm:p-4 ",
         "bg-white/60 dark:bg-white/5",
         config.border,
         config.gradient,
@@ -341,7 +339,7 @@ export default function ProductReviewsSection({
                 onClick={handleWriteNew}
                 size="sm"
                 className={cn(
-                  "rounded-xl border bg-gradient-to-r shadow-sm",
+                  "rounded-xl border shadow-sm",
                   config.button,
                 )}
               >
@@ -374,10 +372,6 @@ export default function ProductReviewsSection({
               review.reviewerName?.trim() ||
               review.reviewerEmail ||
               (review.userId === user?.id ? "You" : "User");
-            const avatar = resolveAvatarSourcesFromSeed(
-              review.userId,
-              review.reviewerImage,
-            );
             return (
               <li
                 key={review.id}
@@ -408,14 +402,6 @@ export default function ProductReviewsSection({
                       {review.comment}
                     </p>
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      <SafeAvatarImage
-                        src={avatar.src}
-                        fallbackSrc={avatar.fallbackSrc}
-                        alt=""
-                        width={32}
-                        height={32}
-                        className="h-8 w-8 rounded-full object-cover border border-amber-200/90 dark:border-white/30 flex-shrink-0"
-                      />
                       <span className="text-xs sm:text-sm font-normal text-gray-600 dark:text-white/80 ">
                         {displayName}
                       </span>

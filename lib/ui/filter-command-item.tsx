@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0045 — cmdk filter row with whole-row toggle (checkbox is visual only).
+ * Cmdk filter row with whole-row toggle (checkbox is visual only).
  * Use onSelect on CommandItem; never wire Checkbox onCheckedChange (prevents hang / double-toggle).
  */
 
@@ -47,7 +47,7 @@ export function FilterCommandCheckboxItem({
         tabIndex={-1}
         aria-hidden
         className={cn(
-          "pointer-events-none mr-2 size-4 shrink-0 rounded-[4px] border-white/20 bg-white/5 backdrop-blur-md focus:ring-2 focus:ring-rose-500/50",
+          "pointer-events-none mr-2 size-4 shrink-0 rounded-[4px] border-white/20 bg-white/5 focus:ring-2 focus:ring-rose-500/50",
           checkboxClassName,
         )}
       />

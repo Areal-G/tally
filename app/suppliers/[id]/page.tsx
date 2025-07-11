@@ -7,7 +7,7 @@ import type { Supplier } from "@/types";
 
 type Props = { params: Promise<{ id: string }> };
 
-/** REQ-0025 — blocking SSR detail prefetch. REQ-0084 — admin cache-read forecast. */
+/** Blocking SSR detail prefetch. admin cache-read forecast. */
 export const dynamic = "force-dynamic";
 
 export default async function SupplierDetailRoute({ params }: Props) {

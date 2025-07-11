@@ -22,11 +22,11 @@ export interface Supplier {
   updatedAt?: Date | null;
   createdBy: string; // User ID who created the supplier
   updatedBy?: string | null; // User ID who last updated the supplier
-  /** REQ-0141 — linked User.email when Supplier.userId resolves (list). */
+  /** Linked User.email when Supplier.userId resolves (list). */
   email?: string | null;
-  /** REQ-0141 — active products under this supplier (list + SSR). */
+  /** Active products under this supplier (list + SSR). */
   productCount?: number;
-  /** REQ-0141 — role-visible catalog size for Products % column. */
+  /** Role-visible catalog size for Products % column. */
   catalogProductTotal?: number;
   /** True when this is the global Test Supplier (test@supplier.com); edit/duplicate/delete are disabled. */
   isGlobalDemo?: boolean;
@@ -52,7 +52,7 @@ export interface Supplier {
   } | null;
   products?: CatalogDetailProductItem[] | null;
   recentOrders?: CatalogDetailRecentOrderItem[] | null;
-  /** REQ-0084 — derived KPIs + sales trend from supplier products (SSR). */
+  /** Derived KPIs + sales trend from supplier products (SSR). */
   supplierInsights?: CatalogEntityInsights | null;
 }
 

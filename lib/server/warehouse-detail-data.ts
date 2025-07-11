@@ -1,7 +1,7 @@
 /**
  * Server-side warehouse detail fetch for SSR prefetch.
  * Mirrors GET /api/warehouses/:id auth + response shape.
- * REQ-0024, REQ-0096 — creator/updater audit snapshots.
+ * Creator/updater audit snapshots.
  */
 
 import { prisma } from "@/prisma/client";

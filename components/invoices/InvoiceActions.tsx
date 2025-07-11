@@ -1,13 +1,13 @@
 /**
  * Invoice Actions Component
  * Provides view, edit, delete, and send actions for invoice table rows.
- * REQ-0062: cross-domain order actions — View Order for all roles,
+ * Cross-domain order actions — View Order for all roles,
  * Cancel Order for admin/owner; Edit/Delete invoice role-gated like orders.
  */
 
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Invoice } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -60,7 +60,7 @@ export default function InvoiceActions({
   const isCancellingOrder = deleteOrderMutation.isPending;
   const isSending = sendInvoiceMutation.isPending;
 
-  // Invoice/order mutations are admin/owner-only (REQ-0062 — match order table gating)
+  // Invoice/order mutations are admin/owner-only (match order table gating)
   const isSupplierRole = user?.role === "supplier";
   const isClientRole = user?.role === "client";
   const disableInvoiceMutations = isSupplierRole || isClientRole;
@@ -104,7 +104,7 @@ export default function InvoiceActions({
     }
   };
 
-  // Handle Cancel Order (REQ-0062 — API guards already-cancelled orders)
+  // Handle Cancel Order (API guards already-cancelled orders)
   const handleCancelOrder = async () => {
     try {
       await deleteOrderMutation.mutateAsync(invoice.orderId);
@@ -125,7 +125,7 @@ export default function InvoiceActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/5 backdrop-blur-md shadow-lg"
+          className="border border-white/10 bg-white/5 shadow-lg"
         >
           <DropdownMenuItem asChild>
             <Link
@@ -140,7 +140,7 @@ export default function InvoiceActions({
               View Details
             </Link>
           </DropdownMenuItem>
-          {/* REQ-0210 — cancelled invoices are read-only */}
+          {/* Cancelled invoices are read-only */}
           {invoice.status !== "cancelled" && (
             <DropdownMenuItem
               onClick={handleEditInvoice}
@@ -162,7 +162,7 @@ export default function InvoiceActions({
             </DropdownMenuItem>
           )}
           <DropdownMenuSeparator />
-          {/* REQ-0062: linked order actions — every invoice row has an orderId */}
+          {/* Linked order actions — every invoice row has an orderId */}
           <DropdownMenuItem asChild>
             <Link
               href={`${orderHrefBase}/${invoice.orderId}`}
@@ -225,7 +225,7 @@ export default function InvoiceActions({
         actionVariant="default"
       />
 
-      {/* Cancel linked order confirmation (REQ-0062) */}
+      {/* Cancel linked order confirmation */}
       <AlertDialogWrapper
         open={cancelOrderDialogOpen}
         onOpenChange={setCancelOrderDialogOpen}

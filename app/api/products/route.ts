@@ -7,6 +7,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromRequest } from "@/utils/auth";
 import { logger } from "@/lib/logger";
+import { normalizeBarcode } from "@/lib/inventory/barcode";
+import { barcodeTakenMessage, findBarcodeOwner } from "@/lib/inventory/barcode.server";
 import {
   generateAndUploadQRCode,
   deleteQRCodeFromImageKit,
@@ -41,16 +43,11 @@ import {
   createProductBodySchema,
   updateProductBodySchema,
 } from "@/lib/validations/product";
-// NOTE: Performance tracking wrapper is available but deferred until after all features are implemented
-// import { withPerformanceTracking } from "@/lib/api/performance-wrapper";
 
 /**
  * GET /api/products
  * Fetch all products for the authenticated user
  * Uses Redis caching for improved performance
- *
- * TODO (Future): Wrap with withPerformanceTracking() after all features are implemented
- * Example: export const GET = withPerformanceTracking(async (request) => { ... })
  */
 export async function GET(request: NextRequest) {
   try {
@@ -93,13 +90,14 @@ export async function GET(request: NextRequest) {
     const cachedProducts = await getCache<
       Array<{ committedQuantity?: number }>
     >(cacheKey);
-    // REQ-0179 — require party avatar fields (list v3)
+    // Require party avatar + owner email fields (list densify)
     if (
       cachedProducts &&
       cachedProducts.every(
         (p) =>
           typeof p.committedQuantity === "number" &&
           "productOwnerImage" in p &&
+          "productOwnerEmail" in p &&
           "supplierImage" in p,
       )
     ) {
@@ -118,7 +116,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    // REQ-0179 — category + owner/supplier avatars for dialog densify
+    // Category + owner/supplier avatars for dialog densify
     const {
       loadProductListPartyMaps,
       productListPartyFields,
@@ -149,8 +147,13 @@ export async function GET(request: NextRequest) {
           imageUrl: product.imageUrl || null,
           imageFileId: product.imageFileId || null,
           expirationDate: product.expirationDate?.toISOString() || null,
+          reorderPoint: product.reorderPoint ?? null,
+          reorderQuantity: product.reorderQuantity ?? null,
+          lotNumber: product.lotNumber ?? null,
+          barcode: product.barcode ?? null,
           productOwnerName: party.productOwnerName,
           productOwnerImage: party.productOwnerImage,
+          productOwnerEmail: party.productOwnerEmail,
           supplierImage: party.supplierImage,
         };
       }),
@@ -214,6 +217,10 @@ export async function POST(request: NextRequest) {
       imageUrl,
       imageFileId,
       expirationDate,
+      reorderPoint,
+      reorderQuantity,
+      lotNumber,
+      barcode,
     } = validationResult.data;
 
     // Check if SKU already exists
@@ -228,13 +235,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const barcodeOwner = await findBarcodeOwner(userId, barcode);
+    if (barcodeOwner) {
+      return NextResponse.json({ error: barcodeTakenMessage(barcodeOwner) }, { status: 400 });
+    }
+
     // Create product with audit fields
     const product = await prisma.product.create({
       data: {
         name,
         sku,
         price,
-        quantity: BigInt(quantity) as any,
+        quantity: BigInt(quantity),
         status,
         userId,
         createdBy: userId, // Set createdBy same as userId
@@ -243,6 +255,10 @@ export async function POST(request: NextRequest) {
         imageUrl: imageUrl || null,
         imageFileId: imageFileId || null,
         expirationDate: expirationDate ? new Date(expirationDate) : null,
+        reorderPoint: reorderPoint ?? null,
+        reorderQuantity: reorderQuantity ?? null,
+        lotNumber: lotNumber || null,
+        barcode: normalizeBarcode(barcode),
         createdAt: new Date(),
         updatedAt: null, // Set to null on creation - will be set when updated
       },
@@ -284,7 +300,7 @@ export async function POST(request: NextRequest) {
             qrCodeFileId: qrCodeData.fileId,
           },
         });
-        // REQ-0134: second wipe — first invalidation ran before QR existed in DB
+        // Second wipe — first invalidation ran before QR existed in DB
         await invalidateOnProductChange();
       })
       .catch((error) => {
@@ -396,6 +412,10 @@ export async function PUT(request: NextRequest) {
       imageUrl,
       imageFileId,
       expirationDate,
+      reorderPoint,
+      reorderQuantity,
+      lotNumber,
+      barcode,
     } = validationResult.data;
 
     // Verify product belongs to user
@@ -422,6 +442,11 @@ export async function PUT(request: NextRequest) {
           { status: 400 },
         );
       }
+    }
+
+    const barcodeOwner = await findBarcodeOwner(userId, barcode, id);
+    if (barcodeOwner) {
+      return NextResponse.json({ error: barcodeTakenMessage(barcodeOwner) }, { status: 400 });
     }
 
     // Handle image deletion if imageUrl is being cleared
@@ -454,6 +479,10 @@ export async function PUT(request: NextRequest) {
             ? null
             : new Date(expirationDate),
       }),
+      ...(reorderPoint !== undefined && { reorderPoint }),
+      ...(reorderQuantity !== undefined && { reorderQuantity }),
+      ...(lotNumber !== undefined && { lotNumber: lotNumber || null }),
+      ...(barcode !== undefined && { barcode: normalizeBarcode(barcode) }),
       updatedBy: session.id,
       updatedAt: new Date(),
     };
@@ -462,7 +491,17 @@ export async function PUT(request: NextRequest) {
       quantity !== undefined &&
       existingProduct.quantity !== BigInt(quantity);
 
-    let stockReconcile: { unitsRemovedFromWarehouses: number } | undefined;
+    let stockReconcile:
+      | {
+          unitsRemovedFromWarehouses: number;
+          shrinkSteps?: Array<{
+            id: string;
+            deduct: number;
+            warehouseId?: string;
+            productId: string;
+          }>;
+        }
+      | undefined;
 
     if (quantityChanged) {
       const allocationRows = await getStockAllocationsByProduct(id);
@@ -474,6 +513,7 @@ export async function PUT(request: NextRequest) {
           id: row.id,
           quantity: Number(row.quantity),
           reservedQuantity: Number(row.reservedQuantity ?? 0),
+          warehouseId: row.warehouseId,
         })),
       });
 
@@ -497,6 +537,16 @@ export async function PUT(request: NextRequest) {
           shrinkSteps: reconcilePlan.shrinkSteps,
           productUpdate: productUpdateData,
         });
+        // Client patches warehouse/product stock caches from steps
+        stockReconcile = {
+          ...stockReconcile,
+          shrinkSteps: reconcilePlan.shrinkSteps.map((step) => ({
+            id: step.id,
+            deduct: step.deduct,
+            warehouseId: step.warehouseId,
+            productId: id,
+          })),
+        };
       } else {
         await prisma.product.update({
           where: { id },
@@ -588,7 +638,7 @@ export async function PUT(request: NextRequest) {
               }
             }
           }
-          // REQ-0134: second wipe so detail/list cannot re-serve pre-QR Redis snapshot
+          // Second wipe so detail/list cannot re-serve pre-QR Redis snapshot
           await invalidateOnProductChange();
         })
         .catch((error) => {
@@ -654,8 +704,18 @@ export async function PUT(request: NextRequest) {
       imageUrl: product.imageUrl || null,
       imageFileId: product.imageFileId || null,
       expirationDate: product.expirationDate?.toISOString() || null,
+      reorderPoint: product.reorderPoint ?? null,
+      reorderQuantity: product.reorderQuantity ?? null,
+      lotNumber: product.lotNumber ?? null,
+      barcode: product.barcode ?? null,
       ...(stockReconcile
-        ? { stockReconcile: { unitsRemovedFromWarehouses: stockReconcile.unitsRemovedFromWarehouses } }
+        ? {
+            stockReconcile: {
+              unitsRemovedFromWarehouses:
+                stockReconcile.unitsRemovedFromWarehouses,
+              shrinkSteps: stockReconcile.shrinkSteps ?? [],
+            },
+          }
         : {}),
     };
 

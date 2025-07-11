@@ -4,6 +4,7 @@
  * with bcrypt, then issues a JWT and sets it in a cookie (session_id) for subsequent requests.
  */
 
+import { withRateLimit, defaultRateLimits } from "@/lib/api/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { generateToken, sessionCookieOptions } from "@/utils/auth";
@@ -17,6 +18,10 @@ import { prisma } from "@/prisma/client";
  * Authenticate user and create session
  */
 export async function POST(request: NextRequest) {
+  // Brute-force guard: 5 attempts per minute per IP
+  const rateLimitResponse = await withRateLimit(request, defaultRateLimits.auth);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // Handle CORS
     const responseHeaders = createCorsHeaders(request);
@@ -111,7 +116,7 @@ export async function POST(request: NextRequest) {
       { status: 200, headers: responseHeaders },
     );
 
-    // REQ-0134: JWT + cookie both 1d via sessionCookieOptions (was 1h — idle logout)
+    // JWT + cookie both 1d via sessionCookieOptions (was 1h — idle logout)
     response.cookies.set("session_id", token, sessionCookieOptions(isSecure));
 
     return response;

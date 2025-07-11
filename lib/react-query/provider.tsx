@@ -20,7 +20,7 @@ interface QueryProviderProps {
   children: ReactNode;
 }
 
-/** Query roots persisted to localStorage — volatile server data excluded (REQ-0133). */
+/** Query roots persisted to localStorage — volatile server data excluded. */
 const PERSISTED_QUERY_ROOTS = new Set(["auth", "user"]);
 
 /**

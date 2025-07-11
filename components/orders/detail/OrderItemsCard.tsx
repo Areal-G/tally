@@ -1,11 +1,10 @@
 "use client";
 
 /**
- * REQ-0147 — Items card subtitle is count + created only (invoice lives in Order Information).
- * REQ-0148 — pass full order so ProductLineItemsList can render invoice meta chip.
+ * Items card subtitle is count + created only (invoice lives in Order Information).
+ * Pass full order so ProductLineItemsList can render invoice meta chip.
  */
 
-import React from "react";
 import { Package } from "lucide-react";
 import {
   ClientDateTime,
@@ -24,7 +23,7 @@ export type OrderItemsCardProps = {
   dataLoading: boolean;
   linkMode: "admin" | "portal" | "none";
   warehouseLinkMode?: "admin" | "owner" | "none";
-  /** REQ-0026 — batch SSR review context keyed by productId */
+  /** Batch SSR review context keyed by productId */
   initialReviewContext?: OrderReviewContext;
   className?: string;
 };
@@ -76,7 +75,7 @@ export function OrderItemsCard({
           [1, 2, 3].map((i) => (
             <div
               key={i}
-              className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 rounded-xl border border-sky-200/40 dark:border-sky-400/20 bg-gradient-to-r from-sky-100/40 via-sky-50/20 to-transparent dark:from-sky-500/10 dark:via-sky-500/5 dark:to-transparent"
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-4 rounded-xl border border-sky-200/40 dark:border-sky-400/20 bg-sky-100/40 dark:bg-sky-500/10 "
             >
               <div className="flex-1 space-y-2">
                 <DataSlotPulse variant="text-md" className="w-40" />

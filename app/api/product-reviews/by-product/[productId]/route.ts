@@ -1,7 +1,7 @@
 /**
  * GET /api/product-reviews/by-product/:productId
  * List reviews for a product (approved by default; optional status=all for pending too).
- * REQ-0202 — reviewerEmail densify (parity with SSR getReviewsForProductPage).
+ * reviewerEmail densify (parity with SSR getReviewsForProductPage).
  */
 
 import { NextRequest, NextResponse } from "next/server";

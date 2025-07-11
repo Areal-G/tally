@@ -1,6 +1,6 @@
 /**
- * SSR stock allocations for warehouse detail pages (REQ-0026).
- * REQ-0084 — admin can load any warehouse allocations (mirrors warehouse detail access).
+ * SSR stock allocations for warehouse detail pages.
+ * Admin can load any warehouse allocations (mirrors warehouse detail access).
  */
 import { prisma } from "@/prisma/client";
 import {

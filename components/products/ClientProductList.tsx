@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
-import { PaginationType } from "@/components/shared/PaginationSelector";
 import { columns } from "./ProductTableColumns";
 import { useClientBrowseMeta, useClientBrowseProducts } from "@/hooks/queries";
+import { useTypedListSearch } from "@/hooks/use-typed-list-search";
 import { isDataSlotLoading, queryKeys, useSyncSsrQueryData } from "@/lib/react-query";
 import { PAGE_STATS_GRID_CLASS, APP_SHELL_WIDTH_CLASS, PAGE_SECTION_SPACING_CLASS } from "@/lib/ui/shell-layout-styles";
 import type {
@@ -19,6 +19,7 @@ import { Users, Truck, FolderTree, Warehouse, ShoppingBag } from "lucide-react";
 import { PageSectionHeader } from "@/components/shared";
 import { cn } from "@/lib/utils";
 import ProductFilters from "./ProductFilters";
+import { DEMO_ADMIN_EMAIL } from "@/lib/auth/demo-seed-users";
 
 const ProductTable = dynamic(
   () =>
@@ -32,7 +33,7 @@ export type ClientProductListProps = {
   /** Controlled: parent owns selectedOwnerId */
   selectedOwnerId?: string;
   onOwnerChange?: (ownerId: string) => void;
-  /** REQ-0026 — SSR browse meta + default owner products */
+  /** SSR browse meta + default owner products */
   initialBrowseMeta?: ClientBrowseMeta;
   initialBrowseProducts?: ClientBrowseProductsResponse;
   initialOwnerId?: string;
@@ -68,11 +69,8 @@ export default function ClientProductList({
   const selectedOwnerId = controlledOwnerId ?? internalOwnerId;
   const setSelectedOwnerId = onOwnerChange ?? setInternalOwnerId;
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [pagination, setPagination] = useState<PaginationType>({
-    pageIndex: 0,
-    pageSize: 8,
-  });
+  const { searchTerm, setSearchTerm, pagination, setPagination } =
+    useTypedListSearch();
   const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedSuppliers, setSelectedSuppliers] = useState<string[]>([]);
@@ -101,10 +99,10 @@ export default function ClientProductList({
   useEffect(() => {
     if (admins.length > 0 && !selectedOwnerId) {
       const defaultAdmin =
-        admins.find((a) => a.email === "test@admin.com") ?? admins[0];
+        admins.find((a) => a.email === DEMO_ADMIN_EMAIL) ?? admins[0];
       if (defaultAdmin) setSelectedOwnerId(defaultAdmin.id);
     }
-  }, [meta?.admins, selectedOwnerId, setSelectedOwnerId]);
+  }, [admins, selectedOwnerId, setSelectedOwnerId]);
 
   const productsAsProductType = useMemo(
     () =>
@@ -117,7 +115,7 @@ export default function ClientProductList({
     [products],
   );
 
-  // REQ-0021: shell-first — only table data slot pulses
+  // Shell-first — only table data slot pulses
   const tableDataLoading =
     !!selectedOwnerId && isDataSlotLoading(productsQuery);
 

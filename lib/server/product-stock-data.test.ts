@@ -23,7 +23,7 @@ describe("getStockByProductForPage", () => {
     vi.clearAllMocks();
   });
 
-  it("resolves warehouses by product owner userId, not session id (REQ-0075 AC1)", async () => {
+  it("resolves warehouses by product owner userId, not session id", async () => {
     vi.mocked(getProductDetailForPage).mockResolvedValue({
       id: "prod-1",
       userId: "admin-owner",

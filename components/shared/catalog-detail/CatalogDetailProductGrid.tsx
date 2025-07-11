@@ -1,6 +1,6 @@
 /**
- * REQ-0086 — product grid for category/supplier detail pages.
- * REQ-0141 — name · SKU on line 1; category link · stock · price on line 2.
+ * Product grid for category/supplier detail pages.
+ * Name · SKU on line 1; category link · stock · price on line 2.
  */
 
 import { getDisplayCommittedQuantity } from "@/lib/products/enrich-product-committed-quantity";
@@ -171,7 +171,7 @@ export function CatalogDetailProductGrid({
                     />
                   </span>
                 )}
-                {/* REQ-0143 — middle-dot between Owner and Supplier */}
+                {/* Middle-dot between Owner and Supplier */}
                 {product.owner && product.supplier ? (
                   <span className="text-gray-400" aria-hidden>
                     ·
@@ -181,7 +181,7 @@ export function CatalogDetailProductGrid({
                   <span className="inline-flex items-center gap-1.5 min-w-0">
                     <Truck className="h-3.5 w-3.5 shrink-0" aria-hidden />
                     Supplier:{" "}
-                    <AvatarInlineLink
+                    <AvatarInlineLink showAvatar={false}
                       seed={product.supplier.id}
                       label={product.supplier.name}
                       href={supplierHref(product.supplier.id)}

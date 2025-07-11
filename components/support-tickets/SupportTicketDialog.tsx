@@ -1,15 +1,15 @@
 "use client";
 
 /**
- * REQ-0185 / REQ-0188 — Create / Edit support ticket dialog.
+ * Create / Edit support ticket dialog.
  * Client/supplier: assignedTo required; densify owner Select; Priority solid/opaque badges.
- * REQ-0188 — Send-to trigger: no line-clamp clip; dual-surface owner text.
- * REQ-0190 — Edit: Send-to read-only (all roles); omit assignedToId on PUT. Create Select unchanged.
- * REQ-0191 — Edit: Status Select (no inline detail Selects).
- * REQ-0197 — Create: optional Related product Command (owner-scoped); edit RO densify.
- * REQ-0198 — render-phase open sync; Send-to placeholder height matches trigger.
- * REQ-0200 — Related products via owner-scoped API (not role-scoped useProducts); Select always controlled.
- * REQ-0201 — Related product DialogProductOptionRow densify (create + edit RO).
+ * Send-to trigger: no line-clamp clip; dual-surface owner text.
+ * Edit: Send-to read-only (all roles); omit assignedToId on PUT. Create Select unchanged.
+ * Edit: Status Select (no inline detail Selects).
+ * Create: optional Related product Command (owner-scoped); edit RO densify.
+ * Render-phase open sync; Send-to placeholder height matches trigger.
+ * Related products via owner-scoped API (not role-scoped useProducts); Select always controlled.
+ * Related product DialogProductOptionRow densify (create + edit RO).
  */
 
 import React, { useState } from "react";
@@ -73,9 +73,6 @@ import {
   productCategoryLabel,
   productSupplierLabel,
 } from "@/components/products/ProductOptionRow";
-import { SafeAvatarImage } from "@/components/ui/safe-avatar-image";
-import { resolveAvatarSourcesFromSeed } from "@/lib/ui/user-avatar-sources";
-import { AVATAR_RING_CLASS } from "@/lib/ui/avatar-ring-styles";
 import {
   FILTER_COMMAND_INPUT_WRAPPER_CLASS,
   filterCommandPopoverClass,
@@ -116,20 +113,17 @@ const STATUSES: { value: SupportTicketStatus; label: string }[] = [
 ];
 
 /**
- * REQ-0185 densify Send-to row; REQ-0188 — dual surface text + circle overflow only.
+ * Densify Send-to row; dual surface text + circle overflow only.
  * trigger = dark glass SelectTrigger; item = light readable popover.
- * Exported for admin Reassign Select (REQ-0190).
+ * Exported for admin Reassign Select.
  */
 export function OwnerSelectRow({
   owner,
-  avatarSize = 28,
   surface = "item",
 }: {
   owner: ProductOwnerOption;
-  avatarSize?: number;
   surface?: "trigger" | "item";
 }) {
-  const avatar = resolveAvatarSourcesFromSeed(owner.id, owner.image);
   const count = owner.productCount;
   const nameClass =
     surface === "trigger"
@@ -141,23 +135,6 @@ export function OwnerSelectRow({
       : "truncate text-xs text-muted-foreground dark:text-white/70";
   return (
     <span className="flex min-w-0 flex-1 items-center gap-2 text-left">
-      {/* overflow-hidden on circle only — clip image to round, no extra padding */}
-      <span
-        className={cn(
-          "relative shrink-0 overflow-hidden rounded-full",
-          AVATAR_RING_CLASS,
-        )}
-        style={{ width: avatarSize, height: avatarSize }}
-      >
-        <SafeAvatarImage
-          src={avatar.src}
-          fallbackSrc={avatar.fallbackSrc}
-          alt=""
-          width={avatarSize}
-          height={avatarSize}
-          className="h-full w-full object-cover"
-        />
-      </span>
       <span className="flex min-w-0 flex-1 flex-col justify-center">
         <span className={nameClass}>{owner.name}</span>
         <span className={metaClass}>
@@ -177,7 +154,7 @@ export type SupportTicketDialogProps = {
   onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
   variant?: "sky" | "violet";
-  /** REQ-0185 — when set, dialog is Edit mode */
+  /** When set, dialog is Edit mode */
   existingTicket?: SupportTicket | null;
 };
 
@@ -204,13 +181,13 @@ export default function SupportTicketDialog({
   const [priority, setPriority] = useState<SupportTicketPriority>("medium");
   const [status, setStatus] = useState<SupportTicketStatus>("open");
   const [assignedToId, setAssignedToId] = useState<string | null>(null);
-  // REQ-0197 — optional Related product (create only)
+  // Optional Related product (create only)
   const [productId, setProductId] = useState<string | null>(null);
   const [productPickerOpen, setProductPickerOpen] = useState(false);
 
   const createMutation = useCreateSupportTicket();
   const updateMutation = useUpdateSupportTicket();
-  // REQ-0200/0201 — owner catalog for create picker; edit RO fallback densify
+  // Owner catalog for create picker; edit RO fallback densify
   const ownerFetchId = isEdit
     ? (existingTicket?.assignedToId ?? assignedToId)
     : assignedToId;
@@ -223,14 +200,14 @@ export default function SupportTicketDialog({
     });
 
   const role = user?.role;
-  // REQ-0195 — workflow status Select only for admin; client/supplier see RO badge
+  // Workflow status Select only for admin; client/supplier see RO badge
   const canEditStatus = role === "admin";
   const requireAssignee =
     (role === "client" || role === "supplier") && productOwners.length > 0;
   const allowNoneOwner = role === "admin" || !requireAssignee;
 
   const selectedProduct = ownerProducts.find((p) => p.id === productId);
-  // REQ-0201 — edit RO densify from ticket snap, else owner-products row
+  // Edit RO densify from ticket snap, else owner-products row
   const editRelatedFromOwner = existingTicket?.productId
     ? ownerProducts.find((p) => p.id === existingTicket.productId)
     : undefined;
@@ -245,7 +222,7 @@ export default function SupportTicketDialog({
     setProductId(null);
   };
 
-  // REQ-0198 — sync on open / ticket change (no queueMicrotask bounce)
+  // Sync on open / ticket change (no queueMicrotask bounce)
   useSyncDialogOpenState(
     open,
     () => {
@@ -272,7 +249,7 @@ export default function SupportTicketDialog({
   const isPending = createMutation.isPending || updateMutation.isPending;
   const isViolet = variant === "violet";
   const selectedOwner = productOwners.find((po) => po.id === assignedToId);
-  // REQ-0190 — edit read-only row may use list enrich when owners list omits assignee
+  // Edit read-only row may use list enrich when owners list omits assignee
   const editAssigneeOwner: ProductOwnerOption | null = (() => {
     if (!isEdit || !existingTicket?.assignedToId) return selectedOwner ?? null;
     if (selectedOwner) return selectedOwner;
@@ -298,8 +275,8 @@ export default function SupportTicketDialog({
     if (!canSubmit) return;
 
     if (isEdit && existingTicket) {
-      // REQ-0190 — never send assignedToId from edit (admin Reassign is separate)
-      // REQ-0195 — omit status for non-admin (API also strips via resolveStatusUpdate)
+      // Never send assignedToId from edit (admin Reassign is separate)
+      // Omit status for non-admin (API also strips via resolveStatusUpdate)
       updateMutation.mutate(
         {
           id: existingTicket.id,
@@ -342,8 +319,8 @@ export default function SupportTicketDialog({
     ? "border-violet-400/30 dark:border-violet-400/30"
     : "border-sky-400/30 dark:border-sky-400/30";
   const shadowClass = isViolet
-    ? "shadow-[0_30px_80px_rgba(139,92,246,0.35)] dark:shadow-[0_30px_80px_rgba(139,92,246,0.25)]"
-    : "shadow-[0_30px_80px_rgba(2,132,199,0.35)] dark:shadow-[0_30px_80px_rgba(2,132,199,0.25)]";
+    ? " "
+    : " ";
   const inputClass = isViolet
     ? DIALOG_FORM_FIELD_VIOLET
     : DIALOG_FORM_FIELD_SKY;
@@ -355,7 +332,7 @@ export default function SupportTicketDialog({
       <DialogContent
         className={cn(
           "p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto",
-          "bg-gradient-to-br from-slate-800/98 to-slate-900/98 dark:from-slate-800/98 dark:to-slate-900/98",
+          " bg-slate-800/98 dark:bg-slate-800/98 ",
           borderClass,
           shadowClass,
         )}
@@ -415,7 +392,7 @@ export default function SupportTicketDialog({
               className={cn("min-h-[120px] rounded-xl resize-none", inputClass)}
             />
           </div>
-          {/* REQ-0190 — edit: always show Send-to as read-only; create: Select when owners exist */}
+          {/* Edit: always show Send-to as read-only; create: Select when owners exist */}
           {(isEdit || productOwners.length > 0) && (
             <div className="space-y-2">
               <DialogFormLabel
@@ -451,7 +428,7 @@ export default function SupportTicketDialog({
                 <DeferredSelectGate
                   enabled={open}
                   placeholder={
-                    // REQ-0198 — match SelectTrigger h-auto min-h-11 (Send-to densify)
+                    // Match SelectTrigger h-auto min-h-11 (Send-to densify)
                     <div
                       className={cn(
                         "flex h-auto min-h-11 w-full items-center rounded-xl px-2 py-1.5 text-sm text-white/60",
@@ -476,7 +453,7 @@ export default function SupportTicketDialog({
                   {({ selectRemountKey }) => (
                     <Select
                       key={selectRemountKey}
-                      // REQ-0200 — always controlled (never undefined → uncontrolled warning)
+                      // Always controlled (never undefined → uncontrolled warning)
                       value={
                         assignedToId ?? (allowNoneOwner ? "none" : "")
                       }
@@ -487,7 +464,7 @@ export default function SupportTicketDialog({
                       }
                       disabled={isPending}
                     >
-                      {/* REQ-0188 — kill Radix line-clamp so avatar/meta are not clipped */}
+                      {/* Kill Radix line-clamp so avatar/meta are not clipped */}
                       <SelectTrigger
                         id="support-ticket-send-to"
                         className={cn(
@@ -545,7 +522,7 @@ export default function SupportTicketDialog({
               )}
             </div>
           )}
-          {/* REQ-0197 — create: optional Related product (owner-scoped); edit: RO densify */}
+          {/* Create: optional Related product (owner-scoped); edit: RO densify */}
           {!isEdit ? (
             <div className="space-y-2">
               <DialogFormLabel
@@ -555,7 +532,7 @@ export default function SupportTicketDialog({
               >
                 Related product
               </DialogFormLabel>
-              {/* REQ-0199 — modal Popover + shared Combobox trigger (no white hover / reopen) */}
+              {/* Modal Popover + shared Combobox trigger (no white hover / reopen) */}
               <Popover
                 open={productPickerOpen}
                 onOpenChange={setProductPickerOpen}
@@ -761,7 +738,7 @@ export default function SupportTicketDialog({
               </div>
             </div>
           ) : null}
-          {/* REQ-0191/0195 — Status on edit: admin Select; non-admin read-only badge */}
+          {/* Status on edit: admin Select; non-admin read-only badge */}
           {isEdit ? (
             <div className="space-y-2">
               <DialogFormLabel

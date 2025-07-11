@@ -1,5 +1,5 @@
 /**
- * REQ-0101 — catalog vs warehouse allocation budget for allocate dialog hints.
+ * Catalog vs warehouse allocation budget for allocate dialog hints.
  * Upsert sets absolute qty per warehouse; max = current row + unallocated catalog.
  */
 

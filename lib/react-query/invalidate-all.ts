@@ -52,7 +52,7 @@ export function invalidateAllRelatedQueries(queryClient: QueryClient): void {
 }
 
 /**
- * Back-button / leave-detail navigation only (REQ-0220).
+ * Back-button / leave-detail navigation only.
  * Soft-nav keeps the departing detail mounted until the list RSC lands — invalidating
  * `*.all`, `forecasting`, or `stockAllocation` refetches active detail slots and flashes
  * empty/`—` UI. Lists + dashboards/portals are enough for a fresh destination.
@@ -106,7 +106,7 @@ export function invalidateAfterStockChange(queryClient: QueryClient): void {
 
 /**
  * Catalog CRUD (product/category/supplier/warehouse) — lists, detail, portals, dashboards.
- * REQ-0133: detail keys included so embedded names/qty stay in sync after rename/qty change.
+ * Detail keys included so embedded names/qty stay in sync after rename/qty change.
  */
 export function invalidateAfterCatalogChange(queryClient: QueryClient): void {
   invalidateAllRelatedQueries(queryClient);

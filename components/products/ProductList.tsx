@@ -3,17 +3,16 @@
 import React, { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { PaginationType } from "@/components/shared/PaginationSelector";
 import { createProductColumns } from "./ProductTableColumns";
 import { useAuth } from "@/contexts";
 import {
   useProducts,
   useCategories,
   useSuppliers,
-  useOrders,
   useDashboard,
   useSupplierPortalDashboard,
 } from "@/hooks/queries";
+import { useTypedListSearch } from "@/hooks/use-typed-list-search";
 import { isDataSlotLoading, isDataSlotUnsettled, queryKeys, useSyncSsrQueryData } from "@/lib/react-query";
 import ProductFilters from "./ProductFilters";
 import { StatisticsCard } from "@/components/home/StatisticsCard";
@@ -23,6 +22,7 @@ import type { Product } from "@/types";
 import type { ProductForHome } from "@/lib/server/home-data";
 import type { DashboardStats, SupplierPortalDashboard } from "@/types";
 import { APP_SHELL_WIDTH_CLASS } from "@/lib/ui/shell-layout-styles";
+import { formatStableCurrency } from "@/lib/format";
 
 const ProductTable = dynamic(
   () =>
@@ -36,9 +36,9 @@ const ProductTable = dynamic(
 //import { ColumnFiltersState } from "@tanstack/react-table";
 
 export type ProductListProps = {
-  /** SSR-passed products for first-render hydration (REQ-0021) */
+  /** SSR-passed products for first-render hydration */
   initialProducts?: Product[] | ProductForHome[];
-  /** SSR dashboard stats for stat cards (REQ-0025 P2) */
+  /** SSR dashboard stats for stat cards (P2) */
   initialStats?: DashboardStats;
   /** SSR supplier portal stats for supplier /products cards */
   initialSupplierPortal?: SupplierPortalDashboard | null;
@@ -68,7 +68,6 @@ const ProductList = React.memo(function ProductList({
   const productsQuery = useProducts(initialProducts);
   const categoriesQuery = useCategories();
   const suppliersQuery = useSuppliers();
-  const ordersQuery = useOrders();
   const dashboardQuery = useDashboard(initialStats, { enabled: enableDashboard });
   const supplierPortalQuery = useSupplierPortalDashboard(
     isSupplierProductsPage ? (initialSupplierPortal ?? undefined) : undefined,
@@ -91,7 +90,6 @@ const ProductList = React.memo(function ProductList({
   const allProducts = productsQuery.data ?? [];
   const allCategories = categoriesQuery.data ?? [];
   const allSuppliers = suppliersQuery.data ?? [];
-  const allOrders = ordersQuery.data ?? [];
   const dashboard = isAdminProducts ? (dashboardQuery.data ?? null) : null;
   /** Dashboard stats for products-page cards (only when on /products) */
   const productsPageStats = isUserProductsPage
@@ -107,7 +105,7 @@ const ProductList = React.memo(function ProductList({
     [detailBase, isSupplierProductsPage],
   );
 
-  // REQ-0021: shell-first — only data slots pulse
+  // Shell-first — only data slots pulse
   const tableDataLoading = isDataSlotLoading(productsQuery, initialProducts);
   const dashboardCardsLoading = enableDashboard
     ? isDataSlotUnsettled(dashboardQuery, initialStats)
@@ -119,11 +117,8 @@ const ProductList = React.memo(function ProductList({
       )
     : false;
   const supplierPortal = supplierPortalQuery.data;
-  const [searchTerm, setSearchTerm] = useState("");
-  const [pagination, setPagination] = useState<PaginationType>({
-    pageIndex: 0,
-    pageSize: 8,
-  });
+  const { searchTerm, setSearchTerm, pagination, setPagination } =
+    useTypedListSearch();
 
   // State for selected filters
   const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
@@ -132,8 +127,7 @@ const ProductList = React.memo(function ProductList({
 
   // Removed debug log - use React DevTools for debugging
 
-  const formatCurrency = (value: number) =>
-    `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formatCurrency = formatStableCurrency;
 
   const nonCancelledSupplierOrders = Math.max(
     0,
@@ -144,83 +138,6 @@ const ProductList = React.memo(function ProductList({
     nonCancelledSupplierOrders > 0
       ? (supplierPortal?.totalRevenue ?? 0) / nonCancelledSupplierOrders
       : 0;
-
-  // State for column filters, search term, and pagination
-  const productStats = useMemo(() => {
-    const total = allProducts.length;
-    const available = allProducts.filter(
-      (p) =>
-        (p.status || "").toLowerCase().replace(/\s+/g, "_") === "available",
-    ).length;
-    const stockLow = allProducts.filter(
-      (p) =>
-        (p.status || "").toLowerCase().replace(/\s+/g, "_") === "stock_low",
-    ).length;
-    const stockOut = allProducts.filter(
-      (p) =>
-        (p.status || "").toLowerCase().replace(/\s+/g, "_") === "stock_out",
-    ).length;
-    const totalValue = allProducts.reduce(
-      (sum, p) => sum + (Number(p.price) || 0) * (Number(p.quantity) || 0),
-      0,
-    );
-    return { total, available, stockLow, stockOut, totalValue };
-  }, [allProducts]);
-
-  const orderStats = useMemo(() => {
-    const total = allOrders.length;
-    const paidOrders = allOrders.filter(
-      (o) => (o.paymentStatus || "").toLowerCase() === "paid",
-    );
-    const paid = paidOrders.length;
-    const unpaid = allOrders.filter(
-      (o) =>
-        (o.paymentStatus || "").toLowerCase() === "unpaid" ||
-        (o.paymentStatus || "").toLowerCase() === "partial",
-    ).length;
-    const totalRevenue = paidOrders.reduce(
-      (sum, o) => sum + (Number(o.total) || 0),
-      0,
-    );
-    const pending = allOrders.filter(
-      (o) => (o.status || "").toLowerCase() === "pending",
-    ).length;
-    const confirmed = allOrders.filter(
-      (o) => (o.status || "").toLowerCase() === "confirmed",
-    ).length;
-    const shipping = allOrders.filter(
-      (o) =>
-        (o.status || "").toLowerCase() === "shipped" ||
-        (o.status || "").toLowerCase() === "processing",
-    ).length;
-    const refunded = allOrders.filter(
-      (o) => (o.paymentStatus || "").toLowerCase() === "refunded",
-    ).length;
-    const cancelled = allOrders.filter(
-      (o) => (o.status || "").toLowerCase() === "cancelled",
-    ).length;
-    return {
-      total,
-      paid,
-      unpaid,
-      totalRevenue,
-      pending,
-      confirmed,
-      shipping,
-      refunded,
-      cancelled,
-    };
-  }, [allOrders]);
-
-  const cardVariantClasses = {
-    violet:
-      "border-violet-400/30 bg-gradient-to-br from-violet-500/25 via-violet-500/10 to-violet-500/5 shadow-[0_20px_50px_rgba(139,92,246,0.25)] dark:shadow-[0_20px_50px_rgba(139,92,246,0.15)]",
-    emerald:
-      "border-emerald-400/30 bg-gradient-to-br from-emerald-500/25 via-emerald-500/10 to-emerald-500/5 shadow-[0_20px_50px_rgba(16,185,129,0.25)] dark:shadow-[0_20px_50px_rgba(16,185,129,0.15)]",
-    amber:
-      "border-amber-400/30 bg-gradient-to-br from-amber-500/30 via-amber-500/15 to-amber-500/5 shadow-[0_20px_50px_rgba(245,158,11,0.2)] dark:shadow-[0_20px_50px_rgba(245,158,11,0.12)]",
-    blue: "border-blue-400/30 bg-gradient-to-br from-blue-500/25 via-blue-500/10 to-blue-500/5 shadow-[0_20px_50px_rgba(59,130,246,0.25)] dark:shadow-[0_20px_50px_rgba(59,130,246,0.15)]",
-  };
 
   return (
     <div className="flex flex-col poppins">

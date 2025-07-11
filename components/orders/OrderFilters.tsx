@@ -55,7 +55,6 @@ interface OrderFiltersProps {
 export default function OrderFilters({
   searchTerm,
   setSearchTerm,
-  pagination,
   setPagination,
   allOrders,
   selectedStatuses,
@@ -136,7 +135,7 @@ export default function OrderFilters({
         { header: "Tracking Number", key: "Tracking Number" },
       ];
 
-      exportToCSV(csvData, columns, "stockly-orders");
+      exportToCSV(csvData, columns, "tally-orders");
 
       toast({
         title: "CSV Export Successful!",
@@ -182,7 +181,7 @@ export default function OrderFilters({
 
       await exportToExcel({
         sheetName: "Orders",
-        fileName: "stockly-orders",
+        fileName: "tally-orders",
         columns: [
           { header: "Order Number", key: "Order Number", width: 20 },
           { header: "Order Date", key: "Order Date", width: 12 },
@@ -287,7 +286,7 @@ export default function OrderFilters({
               variant="ghost"
               size="sm"
               onClick={() => setSearchTerm("")}
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 backdrop-blur-md"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 "
             >
               <IoClose className="h-4 w-4 text-gray-700 dark:text-white/80" />
             </Button>

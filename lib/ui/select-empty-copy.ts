@@ -1,5 +1,5 @@
 /**
- * REQ-0217 — empty copy for dynamic Select / Command pickers (parity with table
+ * Empty copy for dynamic Select / Command pickers (parity with table
  * "No … found." rows). Entity plural drives both closed-trigger placeholder and
  * open-panel empty body; no TanStack/invalidation impact (presentational only).
  */

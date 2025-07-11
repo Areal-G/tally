@@ -17,7 +17,7 @@ type SelectEmptyContentProps = {
 };
 
 /**
- * REQ-0217 — non-selectable empty body inside Radix SelectContent when the
+ * Non-selectable empty body inside Radix SelectContent when the
  * option list is empty (SelectItem cannot render with no options).
  */
 export function SelectEmptyContent({

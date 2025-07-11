@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { updateInvoiceSchema } from "./invoice";
 
 describe("updateInvoiceSchema", () => {
-  it("accepts date-only sentAt/paidAt/cancelledAt (REQ-0151 DialogDateField)", () => {
+  it("accepts date-only sentAt/paidAt/cancelledAt (DialogDateField)", () => {
     const parsed = updateInvoiceSchema.safeParse({
       id: "inv-1",
       status: "sent",

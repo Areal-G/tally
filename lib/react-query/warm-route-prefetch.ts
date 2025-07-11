@@ -1,5 +1,5 @@
 /**
- * Role-scoped TanStack warm prefetch after login (REQ-0025, REQ-0093).
+ * Role-scoped TanStack warm prefetch after login.
  * Runs in background — does not block navigation; complements SSR + localStorage persist.
  *
  * Client: skips admin catalog list keys (uses portal browse APIs on /products).
@@ -9,6 +9,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
 import { queryKeys } from "./config";
+import { DEMO_ADMIN_EMAIL } from "@/lib/auth/demo-seed-users";
 
 type WarmUser = { id: string; role: string | null };
 
@@ -41,7 +42,7 @@ async function prefetchBatched(
 }
 
 /**
- * Role → TanStack query keys warmed after login (REQ-0093).
+ * Role → TanStack query keys warmed after login.
  * Shared: orders + notifications (all roles).
  * Admin/user: full catalog + dashboard + admin lists.
  * Supplier: catalog + supplier portal.
@@ -102,12 +103,12 @@ function buildWarmTasks(user: WarmUser): PrefetchTask[] {
       const r = await apiClient.productReviews.getAll();
       return r.data;
     });
-    // REQ-0159 — Self-only issuer list (matches /invoices SSR)
+    // Self-only issuer list (matches /invoices SSR)
     add(queryKeys.invoices.list(undefined), async () => {
       const r = await apiClient.invoices.getAll();
       return r.data;
     });
-    // client-orders / client-invoices: warm on / or /admin — see warmAdminClientPortalLists (REQ-0027)
+    // Client-orders / client-invoices: warm on / or /admin — see warmAdminClientPortalLists
   }
 
   if (role === "supplier") {
@@ -172,7 +173,7 @@ export async function warmQueriesForUser(
       });
       const admins = meta.admins ?? [];
       const preferred =
-        admins.find((a) => a.email === "test@admin.com") ?? admins[0];
+        admins.find((a) => a.email === DEMO_ADMIN_EMAIL) ?? admins[0];
       const ownerId = preferred?.id ?? "";
       if (ownerId) {
         await queryClient.prefetchQuery({
@@ -191,7 +192,7 @@ export async function warmQueriesForUser(
 }
 
 /**
- * Admin client-portal list warm — deferred until user visits `/` or `/admin` (REQ-0027).
+ * Admin client-portal list warm — deferred until user visits `/` or `/admin`.
  */
 export async function warmAdminClientPortalLists(
   queryClient: QueryClient,

@@ -1,5 +1,5 @@
 /**
- * Format barrel — stable SSR helpers + client-locale Intl (REQ-0020).
+ * Format barrel — stable SSR helpers + client-locale Intl.
  */
 
 export {

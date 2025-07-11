@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0041 — catalog Active/Inactive status Select with entity icon + glass badges.
+ * Catalog Active/Inactive status Select with entity icon + glass badges.
  * DeferredSelectGate avoids Radix portal teardown on App Router navigation.
  */
 import { ChevronDown } from "lucide-react";

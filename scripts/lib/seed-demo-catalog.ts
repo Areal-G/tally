@@ -1,5 +1,5 @@
 /**
- * REQ-0088 / REQ-0137 — seed connected explore catalog after demo users exist.
+ * Seed connected explore catalog after demo users exist.
  * Covers user-facing entities (1–2 rows) plus stub schema models for completeness.
  */
 
@@ -43,7 +43,7 @@ export async function seedDemoCatalog(
   const { adminId, clientId, supplierUserId, demoSupplierId } = ids;
   const adminUser = DEMO_SEED_USERS.find((u) => u.role === "admin")!;
   const clientUser = DEMO_SEED_USERS.find((u) => u.role === "client")!;
-  /** REQ-0159 — shipping/billing name = buyer so list fallbacks stay correct. */
+  /** Shipping/billing name = buyer so list fallbacks stay correct. */
   const addressForBuyer = (buyer: "self" | "client"): Prisma.InputJsonValue =>
     ({
       ...DEMO_CATALOG_SEED.demoAddress,
@@ -202,7 +202,7 @@ export async function seedDemoCatalog(
     const isPaid = spec.paymentStatus === "paid";
     const isDelivered = spec.status === "delivered";
 
-    // REQ-0158 — userId = store owner; clientId = buyer (null = self)
+    // userId = store owner; clientId = buyer (null = self)
     const isSelfBuyer = spec.buyerKey === "self";
     const orderClientId = isSelfBuyer ? null : clientId;
     const orderCreatedBy = isSelfBuyer ? adminId : clientId;
@@ -263,7 +263,7 @@ export async function seedDemoCatalog(
     const dueDate = new Date(orderDate);
     dueDate.setDate(dueDate.getDate() + 30);
     const invoicePaid = spec.invoiceStatus === "paid";
-    // REQ-0152 — support partial amountPaid on explore seed
+    // Support partial amountPaid on explore seed
     const amountPaid = invoicePaid
       ? total
       : Math.min(total, Math.max(0, spec.amountPaid ?? 0));
@@ -481,7 +481,7 @@ export async function seedDemoCatalog(
         entityId: productIds[0] ?? null,
         details: spec.details as Prisma.InputJsonValue,
         ipAddress: "127.0.0.1",
-        userAgent: "demo-seed/REQ-0137",
+        userAgent: "demo-seed/",
         createdAt: now,
       },
       select: { id: true },

@@ -4,7 +4,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useUsers, useDashboard } from "@/hooks/queries";
 import {
   isDataSlotLoading,
@@ -22,12 +22,13 @@ import { StatisticsCard } from "@/components/home/StatisticsCard";
 import { Users, Shield, Truck, UserCircle } from "lucide-react";
 import { useAuth } from "@/contexts";
 import type { UserForAdmin, DashboardStats } from "@/types";
+import { EMPTY_LIST } from "@/lib/utils";
 
 export type UserManagementListProps = {
   detailHrefBase?: string;
-  /** SSR-passed users for first-render hydration (REQ-0021) */
+  /** SSR-passed users for first-render hydration */
   initialUsers?: UserForAdmin[];
-  /** SSR dashboard stats for role stat cards (REQ-0125 — CategoryList parity) */
+  /** SSR dashboard stats for role stat cards (CategoryList parity) */
   initialStats?: DashboardStats;
 };
 
@@ -48,7 +49,7 @@ export default function UserManagementList({
     user?.id && initialStats !== undefined ? initialStats : undefined,
   );
 
-  const allUsers = usersQuery.data ?? initialUsers ?? [];
+  const allUsers = usersQuery.data ?? initialUsers ?? EMPTY_LIST;
   const dashboard = dashboardQuery.data ?? null;
   const roleBreakdown = dashboard?.userRoleBreakdown;
 
@@ -75,7 +76,7 @@ export default function UserManagementList({
     [detailHrefBase, user?.id],
   );
 
-  // REQ-0125: dashboard role cards unsettled; patched table rows use loading only
+  // Dashboard role cards unsettled; patched table rows use loading only
   const cardsDataLoading = isDataSlotUnsettled(dashboardQuery, initialStats);
   const tableDataLoading = isDataSlotLoading(usersQuery, initialUsers);
 

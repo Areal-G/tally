@@ -1,6 +1,6 @@
 /**
  * Admin settings page shell — Navbar + header + SystemConfigSettings.
- * REQ-0024: optional initialConfigs from SSR avoids field pulse on first paint.
+ * Optional initialConfigs from SSR avoids field pulse on first paint.
  */
 
 "use client";

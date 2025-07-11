@@ -1,6 +1,6 @@
 import type { UseQueryResult } from "@tanstack/react-query";
 
-/** Subset of TanStack state used for REQ-0021 / REQ-0122 data-slot predicates. */
+/** Subset of TanStack state used for data-slot predicates. */
 export type DataSlotQueryHint = Pick<
   UseQueryResult<unknown>,
   "isPending" | "data" | "isFetching" | "isStale"
@@ -23,7 +23,7 @@ export function isDataSlotRefreshing(
 }
 
 /**
- * True when a data slot should show inline pulse on cold load (REQ-0021).
+ * True when a data slot should show inline pulse on cold load.
  * Shell (titles, headers, filters) stays visible; only values pulse.
  * SSR initialData or persisted cache → false on first paint.
  */
@@ -37,7 +37,7 @@ export function isDataSlotLoading<TData>(
 }
 
 /**
- * Pulse when cold-loading OR when a stale refetch may show wrong numbers (REQ-0122).
+ * Pulse when cold-loading OR when a stale refetch may show wrong numbers.
  * Use on dashboard/stat slots; detail/list rows patched via setQueryData should use
  * isDataSlotLoading only so correct patched values stay visible during refetch.
  */
@@ -66,7 +66,7 @@ export function isAnyDataSlotLoading(
   );
 }
 
-/** Combine multiple queries — pulse on cold load or stale refetch (REQ-0122 stats). */
+/** Combine multiple queries — pulse on cold load or stale refetch (stats). */
 export function isAnyDataSlotUnsettled(
   entries: Array<{
     query: DataSlotQueryHint;

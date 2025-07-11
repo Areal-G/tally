@@ -1,6 +1,6 @@
 /**
- * REQ-0164 / REQ-0165 — attach owner-products href for Parties & Roles rows.
- * REQ-0165 — self uses default sky link (no gray override); href unchanged.
+ * Attach owner-products href for Parties & Roles rows.
+ * Self uses default sky link (no gray override); href unchanged.
  * Pure helper (no React); safe for client party cards.
  */
 
@@ -39,7 +39,7 @@ export function enrichPartyPerson(
     email: person.email,
     image: person.image,
     href,
-    // REQ-0165 — self + non-self both use AvatarInlineLink default sky
+    // Self + non-self both use AvatarInlineLink default sky
     linkClassName: undefined,
   };
 }

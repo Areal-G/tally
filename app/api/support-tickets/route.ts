@@ -2,7 +2,7 @@
  * Support Tickets API Route Handler
  * GET /api/support-tickets — list (admin assigned / user created)
  * POST /api/support-tickets — create ticket
- * REQ-0185 — list densify images; client/supplier must set assignedToId
+ * List densify images; client/supplier must set assignedToId
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = parsed.data;
-    // REQ-0185 — client/supplier must send to a product owner
+    // Client/supplier must send to a product owner
     const requiresAssignee =
       session.role === "client" || session.role === "supplier";
     if (requiresAssignee && !data.assignedToId) {
@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // REQ-0197 — optional product must belong to selected Send-to owner
+    // Optional product must belong to selected Send-to owner
     let productId = data.productId;
     if (productId) {
       if (!data.assignedToId) {

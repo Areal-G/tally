@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * REQ-0180 / REQ-0181 / REQ-0183 — admin product review detail (display-only).
+ * Admin product review detail (display-only).
  * Status+Rating | Comment; densified Purchase; opaque status badge; text-sm values.
- * REQ-0196 — single GlassCard body pad (no inner p-2 sm:p-4).
+ * Single GlassCard body pad (no inner p-2 sm:p-4).
  */
 
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useBackWithRefresh } from "@/hooks/use-back-with-refresh";
@@ -216,7 +216,7 @@ export default function AdminProductReviewDetailContent({
           }
         />
 
-        {/* REQ-0183 — Status + Rating | Comment */}
+        {/* Status + Rating | Comment */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4 items-stretch">
           <GlassCard variant="amber">
             <div className="space-y-4">
@@ -371,7 +371,7 @@ export default function AdminProductReviewDetailContent({
                         tone="emerald"
                         valueClassName="min-w-0"
                       >
-                        {/* REQ-0191 gap — avatar centered beside name + email (PersonNameEmailCell) */}
+                        {/* Avatar centered beside name + email (PersonNameEmailCell) */}
                         <PersonNameEmailCell
                           seed={r!.supplierId}
                           image={r!.supplierImage}
@@ -383,7 +383,7 @@ export default function AdminProductReviewDetailContent({
                         />
                       </DetailInfoRow>
                     ) : null}
-                    {/* REQ-0191 — Created | Updated same responsive row */}
+                    {/* Created | Updated same responsive row */}
                     <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 [&>*]:flex-1 [&>*]:min-w-0">
                       <DetailInfoRow
                         icon={Calendar}
@@ -433,7 +433,7 @@ export default function AdminProductReviewDetailContent({
                     tone="violet"
                     valueClassName={cn("text-sm", DETAIL_DATA_VALUE_CLASS)}
                   >
-                    {/* REQ-0183 — name only; email in dedicated row below */}
+                    {/* Name only; email in dedicated row below */}
                     <PersonInlineRow
                       seed={r!.userId}
                       name={reviewerLabel}

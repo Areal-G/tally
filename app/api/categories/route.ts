@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       countActiveCatalogProductsForUser(userId),
     ]);
 
-    // REQ-0141 — productCount + catalogProductTotal for list Products column
+    // productCount + catalogProductTotal for list Products column
     return NextResponse.json(
       enriched.map((c) => ({ ...c, catalogProductTotal })),
     );

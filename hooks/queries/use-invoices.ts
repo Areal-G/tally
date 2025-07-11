@@ -31,14 +31,14 @@ import type { QueryClient } from "@tanstack/react-query";
 import { densifyInvoiceFromOrder } from "@/lib/invoices/densify-invoice-from-order";
 import { resolveInvoiceStatusAt } from "@/lib/invoices/invoice-status-display-date";
 
-/** REQ-0136 — keep Status column date in sync after CRUD (draft/sent/paid/…). */
+/** Keep Status column date in sync after CRUD (draft/sent/paid/…). */
 function withResolvedInvoiceStatusAt(invoice: Invoice): Invoice {
   const statusAt = resolveInvoiceStatusAt(invoice);
   if (statusAt == null) return invoice;
   return { ...invoice, statusAt };
 }
 
-/** Snapshot linked order before money patches (REQ-0222 settle densify). */
+/** Snapshot linked order before money patches (settle densify). */
 function getCachedOrderCommittedSnapshot(
   queryClient: QueryClient,
   orderId: string | null | undefined,
@@ -51,7 +51,7 @@ function getCachedOrderCommittedSnapshot(
   );
 }
 
-/** REQ-0222 — patch reserved when invoice money/status fulfills a pending order. */
+/** Patch reserved when invoice money/status fulfills a pending order. */
 function settleCommittedFromInvoice(
   queryClient: QueryClient,
   invoice: Invoice,
@@ -99,7 +99,7 @@ function densifyInvoiceRowFromOrderCache(
 
 /**
  * Optimistic invoice merge — coerces date fields from UpdateInvoiceInput strings.
- * REQ-0125 / REQ-0153 — recompute amountDue when amountPaid or total changes.
+ * Recompute amountDue when amountPaid or total changes.
  */
 function mergeOptimisticInvoiceUpdate(
   old: Invoice | undefined,
@@ -120,7 +120,7 @@ function mergeOptimisticInvoiceUpdate(
       : base.cancelledAt,
   };
 
-  // REQ-0153 — keep Total / Due / order patch coherent before server responds
+  // Keep Total / Due / order patch coherent before server responds
   const moneyTouched =
     partial.amountPaid !== undefined ||
     partial.total !== undefined ||
@@ -136,7 +136,7 @@ function mergeOptimisticInvoiceUpdate(
     }
   }
 
-  // REQ-0136 — Status column date under badge after dropdown status change
+  // Status column date under badge after dropdown status change
   next.statusAt = resolveInvoiceStatusAt(next);
 
   return next;
@@ -217,7 +217,7 @@ export function useCreateInvoice() {
       return response.data;
     },
     onSuccess: (data: Invoice) => {
-      // REQ-0211 — densify + prepend only invoice lists (never orders — wrong id)
+      // Densify + prepend only invoice lists (never orders — wrong id)
       const densified = withResolvedInvoiceStatusAt(
         densifyInvoiceRowFromOrderCache(queryClient, data),
       );
@@ -232,7 +232,7 @@ export function useCreateInvoice() {
       patchListCaches(queryClient, queryKeys.clientInvoices.all, densified, {
         prependIfMissing: true,
       });
-      // REQ-0153 — link invoiceForOrder on order rows (merge, not prepend)
+      // Link invoiceForOrder on order rows (merge, not prepend)
       patchLinkedOrderFromInvoiceMoney(queryClient, densified);
 
       invalidateAfterOrderGraphChange(queryClient);
@@ -272,7 +272,7 @@ export function useUpdateInvoice() {
     UpdateInvoiceInput,
     {
       previousInvoice: Invoice | undefined;
-      /** Order before money/status patches — required for REQ-0222 deltas. */
+      /** Order before money/status patches — required for deltas. */
       prevOrder: Order | null;
     }
   >({
@@ -302,7 +302,7 @@ export function useUpdateInvoice() {
       if (optimistic) {
         patchDetailCacheMerge(queryClient, detailKey, () => optimistic);
         patchOrderGraphListCaches(queryClient, optimistic);
-        // REQ-0153 — optimistic order Payment badge + invoiceForOrder money
+        // Optimistic order Payment badge + invoiceForOrder money
         patchLinkedOrderFromInvoiceMoney(queryClient, optimistic);
       }
 
@@ -316,7 +316,7 @@ export function useUpdateInvoice() {
           context.previousInvoice,
         );
         patchOrderGraphListCaches(queryClient, context.previousInvoice);
-        // REQ-0153 — rollback linked order payment patch
+        // Rollback linked order payment patch
         patchLinkedOrderFromInvoiceMoney(
           queryClient,
           context.previousInvoice,
@@ -341,9 +341,9 @@ export function useUpdateInvoice() {
         withStatusAt,
       );
       patchOrderGraphListCaches(queryClient, withStatusAt);
-      // REQ-0153 — confirm linked order from server invoice money
+      // Confirm linked order from server invoice money
       patchLinkedOrderFromInvoiceMoney(queryClient, withStatusAt);
-      // REQ-0222 — reserved densify on fulfill (use pre-mutate order snapshot)
+      // Reserved densify on fulfill (use pre-mutate order snapshot)
       settleCommittedFromInvoice(
         queryClient,
         withStatusAt,
@@ -422,9 +422,9 @@ export function useSendInvoice() {
         withStatusAt,
       );
       patchOrderGraphListCaches(queryClient, withStatusAt);
-      // REQ-0153 — keep order invoiceForOrder / payment badge in sync after send
+      // Keep order invoiceForOrder / payment badge in sync after send
       patchLinkedOrderFromInvoiceMoney(queryClient, withStatusAt);
-      // REQ-0222 — no-op unless send somehow fulfills; safe shared path
+      // No-op unless send somehow fulfills; safe shared path
       settleCommittedFromInvoice(queryClient, withStatusAt, prevOrder);
 
       invalidateAfterOrderGraphChange(queryClient);

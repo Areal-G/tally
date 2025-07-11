@@ -1,6 +1,6 @@
 /**
- * REQ-0161 — Hover copy for dense Order / Invoice table column headers (HelpTooltip).
- * Mirrors catalog Products column pattern (REQ-0142).
+ * Hover copy for dense Order / Invoice table column headers (HelpTooltip).
+ * Mirrors catalog Products column pattern.
  */
 
 /** Order table — Order # cell (link, party meta, products, items/units/date). */

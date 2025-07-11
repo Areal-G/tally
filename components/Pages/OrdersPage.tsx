@@ -5,7 +5,6 @@
 
 "use client";
 
-import React from "react";
 import Navbar from "@/components/layouts/Navbar";
 import OrderList from "@/components/orders/OrderList";
 import { PageContentWrapper } from "@/components/shared";
@@ -20,7 +19,7 @@ import type {
 export type OrdersPageProps = {
   initialOrders?: OrderForPage[];
   userRole?: string;
-  /** SSR dashboard stats for admin/user /orders cards (REQ-0025) */
+  /** SSR dashboard stats for admin/user /orders cards */
   initialStats?: DashboardStats;
   /** SSR client portal for client /orders cards */
   initialClientPortal?: ClientPortalDashboard;
@@ -30,7 +29,7 @@ export type OrdersPageProps = {
 
 /**
  * Orders page client component.
- * REQ-0021 — shell-first; SSR initialData passed to OrderList.
+ * Shell-first; SSR initialData passed to OrderList.
  */
 export default function OrdersPage({
   initialOrders,

@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useProductReviews, useDashboard } from "@/hooks/queries";
 import { isDataSlotLoading, isDataSlotUnsettled, queryKeys, useSyncSsrQueryData } from "@/lib/react-query";
 import { useAuth } from "@/contexts";
@@ -21,12 +21,13 @@ import { Star } from "lucide-react";
 import { StatisticsCard } from "@/components/home/StatisticsCard";
 import type { ProductReview } from "@/types";
 import type { DashboardStats } from "@/types";
+import { EMPTY_LIST } from "@/lib/utils";
 
 export type ProductReviewListProps = {
   detailHrefBase?: string;
-  /** SSR-passed reviews for first-render hydration (REQ-0021) */
+  /** SSR-passed reviews for first-render hydration */
   initialReviews?: ProductReview[];
-  /** SSR dashboard stats for review stat cards (REQ-0025 P2) */
+  /** SSR dashboard stats for review stat cards (P2) */
   initialStats?: DashboardStats;
 };
 
@@ -48,7 +49,7 @@ export default function ProductReviewList({
     user?.id && initialStats !== undefined ? initialStats : undefined,
   );
 
-  const allReviews = reviewsQuery.data ?? initialReviews ?? [];
+  const allReviews = reviewsQuery.data ?? initialReviews ?? EMPTY_LIST;
 
   const ratingBreakdown = useMemo(() => {
     const r5 = allReviews.filter((r) => r.rating === 5).length;
@@ -98,7 +99,7 @@ export default function ProductReviewList({
     [detailHrefBase],
   );
 
-  // REQ-0021: shell-first — only data slots pulse
+  // Shell-first — only data slots pulse
   const dashboardCardsLoading = isDataSlotUnsettled(dashboardQuery, initialStats);
   const reviewsCardsLoading = isDataSlotLoading(reviewsQuery, initialReviews);
   const tableDataLoading = isDataSlotLoading(reviewsQuery, initialReviews);
@@ -109,7 +110,7 @@ export default function ProductReviewList({
         as="h2"
         icon={Star}
         tone="amber"
-        title="Store Product Reviews (your products)"
+        title="Product Reviews"
         description="Manage and moderate product reviews. Approve or reject, view by product, rating, and status. Add reviews for products."
       />
 
@@ -171,7 +172,7 @@ export default function ProductReviewList({
           <div className="flex-shrink-0">
             <ProductReviewDialog
               trigger={
-                <Button className="h-10 rounded-[28px] border border-violet-400/30 dark:border-violet-400/30 bg-gradient-to-r from-violet-500/70 via-violet-500/50 to-violet-500/30 dark:from-violet-500/70 dark:via-violet-500/50 dark:to-violet-500/30 text-white shadow-[0_10px_30px_rgba(139,92,246,0.3)] flex items-center gap-2">
+                <Button className="h-10 rounded-lg border border-violet-400/30 dark:border-violet-400/30 bg-violet-500/70 dark:bg-violet-500/70 text-white flex items-center gap-2">
                   <Star className="h-4 w-4" />
                   Add Review
                 </Button>

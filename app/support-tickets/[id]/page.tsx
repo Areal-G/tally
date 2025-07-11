@@ -7,12 +7,12 @@ import SupportTicketDetailContent from "@/components/support-tickets/SupportTick
 
 type Props = { params: Promise<{ id: string }> };
 
-/** REQ-0094 — explicit force-dynamic for shell-first parity. */
+/** Explicit force-dynamic for shell-first parity. */
 export const dynamic = "force-dynamic";
 
 /**
  * User-facing Support Ticket detail page (SSR).
- * REQ-0191 — uses canMutateSupportTicket via getSupportTicketDetailForPage.
+ * Uses canMutateSupportTicket via getSupportTicketDetailForPage.
  */
 export default async function SupportTicketDetailRoute({ params }: Props) {
   const user = await getSession();

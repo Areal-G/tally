@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0117 — admin portal embed tables matching UserManagementTable styling.
+ * Admin portal embed tables matching UserManagementTable styling.
  */
 
 import type { LucideIcon } from "lucide-react";
@@ -48,10 +48,10 @@ export function AdminEmbedDataTable<T>({
   return (
     <div
       className={cn(
-        "rounded-[28px] border border-violet-400/20 dark:border-white/10",
-        "shadow-[0_30px_80px_rgba(139,92,246,0.25)] dark:shadow-[0_30px_80px_rgba(139,92,246,0.15)]",
-        "bg-gradient-to-br from-white/20 via-white/15 to-white/10 dark:from-white/5 dark:via-white/5 dark:to-white/5",
-        "backdrop-blur-md overflow-hidden",
+        "rounded-lg border border-violet-400/20 dark:border-white/10",
+        " ",
+        " bg-white/20 dark:bg-white/5 ",
+        " overflow-hidden",
         className,
       )}
     >

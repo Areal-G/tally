@@ -11,7 +11,7 @@ type AuthAnimatedBlockProps = {
 };
 
 /**
- * REQ-0030 — CSS-only entrance wrapper for auth pages.
+ * CSS-only entrance wrapper for auth pages.
  * Uses .auth-enter from globals.css; safe for SSR (same markup server/client).
  */
 export function AuthAnimatedBlock({

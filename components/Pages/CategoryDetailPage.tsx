@@ -55,7 +55,6 @@ import {
   SectionTitleRow,
   GlassCard,
   GlassCardBody,
-  GLASS_CARD_VARIANT_CONFIG as variantConfig,
 } from "@/components/shared";
 import { buildCategoryForecastRollup } from "@/lib/forecasting/category-forecast-rollup";
 import { toDateOrNull } from "@/lib/format";
@@ -75,7 +74,7 @@ import {
   queryKeys,
   useSyncSsrQueryData,
 } from "@/lib/react-query";
-import { cn } from "@/lib/utils";
+import { cn, EMPTY_LIST } from "@/lib/utils";
 import {
   TYPO_BODY_MUTED,
   TYPO_CARD_TITLE,
@@ -89,7 +88,7 @@ import {
 export type CategoryDetailPageProps = {
   embedInAdmin?: boolean;
   initialCategory?: Category;
-  /** REQ-0082 — cache-read forecast for admin embed (non-blocking SSR). */
+  /** Cache-read forecast for admin embed (non-blocking SSR). */
   initialForecasting?: ForecastingSummary | null;
 };
 
@@ -130,7 +129,7 @@ export default function CategoryDetailPage({
     initialForecasting ?? undefined,
   );
 
-  const productsForForecast = category?.products ?? [];
+  const productsForForecast = category?.products ?? EMPTY_LIST;
   const productIdSet = useMemo(
     () => new Set(productsForForecast.map((p) => p.id)),
     [productsForForecast],
@@ -271,8 +270,8 @@ export default function CategoryDetailPage({
     );
   }
 
-  // Format dates — shell visible while loading; pulse individual slots (REQ-0021)
-  // REQ-0136 — never fall back to `new Date()` ("now"): SSR/client render at different
+  // Format dates — shell visible while loading; pulse individual slots
+  // Never fall back to `new Date()` ("now"): SSR/client render at different
   // instants and that non-determinism is a classic hydration-mismatch source.
   const createdAt = toDateOrNull(category?.createdAt);
   const updatedAt = category?.updatedAt ? new Date(category.updatedAt) : null;
@@ -340,7 +339,7 @@ export default function CategoryDetailPage({
               dataLoading ? (
                 <DataSlotPulse variant="badge" className="self-center" />
               ) : category != null ? (
-                // REQ-0187 — compact status caption; parity with WarehouseDetailPage
+                // Compact status caption; parity with WarehouseDetailPage
                 <div className="flex shrink-0 flex-col items-end justify-center gap-0.5 self-center">
                   <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide text-gray-500 dark:text-white/60">
                     <CheckCircle2 className="h-3 w-3 shrink-0" aria-hidden />
@@ -421,22 +420,22 @@ export default function CategoryDetailPage({
                       icon={Calendar}
                       label="Created:"
                       tone="teal"
-                      loading={dataLoading}
+                      loading={dataLoading && !createdAt}
                     >
-                      {!dataLoading && createdAt && (
+                      {createdAt ? (
                         <ClientDateTime date={createdAt} semantic="created" />
-                      )}
+                      ) : null}
                     </DetailInfoRow>
                     {(dataLoading || updatedAt) && (
                       <DetailInfoRow
                         icon={Calendar}
                         label="Updated:"
                         tone="sky"
-                        loading={dataLoading}
+                        loading={dataLoading && !updatedAt}
                       >
-                        {!dataLoading && updatedAt && (
+                        {updatedAt ? (
                           <ClientDateTime date={updatedAt} semantic="updated" />
-                        )}
+                        ) : null}
                       </DetailInfoRow>
                     )}
                   </DetailInfoRowGroup>
@@ -544,11 +543,11 @@ export default function CategoryDetailPage({
             </GlassCard>
           </div>
 
-          {/* REQ-0081/0084 — Category insights + charts */}
+          {/* Category insights + charts */}
           {insights && (
             <CatalogInsightsSection
               insights={insights}
-              // REQ-0221 — densify present → no metric pulse (cold-only when !insights)
+              // Densify present → no metric pulse (cold-only when !insights)
               dataLoading={false}
               isAdminRole={isAdminRole}
               forecastLoading={forecastLoading}
@@ -580,7 +579,7 @@ export default function CategoryDetailPage({
             />
           )}
 
-          {/* Products in this Category — REQ-0081 always visible */}
+          {/* Products in this Category — always visible */}
           <GlassCard variant="sky">
             <GlassCardBody>
               <SectionTitleRow
@@ -608,7 +607,7 @@ export default function CategoryDetailPage({
             </GlassCardBody>
           </GlassCard>
 
-          {/* Recent Orders — REQ-0081 ProductDetail parity */}
+          {/* Recent Orders — ProductDetail parity */}
           <GlassCard variant="violet">
             <GlassCardBody>
               <SectionTitleRow
@@ -638,7 +637,7 @@ export default function CategoryDetailPage({
             </GlassCardBody>
           </GlassCard>
 
-          {/* Actions — REQ-0081 glass footer parity with ProductDetailPage */}
+          {/* Actions — glass footer parity with ProductDetailPage */}
           <div className="flex flex-col sm:flex-row flex-wrap gap-2">
             <Button
               onClick={handleBack}

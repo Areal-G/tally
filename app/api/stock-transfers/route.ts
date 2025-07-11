@@ -1,5 +1,5 @@
 /**
- * Stock Transfers API — POST create + complete transfer atomically (REQ-0066).
+ * Stock Transfers API — POST create + complete transfer atomically.
  */
 
 import { NextRequest, NextResponse } from "next/server";

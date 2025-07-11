@@ -1,5 +1,5 @@
 /**
- * REQ-0209 — Run Stripe confirm-session during SSR before detail prefetch.
+ * Run Stripe confirm-session during SSR before detail prefetch.
  * Avoids Pending→Confirmed flash: first HTML already has Confirmed + Partial/Paid.
  * Idempotent with webhook / browser confirm (PaymentIntent match).
  */

@@ -9,9 +9,10 @@ import { getOrdersForUser } from "@/lib/server/orders-data";
 import { getWarehousesForUser } from "@/lib/server/warehouses-data";
 import { getInvoicesForUser } from "@/lib/server/invoices-data";
 import { getUsersForAdmin } from "@/lib/server/users-data";
+import { isPlatformAdmin } from "@/lib/auth/platform-admin";
 import AdminMyActivityContent from "@/components/admin/AdminMyActivityContent";
 
-/** REQ-0025 — blocking SSR prefetch (no Suspense shell flash). */
+/** Blocking SSR prefetch (no Suspense shell flash). */
 export const dynamic = "force-dynamic";
 
 export default async function MyActivityPage() {
@@ -33,7 +34,7 @@ export default async function MyActivityPage() {
     getWarehousesForUser(user.id),
     getInvoicesForUser(user.id),
     getCategoriesForUser(user.id),
-    getUsersForAdmin(),
+    isPlatformAdmin(user) ? getUsersForAdmin() : Promise.resolve([]),
   ]);
 
   return (

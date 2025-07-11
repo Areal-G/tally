@@ -7,7 +7,7 @@
  * - Performance metrics
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { prisma } from "@/prisma/client";
 import { getRedis, isRedisConfigured } from "@/lib/cache/redis";
 import { isBrevoConfigured } from "@/lib/email/brevo";
@@ -309,7 +309,7 @@ async function initializeUptimeTracking(): Promise<void> {
  * GET /api/health
  * Comprehensive health check endpoint
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Initialize uptime tracking (non-blocking)
     await initializeUptimeTracking();

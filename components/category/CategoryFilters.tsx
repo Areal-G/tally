@@ -1,7 +1,7 @@
 "use client";
 
 import { FILTER_SEARCH_INPUT_SKY_CLASS } from "@/lib/ui/filter-toolbar-styles";
-import React, { useMemo, useCallback } from "react";
+import { useMemo, useCallback } from "react";
 import { Category } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,9 +47,7 @@ export default function CategoryFilters({
   setStatusFilter,
   searchTerm,
   setSearchTerm,
-  pagination,
   setPagination,
-  userId,
 }: CategoryFiltersProps) {
   const { toast } = useToast();
 
@@ -236,7 +234,7 @@ export default function CategoryFilters({
               variant="ghost"
               size="sm"
               onClick={() => setSearchTerm("")}
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 backdrop-blur-md"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 "
             >
               <IoClose className="h-4 w-4 text-gray-700 dark:text-white/80" />
             </Button>

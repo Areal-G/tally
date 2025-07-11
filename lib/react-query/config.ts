@@ -17,14 +17,14 @@ const defaultQueryOptions = {
     // stale and forces an immediate refetch for active queries, so UI always
     // reflects mutations regardless of staleTime.
     staleTime: 1000 * 60 * 5, // 5 minutes
-    // REQ-0134: 30 min in-memory retention for idle nav (lists still not persisted — REQ-0133)
+    // 30 min in-memory retention for idle nav (lists still not persisted —)
     gcTime: 1000 * 60 * 30,
     // Retry failed requests 3 times
     retry: 3,
     // Retry delay increases exponentially
     retryDelay: (attemptIndex: number) =>
       Math.min(1000 * 2 ** attemptIndex, 30000),
-    // REQ-0133: passive stale refetch on tab focus served stale Redis — CRUD uses invalidateQueries.
+    // Passive stale refetch on tab focus served stale Redis — CRUD uses invalidateQueries.
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
     refetchOnMount: true,
@@ -177,7 +177,7 @@ export const queryKeys = {
     details: () => [...queryKeys.supportTickets.all, "detail"] as const,
     detail: (id: string) =>
       [...queryKeys.supportTickets.details(), id] as const,
-    /** REQ-0200 — Related product picker by Send-to ownerId */
+    /** Related product picker by Send-to ownerId */
     ownerProducts: (ownerId: string) =>
       [...queryKeys.supportTickets.all, "ownerProducts", ownerId] as const,
   },
@@ -200,7 +200,7 @@ export const queryKeys = {
   // Dashboard (admin overview) queries — key by userId so cache is per-user (avoids showing previous user's data when persisted)
   dashboard: {
     all: ["dashboard"] as const,
-    // v2 — REQ-0173 topProducts catalog meta (drop stale warm-prefetch snapshots)
+    // V2 — topProducts catalog meta (drop stale warm-prefetch snapshots)
     overview: (userId?: string) =>
       [...queryKeys.dashboard.all, "overview", "v2", userId ?? ""] as const,
   },
@@ -257,13 +257,13 @@ export const queryKeys = {
     supplier: () => [...queryKeys.portal.all, "supplier"] as const,
     client: () => [...queryKeys.portal.all, "client"] as const,
     clientCatalog: () => [...queryKeys.portal.all, "client", "catalog"] as const,
-    /** REQ-0206 — role supplier KPI key (matches useSupplierPortalDashboard) */
+    /** Role supplier KPI key (matches useSupplierPortalDashboard) */
     supplierDashboard: (userId: string) =>
       [...queryKeys.portal.supplier(), userId] as const,
-    /** REQ-0206 — role client KPI key (matches useClientPortalDashboard) */
+    /** Role client KPI key (matches useClientPortalDashboard) */
     clientDashboard: (userId: string) =>
       [...queryKeys.portal.client(), userId] as const,
-    /** REQ-0206 — role client catalog key (matches useClientCatalogOverview) */
+    /** Role client catalog key (matches useClientCatalogOverview) */
     clientCatalogDashboard: (userId: string) =>
       [...queryKeys.portal.clientCatalog(), userId] as const,
     clientBrowseMeta: () =>

@@ -1,5 +1,5 @@
 /**
- * Post-mutation cache invalidation — unit tests (REQ-0052/0054).
+ * Post-mutation cache invalidation — unit tests.
  *
  * Architecture validated:
  * - scheduleInvalidate*Caches() are synchronous async functions (no after()).
@@ -131,7 +131,7 @@ describe("post-mutation cache invalidation", () => {
     expect(invalidateCache).toHaveBeenCalled();
   });
 
-  // REQ-0135 — pattern membership (prevent silent regress on stock/portals)
+  // Pattern membership (prevent silent regress on stock/portals)
   it("invoice invalidate includes stock-allocation + portals", async () => {
     await scheduleInvalidateInvoiceCaches();
     const p = invalidatedPatterns();

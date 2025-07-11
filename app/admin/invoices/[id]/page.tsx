@@ -10,7 +10,7 @@ type Props = {
   searchParams: Promise<{ payment?: string; session_id?: string }>;
 };
 
-/** REQ-0025 — blocking SSR detail prefetch (no Suspense shell flash). */
+/** Blocking SSR detail prefetch (no Suspense shell flash). */
 export const dynamic = "force-dynamic";
 
 export default async function AdminInvoiceDetailPage({
@@ -33,7 +33,7 @@ export default async function AdminInvoiceDetailPage({
   );
   if (!initialInvoice) notFound();
 
-  // REQ-0163 — SSR review context for Order Items Write review (hydrate-safe)
+  // SSR review context for Order Items Write review (hydrate-safe)
   const productIds =
     initialInvoice.linkedOrderItems
       ?.map((item) => item.productId)

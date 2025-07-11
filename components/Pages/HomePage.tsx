@@ -2,20 +2,15 @@
 
 /**
  * Home (store overview) for admin: statistics cards and quick links to products, categories, suppliers.
- * REQ-0021 — shell-first layout; hooks receive SSR initialData directly.
+ * Shell-first layout; hooks receive SSR initialData directly.
  */
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/contexts";
-import ProductList from "@/components/products/ProductList";
-import SupplierList from "@/components/supplier/SupplierList";
-import CategoryList from "@/components/category/CategoryList";
-import { StatisticsSection } from "@/components/home/StatisticsSection";
+import { DashboardOverview } from "@/components/home/DashboardOverview";
 import Navbar from "@/components/layouts/Navbar";
 import { PageContentWrapper } from "@/components/shared";
 import FloatingActionButtons from "@/components/shared/FloatingActionButtons";
-import { PageSectionHeader } from "@/components/shared";
 import { useProducts } from "@/hooks/queries";
 import { queryKeys, useSyncSsrQueryData } from "@/lib/react-query";
 import type {
@@ -24,7 +19,6 @@ import type {
   SupplierForHome,
 } from "@/lib/server/home-data";
 import type { DashboardStats } from "@/types";
-import { LayoutDashboard } from "lucide-react";
 
 export type HomePageProps = {
   initialProducts?: ProductForHome[];
@@ -118,42 +112,9 @@ export default function HomePage({
   return (
     <Navbar>
       <PageContentWrapper>
-        <PageSectionHeader
-          as="h2"
-          icon={LayoutDashboard}
-          tone="sky"
-          title="Store Overview"
-          description={
-            <>
-              The cards below show your store-wide metrics as the store owner,
-              including your own activity and activity from clients and others.
-              Numbers update automatically when you or others make changes. For
-              your personal orders, products, and activity only, visit{" "}
-              <Link
-                href="/admin/my-activity"
-                className="font-medium text-sky-600 hover:text-sky-800 dark:text-sky-400 dark:hover:text-sky-300"
-              >
-                My Activities
-              </Link>
-              .
-            </>
-          }
-        />
 
-        <div id="statistics" className="pb-6 scroll-mt-20">
-          <StatisticsSection initialStats={initialStats} />
-        </div>
-
-        <div id="products" className="pb-6 scroll-mt-20">
-          <ProductList initialProducts={initialProducts} />
-        </div>
-
-        <div id="suppliers" className="pb-6 scroll-mt-20">
-          <SupplierList initialSuppliers={initialSuppliers} />
-        </div>
-
-        <div id="categories" className="pb-6 scroll-mt-20">
-          <CategoryList initialCategories={initialCategories} />
+        <div id="statistics" className="scroll-mt-20 pb-6">
+          <DashboardOverview initialStats={initialStats} products={allProducts} />
         </div>
 
         <FloatingActionButtons

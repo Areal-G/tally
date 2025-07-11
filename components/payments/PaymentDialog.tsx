@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * Payment Dialog — Stripe checkout entry (REQ-0152 / REQ-0209).
+ * Payment Dialog — Stripe checkout entry.
  * Default: pay full remaining (readonly). Toggle: pay partially (editable + Zod hint).
- * REQ-0209 — success/cancel URLs follow checkout origin (/admin vs store).
+ * Success/cancel URLs follow checkout origin (/admin vs store).
  */
 
 import React, { useMemo, useState } from "react";
@@ -45,6 +45,7 @@ import { ProductThumb } from "@/components/products/ProductOptionRow";
 import { InvoiceSummaryRow } from "@/components/invoices/detail/InvoiceSummaryCard";
 import { validateCheckoutChargeAmount } from "@/lib/validations/payment";
 import { buildStripeCheckoutReturnUrls } from "@/lib/payments/stripe-checkout-return-urls";
+import { formatStableCurrency } from "@/lib/format";
 
 interface PaymentDialogProps {
   type: CheckoutType;
@@ -56,7 +57,7 @@ interface PaymentDialogProps {
   amountPaid?: number | null;
   /** Document total before payments (optional summary). */
   documentTotal?: number | null;
-  /** Line subtotal before tax/shipping/discount (REQ-0126) */
+  /** Line subtotal before tax/shipping/discount */
   subtotal?: number | null;
   items?: Array<{
     name: string;
@@ -126,7 +127,7 @@ export default function PaymentDialog({
 
   const handlePayment = () => {
     if (!canSubmit) return;
-    // REQ-0209 — land back on /admin/... when checkout started from admin
+    // Land back on /admin/... when checkout started from admin
     const { successUrl, cancelUrl } = buildStripeCheckoutReturnUrls({
       origin: window.location.origin,
       pathname,
@@ -161,11 +162,11 @@ export default function PaymentDialog({
         {trigger || (
           <Button disabled={disabled}>
             <CreditCard className="mr-2 h-4 w-4" />
-            Pay ${remainingDue.toFixed(2)}
+            Pay {formatStableCurrency(remainingDue)}
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="poppins max-h-[90vh] flex flex-col overflow-hidden pl-4 sm:pl-8 pt-4 sm:pt-7 pb-4 sm:pb-7 pr-0 border-sky-400/30 dark:border-sky-400/30 shadow-[0_30px_80px_rgba(2,132,199,0.35)] dark:shadow-[0_30px_80px_rgba(2,132,199,0.25)]">
+      <DialogContent className="poppins max-h-[90vh] flex flex-col overflow-hidden pl-4 sm:pl-8 pt-4 sm:pt-7 pb-4 sm:pb-7 pr-0 border-sky-400/30 dark:border-sky-400/30 ">
         <DialogHeaderBrand
           className={DIALOG_EDGE_SCROLL_HEADER}
           icon={CreditCard}
@@ -176,7 +177,7 @@ export default function PaymentDialog({
 
         <div className="flex flex-col gap-2 sm:gap-4 overflow-y-auto min-h-0 flex-1 w-full">
           <div className="pr-4 sm:pr-8 flex flex-col gap-2 sm:gap-4">
-            <div className="rounded-lg border border-sky-400/30 dark:border-white/20 bg-white/10 dark:bg-white/5 backdrop-blur-md p-4 space-y-2 flex-shrink-0 shadow-[0_10px_30px_rgba(2,132,199,0.15)] dark:shadow-[0_10px_30px_rgba(2,132,199,0.1)]">
+            <div className="rounded-lg border border-sky-400/30 dark:border-white/20 bg-white/10 dark:bg-white/5 p-4 space-y-2 flex-shrink-0 ">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-white">
                   {type === "order" ? "Order" : "Invoice"} Summary
@@ -210,7 +211,7 @@ export default function PaymentDialog({
                         <span className="text-white truncate">{item.name}</span>
                       </span>
                       <span className="font-medium text-white shrink-0">
-                        ${item.price.toFixed(2)}
+                        {formatStableCurrency(item.price)}
                       </span>
                     </div>
                   ))}
@@ -234,14 +235,14 @@ export default function PaymentDialog({
                 <InvoiceSummaryRow
                   icon={Receipt}
                   label="Subtotal:"
-                  value={`$${displaySubtotal.toFixed(2)}`}
+                  value={formatStableCurrency(displaySubtotal)}
                   variant="glass"
                 />
                 {tax != null && tax > 0 && (
                   <InvoiceSummaryRow
                     icon={Percent}
                     label="Tax:"
-                    value={`$${tax.toFixed(2)}`}
+                    value={formatStableCurrency(tax)}
                     variant="glass"
                   />
                 )}
@@ -249,7 +250,7 @@ export default function PaymentDialog({
                   <InvoiceSummaryRow
                     icon={Truck}
                     label="Shipping:"
-                    value={`$${shipping.toFixed(2)}`}
+                    value={formatStableCurrency(shipping)}
                     variant="glass"
                   />
                 )}
@@ -257,7 +258,7 @@ export default function PaymentDialog({
                   <InvoiceSummaryRow
                     icon={Tag}
                     label="Discount:"
-                    value={`-$${discount.toFixed(2)}`}
+                    value={"-" + formatStableCurrency(discount)}
                     valueClassName="text-emerald-400"
                     variant="glass"
                   />
@@ -266,7 +267,7 @@ export default function PaymentDialog({
                   <InvoiceSummaryRow
                     icon={CircleDollarSign}
                     label="Already paid:"
-                    value={`$${paidSoFar.toFixed(2)}`}
+                    value={formatStableCurrency(paidSoFar)}
                     valueClassName="text-emerald-400"
                     variant="glass"
                   />
@@ -281,18 +282,18 @@ export default function PaymentDialog({
                   {paidSoFar > 0 ? "Amount due" : "Total"}
                 </span>
                 <span className="text-white">
-                  ${remainingDue.toFixed(2)}
+                  {formatStableCurrency(remainingDue)}
                   {paidSoFar > 0 && displayTotal > 0 ? (
                     <span className="ml-1 text-xs font-normal text-white/70">
-                      / ${displayTotal.toFixed(2)}
+                      / {formatStableCurrency(displayTotal)}
                     </span>
                   ) : null}
                 </span>
               </div>
             </div>
 
-            {/* REQ-0152 — full vs partial charge */}
-            <div className="rounded-lg border border-sky-400/30 dark:border-white/20 bg-white/10 dark:bg-white/5 backdrop-blur-md p-4 space-y-3 flex-shrink-0">
+            {/* Full vs partial charge */}
+            <div className="rounded-lg border border-sky-400/30 dark:border-white/20 bg-white/10 dark:bg-white/5 p-4 space-y-3 flex-shrink-0">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <Label
@@ -302,7 +303,7 @@ export default function PaymentDialog({
                     Pay partially
                   </Label>
                   <p className="text-xs text-white/70 mt-0.5">
-                    Off = pay full remaining (${remainingDue.toFixed(2)})
+                    Off = pay full remaining ({formatStableCurrency(remainingDue)})
                   </p>
                 </div>
                 <Switch
@@ -351,7 +352,7 @@ export default function PaymentDialog({
                 ) : (
                   <p className="text-xs text-white/60">
                     {payPartial
-                      ? `Enter any amount up to $${remainingDue.toFixed(2)}`
+                      ? `Enter any amount up to ${formatStableCurrency(remainingDue)}`
                       : "Full remaining balance will be charged"}
                   </p>
                 )}
@@ -390,7 +391,7 @@ export default function PaymentDialog({
                   pendingLabel="Redirecting to payment…"
                   label={
                     Number.isFinite(chargeAmount) && chargeAmount > 0
-                      ? `Pay $${chargeAmount.toFixed(2)}`
+                      ? `Pay ${formatStableCurrency(chargeAmount)}`
                       : "Secure checkout with Link"
                   }
                   icon={CreditCard}

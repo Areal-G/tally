@@ -9,7 +9,7 @@ import {
 import { prefetchListPageStats } from "@/lib/server/list-page-stats";
 import { getSupplierByUserId } from "@/prisma/supplier";
 
-/** REQ-0025 — blocking SSR prefetch (no Suspense shell flash). */
+/** Blocking SSR prefetch (no Suspense shell flash). */
 export const dynamic = "force-dynamic";
 
 export default async function OrdersRoute() {
@@ -19,7 +19,6 @@ export default async function OrdersRoute() {
   const userRole = user.role ?? undefined;
   const listStatsPromise = prefetchListPageStats(user);
 
-  let initialOrders;
   if (userRole === "client") {
     const [orders, listStats] = await Promise.all([
       getOrdersForClientId(user.id),

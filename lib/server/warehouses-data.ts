@@ -17,7 +17,7 @@ export type WarehouseForPage = {
   updatedAt: string | null;
   createdBy: string;
   updatedBy: string | null;
-  /** REQ-0096 — audit user snapshots */
+  /** Audit user snapshots */
   creator?: {
     id: string;
     name?: string | null;

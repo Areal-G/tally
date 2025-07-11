@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { resolveOrderPayAmount } from "./resolve-order-pay-amount";
 
-describe("resolveOrderPayAmount (REQ-0210)", () => {
+describe("resolveOrderPayAmount", () => {
   it("uses positive invoice amountDue", () => {
     expect(
       resolveOrderPayAmount({

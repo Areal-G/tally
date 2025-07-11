@@ -2,7 +2,7 @@
  * Invoice PDF API Route
  * GET /api/invoices/[id]/pdf — generate and download invoice PDF
  *
- * REQ-0204 — authorize via getInvoiceDetailForPage (admin / client / supplier /
+ * Authorize via getInvoiceDetailForPage (admin / client / supplier /
  * issuer / product-owner), then load PDF payload by invoice id.
  */
 
@@ -36,7 +36,7 @@ export async function GET(
 
     const { id } = await params;
 
-    // REQ-0204 — same role gate as invoice detail SSR (client + supplier + owner)
+    // Same role gate as invoice detail SSR (client + supplier + owner)
     const authorized = await getInvoiceDetailForPage(
       { id: session.id, role: session.role },
       id,

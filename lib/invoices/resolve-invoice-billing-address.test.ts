@@ -4,7 +4,7 @@ import {
   resolveInvoiceBillingAddressInput,
 } from "./resolve-invoice-billing-address";
 
-describe("resolveInvoiceBillingAddress (REQ-0210)", () => {
+describe("resolveInvoiceBillingAddress", () => {
   const shipping = {
     street: "Riedstraße 2",
     city: "Frankfurt",

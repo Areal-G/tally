@@ -46,6 +46,37 @@ export interface RateLimitResult {
   reset: number;
 }
 
+/** Request timestamps per identifier for the no-Redis fallback (single process only). */
+const memoryHits = new Map<string, number[]>();
+
+function checkRateLimitInMemory(config: RateLimitConfig): RateLimitResult {
+  const now = Date.now();
+  const windowStart = now - config.window * 1000;
+  const hits = (memoryHits.get(config.identifier) ?? []).filter(
+    (t) => t > windowStart,
+  );
+
+  if (hits.length >= config.limit) {
+    memoryHits.set(config.identifier, hits);
+    const oldest = hits[0] ?? now;
+    return {
+      allowed: false,
+      current: hits.length,
+      limit: config.limit,
+      reset: Math.max(1, Math.ceil((oldest + config.window * 1000 - now) / 1000)),
+    };
+  }
+
+  hits.push(now);
+  memoryHits.set(config.identifier, hits);
+  return {
+    allowed: true,
+    current: hits.length,
+    limit: config.limit,
+    reset: config.window,
+  };
+}
+
 /**
  * Check rate limit using sliding window algorithm
  *
@@ -57,14 +88,8 @@ export async function checkRateLimit(
 ): Promise<RateLimitResult> {
   const redis = getRedis();
   if (!redis) {
-    // Graceful degradation: allow all requests if Redis not available
-    logger.warn("Redis not available, rate limiting disabled");
-    return {
-      allowed: true,
-      current: 0,
-      limit: config.limit,
-      reset: config.window,
-    };
+    // No Redis: per-process sliding window so limits still apply on a single server
+    return checkRateLimitInMemory(config);
   }
 
   try {

@@ -25,8 +25,6 @@ const optionalEnvVars = [
   "BREVO_SENDER_EMAIL",
   "BREVO_SENDER_NAME",
   "BREVO_ADMIN_EMAIL",
-  "SENTRY_DSN",
-  "NEXT_PUBLIC_SENTRY_DSN",
   "UPSTASH_REDIS_URL",
   "UPSTASH_REDIS_TOKEN",
   "UPSTASH_REDIS_REST_URL",
@@ -92,8 +90,6 @@ export function validateEnv(): void {
         .join("\n")}`,
     );
   }
-
-  console.log("✅ Environment variables validated");
 }
 
 /**

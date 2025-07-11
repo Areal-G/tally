@@ -1,5 +1,5 @@
 /**
- * Server-side support ticket replies for SSR detail pages (REQ-0025 P2).
+ * Server-side support ticket replies for SSR detail pages (P2).
  * Mirrors GET /api/support-tickets/:id/replies response shape.
  */
 import { prisma } from "@/prisma/client";

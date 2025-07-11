@@ -1,5 +1,5 @@
 /**
- * REQ-0044 — shared responsive typography tiers (page header, card title, subtitle, stat value).
+ * Shared responsive typography tiers (page header, card title, subtitle, stat value).
  * Use TYPO_STAT_VALUE only for metric numbers — not section titles.
  */
 
@@ -19,7 +19,7 @@ export const TYPO_SUBTITLE =
 export const TYPO_STAT_VALUE =
   "text-sm sm:text-lg font-medium text-gray-700 dark:text-white";
 
-/** REQ-0116 — detail page data values (font-normal; section titles stay TYPO_CARD_TITLE) */
+/** Detail page data values (font-normal; section titles stay TYPO_CARD_TITLE) */
 export const DETAIL_DATA_VALUE_CLASS =
   "font-normal text-gray-700 dark:text-white";
 
@@ -38,8 +38,8 @@ export function detailStatValueToneClass(tone: DetailStatValueTone): string {
   return detailStatValueTones[tone];
 }
 
-/** REQ-0064 — default body text color (use when no explicit tone is set) */
+/** Default body text color (use when no explicit tone is set) */
 export const TYPO_BODY = "text-gray-700 dark:text-white";
 
-/** REQ-0064 — muted body text color (secondary copy, meta labels) */
+/** Muted body text color (secondary copy, meta labels) */
 export const TYPO_BODY_MUTED = "text-gray-600 dark:text-gray-300";

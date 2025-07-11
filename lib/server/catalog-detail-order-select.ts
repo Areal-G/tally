@@ -1,5 +1,5 @@
 /**
- * REQ-0127/0128 — shared order select for catalog detail + portal/dashboard SSR (statusAt).
+ * Shared order select for catalog detail + portal/dashboard SSR (statusAt).
  */
 
 /** Invoice paidAt for paid/partial statusAt (Order has no paidAt field). */
@@ -24,7 +24,7 @@ export const catalogDetailOrderSelect = {
   total: true,
   createdAt: true,
   userId: true,
-  /** REQ-0158 — buyer for placedBy (distinct from store owner userId) */
+  /** Buyer for placedBy (distinct from store owner userId) */
   clientId: true,
   ...orderStatusAtSelect,
 } as const;

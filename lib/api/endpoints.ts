@@ -77,7 +77,7 @@ export const API_ENDPOINTS = {
   // Support Tickets endpoints
   supportTickets: {
     base: "/support-tickets",
-    /** REQ-0200 — Related product picker by Send-to owner */
+    /** Related product picker by Send-to owner */
     ownerProducts: "/support-tickets/owner-products",
   },
 
@@ -128,7 +128,7 @@ export const API_ENDPOINTS = {
   // Payments
   payments: {
     checkout: "/payments/checkout",
-    /** REQ-0209 — browser return reconcile */
+    /** Browser return reconcile */
     confirmSession: "/payments/confirm-session",
     webhook: "/payments/webhook",
   },

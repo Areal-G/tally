@@ -1,8 +1,8 @@
 /**
  * Admin Supplier Portal type definitions
  * Dashboard for viewing supplier (role=supplier) users, their products, orders, activity
- * REQ-0177 — denser recent product/order catalog meta
- * REQ-0178 — recent orders buyer (placedBy*) for date-row avatar
+ * Denser recent product/order catalog meta
+ * Recent orders buyer (placedBy*) for date-row avatar
  */
 
 export interface SupplierPortalStats {
@@ -28,11 +28,11 @@ export interface SupplierPortalRecentProduct {
   status: string;
   supplierId: string;
   supplierName: string;
-  /** REQ-0170 — product thumb + supplier avatar seed */
+  /** Product thumb + supplier avatar seed */
   imageUrl?: string | null;
   supplierUserId?: string | null;
   supplierImage?: string | null;
-  /** REQ-0177 — category + reserved for denser meta row */
+  /** Category + reserved for denser meta row */
   categoryId?: string | null;
   categoryName?: string | null;
   reservedQuantity?: number;
@@ -48,20 +48,20 @@ export interface SupplierPortalRecentOrder {
   total: number;
   supplierId: string;
   supplierName: string;
-  /** REQ-0170 — supplier avatar on recent order rows */
+  /** Supplier avatar on recent order rows */
   supplierUserId?: string | null;
   supplierImage?: string | null;
   createdAt: string;
-  /** REQ-0128 — terminal status date for recent-order cards */
+  /** Terminal status date for recent-order cards */
   statusAt?: string;
-  /** REQ-0177 — first-line product meta (dashboard Recent Orders parity) */
+  /** First-line product meta (dashboard Recent Orders parity) */
   productId?: string | null;
   productPreview?: string | null;
   productImageUrl?: string | null;
   extraItemCount?: number;
   categoryId?: string | null;
   categoryName?: string | null;
-  /** REQ-0178 — buyer for Calendar · date · AvatarInlineLink row */
+  /** Buyer for Calendar · date · AvatarInlineLink row */
   placedById?: string | null;
   placedByName?: string | null;
   placedByImage?: string | null;

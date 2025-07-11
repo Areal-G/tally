@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  CHART_LABEL_RIGHT_MARGIN,
   CHART_LABEL_TOP_MARGIN,
+  DEFAULT_CHART_DOT_LAST_ONLY,
   formatChartCountLabel,
   formatChartCurrencyLabel,
   formatChartPointLabel,
@@ -22,7 +24,12 @@ describe("chart-point-label", () => {
     expect(formatChartPointLabel(NaN)).toBe("");
   });
 
-  it("exports CHART_LABEL_TOP_MARGIN for chart margin sync (REQ-0077)", () => {
+  it("exports CHART_LABEL_TOP_MARGIN for chart margin sync", () => {
     expect(CHART_LABEL_TOP_MARGIN).toBe(28);
+  });
+
+  it("defaults lastOnly off and exports right margin for horizontal bars", () => {
+    expect(DEFAULT_CHART_DOT_LAST_ONLY).toBe(false);
+    expect(CHART_LABEL_RIGHT_MARGIN).toBe(28);
   });
 });

@@ -3,6 +3,7 @@
  * POST /api/shipping/webhook — handle Shippo tracking events
  */
 
+import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/prisma/client";
@@ -11,11 +12,31 @@ import type { OrderStatusUpdateData } from "@/lib/email/types";
 import type { ShippoWebhookPayload } from "@/types";
 
 import { invalidateOnOrderChange } from "@/lib/cache";
+
+/**
+ * Shippo does not sign webhooks, so the registered URL carries a shared secret:
+ * https://<app>/api/shipping/webhook?token=<SHIPPO_WEBHOOK_SECRET>
+ * Unset secret = webhook disabled (fail closed).
+ */
+function hasValidWebhookToken(request: NextRequest): boolean {
+  const secret = process.env.SHIPPO_WEBHOOK_SECRET;
+  const token = request.nextUrl.searchParams.get("token");
+  if (!secret || !token) return false;
+  const a = Buffer.from(token);
+  const b = Buffer.from(secret);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 /**
  * POST /api/shipping/webhook
  * Handles Shippo webhook events (tracking updates)
  */
 export async function POST(request: NextRequest) {
+  if (!hasValidWebhookToken(request)) {
+    logger.warn("Rejected Shippo webhook with missing or invalid token");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body: ShippoWebhookPayload = await request.json();
     const { event, data } = body;
@@ -23,7 +44,7 @@ export async function POST(request: NextRequest) {
     logger.info(`Received Shippo webhook: ${event}`);
 
     if (event === "track_updated" && data) {
-      const { tracking_number, tracking_status, carrier } = data;
+      const { tracking_number, tracking_status } = data;
 
       if (!tracking_number) {
         logger.warn("Shippo webhook missing tracking number");

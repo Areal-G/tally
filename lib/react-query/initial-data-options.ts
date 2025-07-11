@@ -1,5 +1,5 @@
 /**
- * TanStack Query options for SSR-passed initialData (REQ-0021).
+ * TanStack Query options for SSR-passed initialData.
  * Use on first render so hooks are not isPending when server data exists.
  */
 export function withInitialData<T>(initialData?: T) {

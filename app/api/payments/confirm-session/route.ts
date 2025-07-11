@@ -1,6 +1,6 @@
 /**
  * POST /api/payments/confirm-session
- * REQ-0209 — Browser return from Stripe applies/syncs payment when webhook is delayed
+ * Browser return from Stripe applies/syncs payment when webhook is delayed
  * or hits another host. Idempotent with webhook via PaymentIntent match.
  */
 
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
       invoiceId: result.invoiceId,
       paymentStatus: result.paymentStatus,
       orderStatus: result.orderStatus,
-      // REQ-0215 — client patch invoice badge to paid after remainder settle
+      // Client patch invoice badge to paid after remainder settle
       invoiceStatus: result.invoiceStatus,
     });
   } catch (error) {

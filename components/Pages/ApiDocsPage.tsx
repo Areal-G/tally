@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   FileJson,
@@ -44,7 +44,7 @@ function getTabValue(name: string): string {
 }
 
 export default function ApiDocsPage() {
-  // SSR-safe default; client upgrades to window.origin without mount skeleton (REQ-0094).
+  // SSR-safe default; client upgrades to window.origin without mount skeleton.
   const envBase =
     process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ||
     "http://localhost:3000";
@@ -1084,16 +1084,16 @@ export default function ApiDocsPage() {
   const getFetchExample = (method: string, path: string): string => {
     const url = `${baseUrl}${path}`;
     if (method === "GET") {
-      return `fetch(\`${url}\`, {\n  credentials: "include",\n})\n  .then((res) => res.json())\n  .then((data) => console.log(data));`;
+      return `fetch(\`${url}\`, {\n credentials: "include",\n})\n .then((res) => res.json())\n .then((data) => console.log(data));`;
     }
-    return `fetch(\`${url}\`, {\n  method: "${method}",\n  credentials: "include",\n  headers: { "Content-Type": "application/json" },\n  body: JSON.stringify({ /* your payload */ }),\n})\n  .then((res) => res.json())\n  .then((data) => console.log(data));`;
+    return `fetch(\`${url}\`, {\n method: "${method}",\n credentials: "include",\n headers: { "Content-Type": "application/json" },\n body: JSON.stringify({ /* your payload */ }),\n})\n .then((res) => res.json())\n .then((data) => console.log(data));`;
   };
 
   return (
     <Navbar>
       <PageContentWrapper>
         <div className="flex flex-col gap-6">
-          {/* Header — PageSectionHeader parity (REQ-0075 AC3) */}
+          {/* Header — PageSectionHeader parity */}
           <PageSectionHeader
             as="h1"
             className={DETAIL_PAGE_HEADER_SPACING_CLASS}
@@ -1103,7 +1103,7 @@ export default function ApiDocsPage() {
             description="Comprehensive API documentation for the Stock inventory management system. All endpoints require authentication via JWT token."
           />
 
-          {/* Quick Info Cards — render immediately (REQ-0094 shell-first) */}
+          {/* Quick Info Cards — render immediately (shell-first) */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
             <>
               {/* Base URL */}
@@ -1225,7 +1225,7 @@ export default function ApiDocsPage() {
                         {section.endpoints.map((endpoint, index) => (
                           <div
                             key={index}
-                            className="rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 p-4 space-y-2 backdrop-blur-md"
+                            className="rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 p-4 space-y-2 "
                           >
                             <div className="flex flex-wrap items-center gap-2">
                               <Badge
@@ -1368,15 +1368,15 @@ export default function ApiDocsPage() {
                         <div
                           key={type.name}
                           className={cn(
-                            "rounded-xl border p-4 backdrop-blur-md",
+                            "rounded-xl border p-4 ",
                             typeVariant === "emerald" &&
-                              "border-emerald-400/20 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent",
+                              "border-emerald-400/20 bg-emerald-500/10 ",
                             typeVariant === "violet" &&
-                              "border-violet-400/20 bg-gradient-to-br from-violet-500/10 via-violet-500/5 to-transparent",
+                              "border-violet-400/20 bg-violet-500/10 ",
                             typeVariant === "orange" &&
-                              "border-orange-400/20 bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent",
+                              "border-orange-400/20 bg-orange-500/10 ",
                             typeVariant === "teal" &&
-                              "border-teal-400/20 bg-gradient-to-br from-teal-500/10 via-teal-500/5 to-transparent",
+                              "border-teal-400/20 bg-teal-500/10 ",
                           )}
                         >
                           <h4 className="font-medium mb-3 text-gray-700 dark:text-white">
@@ -1424,7 +1424,7 @@ export default function ApiDocsPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {/* Success Codes */}
-                    <div className="rounded-xl border border-emerald-400/20 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent p-4 backdrop-blur-md space-y-2">
+                    <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-4 space-y-2">
                       <h4 className="font-medium text-emerald-700 dark:text-emerald-300 text-sm">
                         Success Codes
                       </h4>
@@ -1449,7 +1449,7 @@ export default function ApiDocsPage() {
                     </div>
 
                     {/* Error Codes */}
-                    <div className="rounded-xl border border-rose-400/20 bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-transparent p-4 backdrop-blur-md space-y-2">
+                    <div className="rounded-xl border border-rose-400/20 bg-rose-500/10 p-4 space-y-2">
                       <h4 className="font-medium text-rose-700 dark:text-rose-300 text-sm">
                         Error Codes
                       </h4>

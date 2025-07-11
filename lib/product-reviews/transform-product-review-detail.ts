@@ -1,6 +1,6 @@
 /**
  * Shared product review detail response transform — used by API GET/PUT and SSR prefetch.
- * REQ-0024 / REQ-0180: single source of truth for product review detail JSON shape.
+ * Single source of truth for product review detail JSON shape.
  */
 
 import type { ProductReview } from "@/types";

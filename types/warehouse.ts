@@ -18,7 +18,7 @@ export interface Warehouse {
   updatedAt?: Date | null;
   createdBy: string;
   updatedBy?: string | null;
-  /** REQ-0096 — audit user snapshots for detail info rows */
+  /** Audit user snapshots for detail info rows */
   creator?: {
     id: string;
     name?: string | null;
@@ -31,7 +31,7 @@ export interface Warehouse {
     email: string;
     image?: string | null;
   } | null;
-  /** REQ-0084 — stock allocation KPIs (SSR from allocations). */
+  /** Stock allocation KPIs (SSR from allocations). */
   warehouseInsights?: WarehouseInsights | null;
 }
 

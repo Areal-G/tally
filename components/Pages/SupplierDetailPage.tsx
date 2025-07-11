@@ -56,7 +56,6 @@ import {
   SectionTitleRow,
   GlassCard,
   GlassCardBody,
-  GLASS_CARD_VARIANT_CONFIG as variantConfig,
 } from "@/components/shared";
 import { buildCategoryForecastRollup } from "@/lib/forecasting/category-forecast-rollup";
 import {
@@ -73,8 +72,8 @@ import {
   queryKeys,
   useSyncSsrQueryData,
 } from "@/lib/react-query";
-import { cn } from "@/lib/utils";
-import { toDateOrNull } from "@/lib/format";
+import { cn, EMPTY_LIST } from "@/lib/utils";
+import { formatStableCurrency, toDateOrNull } from "@/lib/format";
 import {
   TYPO_BODY_MUTED,
   TYPO_CARD_TITLE,
@@ -88,7 +87,7 @@ import {
 export type SupplierDetailPageProps = {
   embedInAdmin?: boolean;
   initialSupplier?: Supplier;
-  /** REQ-0084 — cache-read forecast for admin (non-blocking SSR). */
+  /** Cache-read forecast for admin (non-blocking SSR). */
   initialForecasting?: ForecastingSummary | null;
 };
 
@@ -125,7 +124,7 @@ export default function SupplierDetailPage({
     initialForecasting ?? undefined,
   );
 
-  const productsForForecast = supplier?.products ?? [];
+  const productsForForecast = supplier?.products ?? EMPTY_LIST;
   const productIdSet = useMemo(
     () => new Set(productsForForecast.map((p) => p.id)),
     [productsForForecast],
@@ -222,7 +221,7 @@ export default function SupplierDetailPage({
   }
 
   // Format dates
-  // REQ-0136 — never fall back to `new Date()` ("now"): SSR/client render at different
+  // Never fall back to `new Date()` ("now"): SSR/client render at different
   // instants and that non-determinism is a classic hydration-mismatch source.
   const createdAt = toDateOrNull(supplier?.createdAt);
   const updatedAt = supplier?.updatedAt ? new Date(supplier?.updatedAt) : null;
@@ -302,7 +301,7 @@ export default function SupplierDetailPage({
               dataLoading ? (
                 <DataSlotPulse variant="badge" className="self-center" />
               ) : supplier != null ? (
-                // REQ-0187 — compact status caption; parity with WarehouseDetailPage
+                // Compact status caption; parity with WarehouseDetailPage
                 <div className="flex shrink-0 flex-col items-end justify-center gap-0.5 self-center">
                   <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide text-gray-500 dark:text-white/60">
                     <CheckCircle2 className="h-3 w-3 shrink-0" aria-hidden />
@@ -382,22 +381,22 @@ export default function SupplierDetailPage({
                       icon={Calendar}
                       label="Created:"
                       tone="teal"
-                      loading={dataLoading}
+                      loading={dataLoading && !createdAt}
                     >
-                      {!dataLoading && createdAt && (
+                      {createdAt ? (
                         <ClientDateTime date={createdAt} semantic="created" />
-                      )}
+                      ) : null}
                     </DetailInfoRow>
                     {(dataLoading || updatedAt) && (
                       <DetailInfoRow
                         icon={Calendar}
                         label="Updated:"
                         tone="sky"
-                        loading={dataLoading}
+                        loading={dataLoading && !updatedAt}
                       >
-                        {!dataLoading && updatedAt && (
+                        {updatedAt ? (
                           <ClientDateTime date={updatedAt} semantic="updated" />
-                        )}
+                        ) : null}
                       </DetailInfoRow>
                     )}
                   </DetailInfoRowGroup>
@@ -472,7 +471,7 @@ export default function SupplierDetailPage({
                   >
                     {!dataLoading && (
                       <span className="text-emerald-600 dark:text-emerald-400">
-                        ${stats.totalRevenue.toFixed(2)}
+                        {formatStableCurrency(stats.totalRevenue)}
                       </span>
                     )}
                   </DetailInfoRow>
@@ -493,7 +492,7 @@ export default function SupplierDetailPage({
                     {!dataLoading && (
                       <span className="inline-flex flex-wrap items-baseline gap-x-1.5">
                         <span className="text-sky-600 dark:text-sky-400">
-                          ${(stats.totalValue ?? 0).toFixed(2)}
+                          {formatStableCurrency(stats.totalValue ?? 0)}
                         </span>
                         <span className={cn("text-xs", TYPO_BODY_MUTED)}>
                           (price × on-hand qty)
@@ -509,7 +508,7 @@ export default function SupplierDetailPage({
           {insights && (
             <CatalogInsightsSection
               insights={insights}
-              // REQ-0221 — densify present → no metric pulse
+              // Densify present → no metric pulse
               dataLoading={false}
               isAdminRole={isAdminRole}
               forecastLoading={forecastLoading}
@@ -541,7 +540,7 @@ export default function SupplierDetailPage({
             />
           )}
 
-          {/* Products from this Supplier — REQ-0086 category parity */}
+          {/* Products from this Supplier — category parity */}
           <GlassCard variant="sky">
             <GlassCardBody>
               <SectionTitleRow
@@ -569,7 +568,7 @@ export default function SupplierDetailPage({
             </GlassCardBody>
           </GlassCard>
 
-          {/* Recent Orders — REQ-0086 category parity */}
+          {/* Recent Orders — category parity */}
           <GlassCard variant="violet">
             <GlassCardBody>
               <SectionTitleRow

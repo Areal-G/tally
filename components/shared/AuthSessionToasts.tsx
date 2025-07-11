@@ -2,8 +2,8 @@
 
 /**
  * Consumes deferred login welcome / logout goodbye payloads after full-page navigation.
- * REQ-0034 — mounted after Toaster so useToast listeners exist.
- * REQ-0035 — Google OAuth ?oauth_success=true welcome on /, /client, /supplier.
+ * Mounted after Toaster so useToast listeners exist.
+ * Google OAuth ?oauth_success=true welcome on /, /client, /supplier.
  */
 
 import { useEffect, useRef } from "react";

@@ -1,5 +1,5 @@
 /**
- * REQ-0154 — Invoice-money-aware KPI partition for dashboard Revenue / Invoice cards.
+ * Invoice-money-aware KPI partition for dashboard Revenue / Invoice cards.
  * Pure / client-safe. Does not invent invoice status "partial" — derived from amount fields.
  *
  * Revenue: Paid (fully settled collected) + Partial (mid-pay collected) + Due (open remainder)

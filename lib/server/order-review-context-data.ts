@@ -1,5 +1,5 @@
 /**
- * Batch SSR review context for order detail — avoids per-line-item client eligibility calls (REQ-0026).
+ * Batch SSR review context for order detail — avoids per-line-item client eligibility calls.
  */
 import {
   getReviewsForProductPage,

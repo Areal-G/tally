@@ -3,7 +3,7 @@ import { getSession } from "@/lib/auth-server";
 import { getAdminCounts } from "@/lib/server/admin-counts";
 import AdminLayout from "@/components/layouts/AdminLayout";
 
-/** Admin layout — SSR sidebar counts so badges render without client fetch flash (REQ-0025). */
+/** Admin layout — SSR sidebar counts so badges render without client fetch flash. */
 export const dynamic = "force-dynamic";
 
 export default async function AdminRouteLayout({

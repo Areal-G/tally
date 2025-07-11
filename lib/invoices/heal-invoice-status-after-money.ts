@@ -1,5 +1,5 @@
 /**
- * REQ-0211 / REQ-0215 — Promote invoice status from money already on the row.
+ * Promote invoice status from money already on the row.
  * - draft + mid-pay → sent
  * - draft/sent/overdue + fully settled → paid (clamp amountDue)
  * Also syncs linked order.paymentStatus (partial→paid) when money/status change.
@@ -85,7 +85,7 @@ export async function healInvoiceStatusAfterMoney(
     });
   }
 
-  // REQ-0215 — always re-derive order payment from settled/mid money (fixes stuck partial)
+  // Always re-derive order payment from settled/mid money (fixes stuck partial)
   const priorOrderPay =
     inv.orderId
       ? (

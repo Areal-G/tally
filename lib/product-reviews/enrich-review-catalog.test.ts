@@ -1,5 +1,5 @@
 /**
- * REQ-0180 — pure shape guard for productReviews:list:v2 Redis rows.
+ * Pure shape guard for productReviews:list:v2 Redis rows.
  */
 
 import { describe, expect, it } from "vitest";

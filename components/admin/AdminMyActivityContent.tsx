@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { CellContext, ColumnDef } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,7 +25,7 @@ import {
   useCategories,
   useUsers,
 } from "@/hooks/queries";
-import { cn } from "@/lib/utils";
+import { cn, EMPTY_LIST } from "@/lib/utils";
 import {
   isAnyDataSlotUnsettled,
   isDataSlotLoading,
@@ -64,7 +64,7 @@ import type { OrderForPage } from "@/lib/server/orders-data";
 import type { WarehouseForPage } from "@/lib/server/warehouses-data";
 import type { InvoiceForPage } from "@/lib/server/invoices-data";
 
-/** REQ-0168 — adapt Order-list ColumnDefs for AdminEmbedDataTable (no sort chrome). */
+/** Adapt Order-list ColumnDefs for AdminEmbedDataTable (no sort chrome). */
 function orderColumnDefsToEmbed(
   defs: ColumnDef<Order>[],
 ): AdminEmbedColumn<OrderForPage>[] {
@@ -110,7 +110,7 @@ export type AdminMyActivityContentProps = {
   initialUsers?: UserForAdmin[];
 };
 
-/** REQ-0025 — SSR initialData via props (blocking prefetch in page.tsx). */
+/** SSR initialData via props (blocking prefetch in page.tsx). */
 export default function AdminMyActivityContent({
   initialOrders,
   initialProducts,
@@ -144,15 +144,15 @@ export default function AdminMyActivityContent({
     { queryKey: queryKeys.userManagement.lists(), serverData: initialUsers },
   ]);
 
-  const orders = (ordersQuery.data ?? initialOrders ?? []) as OrderForPage[];
-  const products = productsQuery.data ?? initialProducts ?? [];
-  const suppliers = suppliersQuery.data ?? initialSuppliers ?? [];
-  const warehouses = warehousesQuery.data ?? initialWarehouses ?? [];
-  const invoices = invoicesQuery.data ?? initialInvoices ?? [];
-  const categories = categoriesQuery.data ?? initialCategories ?? [];
-  const users = usersQuery.data ?? initialUsers ?? [];
+  const orders = (ordersQuery.data ?? initialOrders ?? EMPTY_LIST) as OrderForPage[];
+  const products = productsQuery.data ?? initialProducts ?? EMPTY_LIST;
+  const suppliers = suppliersQuery.data ?? initialSuppliers ?? EMPTY_LIST;
+  const warehouses = warehousesQuery.data ?? initialWarehouses ?? EMPTY_LIST;
+  const invoices = invoicesQuery.data ?? initialInvoices ?? EMPTY_LIST;
+  const categories = categoriesQuery.data ?? initialCategories ?? EMPTY_LIST;
+  const users = usersQuery.data ?? initialUsers ?? EMPTY_LIST;
 
-  // REQ-0021: shell-first — headers/cards stay visible; values pulse
+  // Shell-first — headers/cards stay visible; values pulse
   const cardsDataLoading = isAnyDataSlotUnsettled([
     { query: ordersQuery, serverInitial: initialOrders },
     { query: productsQuery, serverInitial: initialProducts },
@@ -168,7 +168,7 @@ export default function AdminMyActivityContent({
     const totalOrders = orders.length;
     const totalRevenue = orders.reduce((sum, o) => sum + Number(o.total), 0);
     const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-    // REQ-0156 — store-parity status dist for Total Orders badges
+    // Store-parity status dist for Total Orders badges
     const statusDistribution = {
       pending: 0,
       confirmed: 0,
@@ -214,7 +214,7 @@ export default function AdminMyActivityContent({
       (w) => w.status === false,
     ).length;
 
-    // REQ-0154 — invoice-money partition (not order.total for partial)
+    // Invoice-money partition (not order.total for partial)
     const moneyStats = buildPaymentMoneyStats(invoices);
     const invoicePaid = moneyStats.paidInvoiceCount;
     const invoicePartial = moneyStats.partialInvoiceCount;
@@ -327,11 +327,11 @@ export default function AdminMyActivityContent({
     return filtered.slice(0, 5);
   }, [orders, searchTerm, authUser?.name, authUser?.email]);
 
-  /** REQ-0168 — Order-list columns via AdminEmbedDataTable (no OrderList chrome / FAB) */
+  /** Order-list columns via AdminEmbedDataTable (no OrderList chrome / FAB) */
   const recentOrderColumns = useMemo(
     () =>
       orderColumnDefsToEmbed(
-        // REQ-0169 — no onEdit (no OrderDialog host); View/Cancel/invoice still work
+        // No onEdit (no OrderDialog host); View/Cancel/invoice still work
         createOrderColumns(undefined, "/admin/orders"),
       ),
     [],
@@ -344,12 +344,12 @@ export default function AdminMyActivityContent({
           as="h1"
           icon={UserRound}
           tone="sky"
-          title="My Activity (self-only as user)"
+          title="My Activity"
           description="Your orders, products, and key metrics as the store owner as you placed order, created products, invoices, and more. This is self-only data. This is different from the Store Analytics & Dashboard, which is the overall store metrics as the store owner & other users."
           className={DETAIL_PAGE_HEADER_SPACING_CLASS}
         />
 
-        {/* REQ-0169 — shell token under gap-6 (no stacked pb-6) */}
+        {/* Shell token under gap-6 (no stacked pb-6) */}
         <div
           className={cn(
             PAGE_STATS_GRID_IN_SHELL_CLASS,
@@ -511,10 +511,10 @@ export default function AdminMyActivityContent({
 
         <article
           className={cn(
-            "rounded-[28px] border border-teal-400/30 dark:border-teal-400/30",
-            "bg-gradient-to-br from-teal-500/25 via-teal-500/10 to-teal-500/5 dark:from-teal-500/25 dark:via-teal-500/10 dark:to-teal-500/5",
-            "shadow-[0_30px_80px_rgba(20,184,166,0.35)] dark:shadow-[0_30px_80px_rgba(20,184,166,0.25)]",
-            "p-2 sm:p-4 backdrop-blur-md overflow-hidden",
+            "rounded-lg border border-teal-400/30 dark:border-teal-400/30",
+            " bg-teal-500/25 dark:bg-teal-500/25 ",
+            " ",
+            "p-2 sm:p-4 overflow-hidden",
           )}
         >
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-4">

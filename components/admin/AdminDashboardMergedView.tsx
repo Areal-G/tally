@@ -1,21 +1,20 @@
 "use client";
 
-import React from "react";
 import { PageContentWrapper } from "@/components/shared";
 import AdminAnalyticsContent from "./AdminAnalyticsContent";
 import type { DashboardStats } from "@/types";
 
 export type AdminDashboardMergedViewProps = {
   variant: "store" | "personal";
-  /** SSR-passed dashboard stats (REQ-0021) */
+  /** SSR-passed dashboard stats */
   initialStats?: DashboardStats | null;
-  /** SSR-passed forecasting summary (REQ-0025) */
+  /** SSR-passed forecasting summary */
   initialForecasting?: import("@/types").ForecastingSummary;
 };
 
 /**
  * Merged dashboard: overview (KPIs + recent orders) + analytics (charts, AI).
- * REQ-0025 — blocking SSR in page.tsx; no Suspense shell flash.
+ * Blocking SSR in page.tsx; no Suspense shell flash.
  */
 export default function AdminDashboardMergedView({
   variant,

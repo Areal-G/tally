@@ -1,5 +1,5 @@
 /**
- * REQ-0215 — healInvoiceStatusAfterMoney promotes sent→paid and syncs order.
+ * healInvoiceStatusAfterMoney promotes sent→paid and syncs order.
  */
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
@@ -26,7 +26,7 @@ import { prisma } from "@/prisma/client";
 import { invalidateOnOrderChange } from "@/lib/cache";
 import { healInvoiceStatusAfterMoney } from "./heal-invoice-status-after-money";
 
-describe("healInvoiceStatusAfterMoney (REQ-0215)", () => {
+describe("healInvoiceStatusAfterMoney", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

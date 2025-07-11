@@ -1,11 +1,11 @@
 /**
  * Logger Utility
  * Centralized logging utility for development-only console logs
- * Automatically sends errors to Sentry in production when configured
+ * In production, errors go to the error reporter (lib/monitoring/error-reporting)
  */
 
 import { isAxiosError, isExpectedClientError } from "@/lib/api/errors";
-import { captureException, captureMessage } from "@/lib/monitoring/sentry";
+import { captureException, captureMessage } from "@/lib/monitoring/error-reporting";
 
 /**
  * Log levels
@@ -73,7 +73,7 @@ function resolvePrimaryError(args: unknown[]): unknown {
  */
 const createLogger = (level: LogLevel): (...args: unknown[]) => void => {
   if (process.env.NODE_ENV === "production") {
-    // In production, send errors to Sentry and suppress console logs
+    // In production, report errors and suppress other console output
     if (level === "error") {
       return (...args: unknown[]) => {
         const primary = resolvePrimaryError(args);
@@ -82,7 +82,7 @@ const createLogger = (level: LogLevel): (...args: unknown[]) => void => {
         }
 
         // Pattern: logger.error("label:", realError) — use the Error instance as primary exception
-        // so Sentry shows the real error message, not the label string
+        // so the report shows the real error message, not the label string
         if (
           args.length > 1 &&
           args[1] instanceof Error &&
@@ -93,7 +93,6 @@ const createLogger = (level: LogLevel): (...args: unknown[]) => void => {
         }
         const error = extractError(args);
         if (error) {
-          // Send to Sentry if configured
           if (args.length > 1 && typeof args[1] === "object") {
             captureException(error, args[1] as Record<string, unknown>);
           } else {
@@ -111,16 +110,8 @@ const createLogger = (level: LogLevel): (...args: unknown[]) => void => {
       };
     }
     if (level === "warn") {
-      return (...args: unknown[]) => {
-        if (args.length > 0) {
-          const message = String(args[0]);
-          const context =
-            args.length > 1 && typeof args[1] === "object"
-              ? (args[1] as Record<string, unknown>)
-              : undefined;
-          captureMessage(message, "warning", context);
-        }
-      };
+      // Expected ops noise (Zod 4xx, OAuth mismatch, etc.) — not reported
+      return () => {};
     }
     // No-op for other levels in production
     return () => {};
@@ -135,7 +126,7 @@ const createLogger = (level: LogLevel): (...args: unknown[]) => void => {
 /**
  * Logger instance
  * Only logs in development mode
- * Sends errors to Sentry in production when configured
+ * Reports errors in production
  */
 export const logger: Logger = {
   log: createLogger("log"),

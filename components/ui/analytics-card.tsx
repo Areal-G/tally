@@ -28,7 +28,7 @@ interface AnalyticsCardProps {
   className?: string;
   iconColor?: string;
   variant?: CardVariant;
-  /** When true, value shows inline pulse (title/icon stay visible — REQ-0021) */
+  /** When true, value shows inline pulse (title/icon stay visible —) */
   valueLoading?: boolean;
 }
 
@@ -45,67 +45,67 @@ const variantConfig: Record<
   }
 > = {
   sky: {
-    border: "border-sky-400/30",
-    gradient: "bg-gradient-to-br from-sky-500/25 via-sky-500/10 to-sky-500/5",
+    border: "",
+    gradient: " money-surface money-stat ",
     shadow:
-      "shadow-[0_20px_50px_rgba(2,132,199,0.25)] dark:shadow-[0_20px_50px_rgba(2,132,199,0.15)]",
-    hoverBorder: "hover:border-sky-300/50",
+      " ",
+    hoverBorder: "",
   },
   emerald: {
-    border: "border-emerald-400/30",
+    border: "",
     gradient:
-      "bg-gradient-to-br from-emerald-500/25 via-emerald-500/10 to-emerald-500/5",
+      " money-surface money-stat ",
     shadow:
-      "shadow-[0_20px_50px_rgba(16,185,129,0.25)] dark:shadow-[0_20px_50px_rgba(16,185,129,0.15)]",
-    hoverBorder: "hover:border-emerald-300/50",
+      " ",
+    hoverBorder: "",
   },
   amber: {
-    border: "border-amber-400/30",
+    border: "",
     gradient:
-      "bg-gradient-to-br from-amber-500/30 via-amber-500/15 to-amber-500/5",
+      " money-surface money-stat ",
     shadow:
-      "shadow-[0_20px_50px_rgba(245,158,11,0.2)] dark:shadow-[0_20px_50px_rgba(245,158,11,0.12)]",
-    hoverBorder: "hover:border-amber-300/60",
+      " ",
+    hoverBorder: "",
   },
   rose: {
-    border: "border-rose-400/30",
+    border: "",
     gradient:
-      "bg-gradient-to-br from-rose-500/25 via-rose-500/10 to-rose-500/5",
+      " money-surface money-stat ",
     shadow:
-      "shadow-[0_20px_50px_rgba(225,29,72,0.25)] dark:shadow-[0_20px_50px_rgba(225,29,72,0.15)]",
-    hoverBorder: "hover:border-rose-300/50",
+      " ",
+    hoverBorder: "",
   },
   violet: {
-    border: "border-violet-400/30",
+    border: "",
     gradient:
-      "bg-gradient-to-br from-violet-500/25 via-violet-500/10 to-violet-500/5",
+      " money-surface money-stat ",
     shadow:
-      "shadow-[0_20px_50px_rgba(139,92,246,0.25)] dark:shadow-[0_20px_50px_rgba(139,92,246,0.15)]",
-    hoverBorder: "hover:border-violet-300/50",
+      " ",
+    hoverBorder: "",
   },
   blue: {
-    border: "border-blue-400/30",
+    border: "",
     gradient:
-      "bg-gradient-to-br from-blue-500/25 via-blue-500/10 to-blue-500/5",
+      " money-surface money-stat ",
     shadow:
-      "shadow-[0_20px_50px_rgba(59,130,246,0.25)] dark:shadow-[0_20px_50px_rgba(59,130,246,0.15)]",
-    hoverBorder: "hover:border-blue-300/50",
+      " ",
+    hoverBorder: "",
   },
   orange: {
-    border: "border-orange-400/30",
+    border: "",
     gradient:
-      "bg-gradient-to-br from-orange-500/25 via-orange-500/10 to-orange-500/5",
+      " money-surface money-stat ",
     shadow:
-      "shadow-[0_20px_50px_rgba(249,115,22,0.25)] dark:shadow-[0_20px_50px_rgba(249,115,22,0.15)]",
-    hoverBorder: "hover:border-orange-300/50",
+      " ",
+    hoverBorder: "",
   },
   teal: {
-    border: "border-teal-400/30",
+    border: "",
     gradient:
-      "bg-gradient-to-br from-teal-500/25 via-teal-500/10 to-teal-500/5",
+      " money-surface money-stat ",
     shadow:
-      "shadow-[0_20px_50px_rgba(20,184,166,0.25)] dark:shadow-[0_20px_50px_rgba(20,184,166,0.15)]",
-    hoverBorder: "hover:border-teal-300/50",
+      " ",
+    hoverBorder: "",
   },
 };
 
@@ -116,7 +116,7 @@ export function AnalyticsCard({
   icon: Icon,
   trend,
   className,
-  iconColor = "text-gray-700 dark:text-white",
+  iconColor = "",
   variant = "blue",
   valueLoading = false,
 }: AnalyticsCardProps) {
@@ -125,7 +125,7 @@ export function AnalyticsCard({
   return (
     <article
       className={cn(
-        "group rounded-[20px] border min-h-[140px] h-full p-2 sm:p-4 backdrop-blur-md transition",
+        "group min-h-[124px] h-full p-5 sm:p-6 transition",
         config.border,
         config.gradient,
         config.shadow,
@@ -135,10 +135,10 @@ export function AnalyticsCard({
     >
       <div className="flex flex-col w-full">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-xs uppercase tracking-[0.3em] text-gray-700 dark:text-white/80 font-medium shrink-0">
+          <p className="text-xs uppercase tracking-[0.1em] text-[var(--text-secondary)] font-semibold shrink-0">
             {title}
           </p>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-300/30 bg-gray-100/50 shadow-inner shadow-primary/20 backdrop-blur dark:border-white/15 dark:bg-white/10">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center money-stat-icon rounded-full h-11 w-11">
             <Icon className={cn("h-5 w-5", iconColor)} />
           </div>
         </div>

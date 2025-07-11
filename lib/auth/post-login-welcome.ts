@@ -1,11 +1,11 @@
 /**
- * Deferred welcome toast after full-page login redirect (REQ-0028).
+ * Deferred welcome toast after full-page login redirect.
  * Login stores payload; destination dashboard consumes on first paint.
  * Shown-marker survives React Strict Mode remount (consume-on-read caused missed toasts).
  */
 
-export const POST_LOGIN_WELCOME_KEY = "stockly:post-login-welcome";
-export const POST_LOGIN_WELCOME_SHOWN_KEY = "stockly:post-login-welcome-shown";
+export const POST_LOGIN_WELCOME_KEY = "tally:post-login-welcome";
+export const POST_LOGIN_WELCOME_SHOWN_KEY = "tally:post-login-welcome-shown";
 
 export type PostLoginWelcomePayload = {
   userName: string;

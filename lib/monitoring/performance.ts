@@ -5,13 +5,9 @@
  * - Error rates
  * - Request counts
  * - Performance trends
- * 
- * NOTE: All utilities are complete and ready to use.
- * Route wrapping with withPerformanceTracking() is deferred until
- * after all other features are implemented. See lib/api/performance-wrapper.ts
- * 
- * Once routes are wrapped, metrics will automatically be collected
- * and displayed on the API status page.
+ *
+ * Metrics are recorded via withPerformanceTracking() (lib/api/performance-wrapper.ts)
+ * and shown on the API status page.
  */
 
 import { getRedis, isRedisConfigured } from "@/lib/cache/redis";

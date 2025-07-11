@@ -1,5 +1,62 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 import tailwindcssAnimate from "tailwindcss-animate";
+
+/**
+ * Tally palette: decorative hues resolve to the brand violet (#5b4cf0),
+ * status hues collapse to one green / amber / red, and grays use the cool
+ * lavender-gray scale (slate-50 = canvas, slate-900 = dark card, slate-950 = dark canvas).
+ */
+const accent = {
+  50: "#f1efff",
+  100: "#e4e0ff",
+  200: "#cbc4ff",
+  300: "#aba0ff",
+  400: "#9488ff",
+  500: "#7464f7",
+  600: "#5b4cf0",
+  700: "#4b3dd4",
+  800: "#3d33a8",
+  900: "#332d85",
+  950: "#1e1a4f",
+};
+const coolGray = {
+  50: "#f4f5fb",
+  100: "#eceefa",
+  200: "#e1e3f0",
+  300: "#c9ccdd",
+  400: "#9ba1bd",
+  500: "#737896",
+  600: "#5c6178",
+  700: "#2a2f4a",
+  800: "#1c2038",
+  900: "#131629",
+  950: "#0b0d1a",
+};
+const paletteOverrides = {
+  slate: coolGray,
+  gray: coolGray,
+  zinc: coolGray,
+  neutral: coolGray,
+  stone: coolGray,
+  sky: accent,
+  blue: accent,
+  cyan: accent,
+  teal: accent,
+  violet: accent,
+  purple: accent,
+  fuchsia: accent,
+  pink: accent,
+  indigo: accent,
+  emerald: colors.emerald,
+  lime: colors.emerald,
+  green: colors.emerald,
+  yellow: colors.amber,
+  orange: colors.amber,
+  amber: colors.amber,
+  rose: colors.rose,
+  red: colors.rose,
+};
 
 export default {
   darkMode: ["class"],
@@ -12,6 +69,7 @@ export default {
   theme: {
     extend: {
       colors: {
+        ...paletteOverrides,
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0043 — borderless multi-group filter chip row with per-group dismiss (X) + global Reset.
+ * Borderless multi-group filter chip row with per-group dismiss (X) + global Reset.
  * Matches catalog ActiveInactiveFilterChips pattern; rose hover on X, sky hover on Reset.
  */
 import type { ReactNode } from "react";

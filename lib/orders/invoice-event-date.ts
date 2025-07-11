@@ -1,5 +1,5 @@
 /**
- * REQ-0145 — pick the most relevant invoice event date + semantic kind for list cells.
+ * Pick the most relevant invoice event date + semantic kind for list cells.
  * Client-safe.
  */
 

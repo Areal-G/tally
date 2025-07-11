@@ -1,14 +1,13 @@
 /**
  * Support Ticket Table Columns
- * REQ-0185 — densify Customer/Sent to; Actions MoreVertical; priority opaque on table.
- * REQ-0189 — Subject & Description header; sky subject link; dual truncate; muted date labels.
- * REQ-0192 — Messages column via ticketMessageTotal (description + replies).
- * REQ-0195 — non-admin Customer/Sent to sky text-xs via resolveDetailAuditUserHref.
+ * Densify Customer/Sent to; Actions MoreVertical; priority opaque on table.
+ * Subject & Description header; sky subject link; dual truncate; muted date labels.
+ * Messages column via ticketMessageTotal (description + replies).
+ * Non-admin Customer/Sent to sky text-xs via resolveDetailAuditUserHref.
  */
 
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { Column, ColumnDef } from "@tanstack/react-table";
 import {
@@ -149,7 +148,7 @@ export function createSupportTicketColumns(
           t.creatorEmail ||
           t.userId?.slice(-8) ||
           "—";
-        // REQ-0195 — admin user-mgmt; non-admin owner-products (sky text-xs via href)
+        // Admin user-mgmt; non-admin owner-products (sky text-xs via href)
         const href = resolveDetailAuditUserHref(t.userId, linkUserManagement);
         return (
           <PersonNameEmailCell
@@ -225,7 +224,7 @@ export function createSupportTicketColumns(
       header: ({ column }) => <SortableHeader column={column} label="Date" />,
       cell: ({ row }) => {
         const t = row.original;
-        // REQ-0189 — muted labels like product Created/Expire
+        // Muted labels like product Created/Expire
         return (
           <div className="flex flex-col whitespace-nowrap text-xs">
             <span>

@@ -1,6 +1,6 @@
 /**
- * SSR stock allocations by product for product detail (REQ-0066).
- * Mirrors GET /api/stock-allocations?productId=xxx with shared enrich (REQ-0102).
+ * SSR stock allocations by product for product detail.
+ * Mirrors GET /api/stock-allocations?productId=xxx with shared enrich.
  */
 import { prisma } from "@/prisma/client";
 import { getProductDetailForPage } from "@/lib/server/product-detail-data";
@@ -20,7 +20,7 @@ export async function getStockByProductForPage(
   const product = await getProductDetailForPage(session, productId);
   if (!product) return null;
 
-  // Warehouses belong to the product owner (admin), not the viewing session (REQ-0075 AC1).
+  // Warehouses belong to the product owner (admin), not the viewing session.
   const ownerUserId = product.userId;
 
   const allocations = await prisma.stockAllocation.findMany({

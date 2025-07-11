@@ -7,14 +7,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromRequest } from "@/utils/auth";
 import { logger } from "@/lib/logger";
 import { generateForecastingSummary } from "@/lib/forecasting";
-import { getCache, setCache, cacheKeys } from "@/lib/cache";
+import { getCache, setCache } from "@/lib/cache";
 import { withRateLimit, defaultRateLimits } from "@/lib/api/rate-limit";
 import type { ForecastingSummary } from "@/types";
 import { createChatCompletion, isLlmConfigured } from "@/lib/ai";
 import { LLM_INSIGHTS_MAX_TOKENS } from "@/lib/ai/constants";
 
-/** v2 — bust cache after max_tokens increase (REQ-0019). */
-// REQ-0170 — keep in sync with lib/server/forecasting-data.ts
+/** V2 — bust cache after max_tokens increase. */
+// Keep in sync with lib/server/forecasting-data.ts
 const FORECASTING_CACHE_KEY_PREFIX = "forecasting:summary:v4";
 
 /**
@@ -50,7 +50,7 @@ ${urgentProducts ? `- Urgent reorder needed: ${urgentProducts}` : ""}
 Provide brief, professional insights focusing on immediate actions.`;
 
   try {
-    // Valid OpenRouter id (gpt-2.5-turbo is not); Groq fallback uses GROQ_MODEL_CHAIN (REQ-0144)
+    // Valid OpenRouter id (gpt-2.5-turbo is not); Groq fallback uses GROQ_MODEL_CHAIN
     const response = await createChatCompletion(
       [{ role: "user", content: prompt }],
       {

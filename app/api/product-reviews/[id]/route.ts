@@ -163,7 +163,7 @@ export async function PUT(
       details: { productName: productForAudit?.name },
     }).catch(() => {});
 
-    // REQ-0180 — return same enriched shape as GET/SSR (catalog + purchase)
+    // Return same enriched shape as GET/SSR (catalog + purchase)
     const detail = await getProductReviewDetailForPage(
       { id: session.id, role: session.role },
       id,

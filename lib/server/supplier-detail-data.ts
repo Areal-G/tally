@@ -1,7 +1,7 @@
 /**
  * Server-side supplier detail fetch for SSR prefetch.
  * Mirrors GET /api/suppliers/:id auth + response shape (includes Redis cache).
- * REQ-0024, REQ-0086 — party enrichment on products + recent orders (category parity).
+ * Party enrichment on products + recent orders (category parity).
  */
 
 import { computeCatalogInsights } from "@/lib/server/catalog-insights";
@@ -61,7 +61,7 @@ function transformSupplierDetail(
     { orderNumber: string; status: string; total: number; createdAt: Date }
   >();
 
-  // REQ-0140 — sold stats = delivered or paid only
+  // Sold stats = delivered or paid only
   products.forEach((product) => {
     product.orderItems?.forEach((item) => {
       const order = item.order;
@@ -89,7 +89,7 @@ function transformSupplierDetail(
     0,
   );
 
-  // Stock buckets refined after enrich with committedQuantity (REQ-0140)
+  // Stock buckets refined after enrich with committedQuantity
   const supplierInsights = computeCatalogInsights(
     products.map((p) => ({
       quantity: p.quantity,
@@ -139,7 +139,7 @@ function transformSupplierDetail(
         createdAt: item.createdAt,
         owner,
         placedBy,
-        // REQ-0143 — category for recent-order meta line
+        // Category for recent-order meta line
         category: categoryMap.get(product.categoryId) ?? null,
       };
     });
@@ -186,7 +186,7 @@ function transformSupplierDetail(
       imageUrl: product.imageUrl || null,
       owner: toParty(ownerMap.get(product.userId)),
       supplier: supplierSnapshot,
-      // REQ-0141 — category for product grid link
+      // Category for product grid link
       category: categoryMap.get(product.categoryId) ?? null,
     })),
     recentOrders,
@@ -352,7 +352,7 @@ export async function getSupplierDetailForPage(
     transformedSupplier.products,
   );
 
-  // REQ-0140 — insights stock buckets use qty − committed (alloc + product reserved)
+  // Insights stock buckets use qty − committed (alloc + product reserved)
   const committedById = new Map(
     enrichedProducts.map((p) => [p.id, p.committedQuantity]),
   );
@@ -368,7 +368,7 @@ export async function getSupplierDetailForPage(
     transformedSupplier.statistics.totalQuantitySold,
   );
 
-  // REQ-0143 — batch invoice links for recent-order indicators
+  // Batch invoice links for recent-order indicators
   const invoiceMap = await getInvoiceLinkMap(
     transformedSupplier.recentOrders.map((o) => o.orderId).filter(Boolean),
   );

@@ -1,5 +1,5 @@
 /**
- * REQ-0103 — committed quantity enrichment tests.
+ * Committed quantity enrichment tests.
  */
 
 import { describe, expect, it, vi, beforeEach } from "vitest";
@@ -40,12 +40,12 @@ describe("enrich-product-committed-quantity", () => {
     expect(getDisplayCommittedQuantity({ reservedQuantity: 5 })).toBe(5);
   });
 
-  it("REQ-0104 warehouse pick: committed is allocation sum when product reserved is 0", () => {
+  it("warehouse pick: committed is allocation sum when product reserved is 0", () => {
     expect(computeCommittedQuantity(0, 20)).toBe(20);
     expect(computeCommittedQuantity(0, 20)).not.toBe(40);
   });
 
-  describe("enrichProductDetailWithCommittedQuantity (REQ-0105)", () => {
+  describe("enrichProductDetailWithCommittedQuantity", () => {
     beforeEach(() => {
       vi.mocked(prisma.stockAllocation.findMany).mockReset();
     });

@@ -65,7 +65,7 @@ const STABLE_COMPACT_UTC = new Intl.DateTimeFormat("en-US", {
 });
 
 /**
- * Compact date+time in UTC — identical on Vercel (UTC) and any client TZ (REQ-0019).
+ * Compact date+time in UTC — identical on Vercel (UTC) and any client TZ.
  * Use for admin recent-activity lists to prevent React #418 text hydration errors.
  */
 export function formatStableCompactDateTime(

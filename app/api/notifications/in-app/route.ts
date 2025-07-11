@@ -8,12 +8,10 @@ import { getSessionFromRequest } from "@/utils/auth";
 import { logger } from "@/lib/logger";
 import {
   getNotificationsByUser,
-  getUnreadNotificationCount,
 } from "@/prisma/notification";
 import {
   getCache,
   setCache,
-  invalidateCache,
   cacheKeys,
 } from "@/lib/cache";
 import { withRateLimit, defaultRateLimits } from "@/lib/api/rate-limit";

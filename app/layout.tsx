@@ -5,7 +5,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { KeyboardShortcutsProvider } from "@/components/providers/KeyboardShortcutsProvider";
-import { Poppins } from "next/font/google";
+import { Manrope } from "next/font/google";
 import localFont from "next/font/local";
 import React from "react";
 import { AuthProvider } from "@/contexts";
@@ -32,10 +32,10 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-const poppins = Poppins({
+/** UI font (part of the Tally design system). */
+const manrope = Manrope({
   subsets: ["latin"],
-  variable: "--font-poppins",
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-manrope",
 });
 
 /** Force dynamic rendering for all routes so useSearchParams etc. work without Suspense and pages render instantly. */
@@ -43,21 +43,15 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: {
-    default: "Stockly — Warehouse & Stock Inventory Management System",
-    template: "%s | Stockly — Warehouse & Stock Inventory Management System",
+    default: "Tally — Warehouse & Stock Inventory Management System",
+    template: "%s | Tally — Warehouse & Stock Inventory Management System",
   },
   description:
-    "Stockly is a full-stack warehouse and stock inventory management system built with Next.js. Manage products, categories, suppliers, orders, invoices, and warehouses. Role-based access for admin, client, and supplier. Analytics dashboard, QR codes, export, and secure JWT authentication. By Arnob Mahmud.",
-  authors: [
-    {
-      name: "Arnob Mahmud",
-      url: "https://www.arnobmahmud.com",
-      email: "contact@arnobmahmud.com",
-    },
-  ],
-  creator: "Arnob Mahmud",
-  publisher: "Arnob Mahmud",
-  applicationName: "Stockly",
+    "Tally is a full-stack warehouse and stock inventory management system built with Next.js. Manage products, categories, suppliers, orders, invoices, and warehouses. Role-based access for admin, client, and supplier. Analytics dashboard, QR codes, export, and secure JWT authentication.",
+  authors: [{ name: "Tally" }],
+  creator: "Tally",
+  publisher: "Tally",
+  applicationName: "Tally",
   keywords: [
     "stock inventory",
     "inventory management",
@@ -74,39 +68,37 @@ export const metadata = {
     "JWT authentication",
     "responsive web app",
     "business dashboard",
-    "Arnob Mahmud",
   ],
   icons: {
-    icon: "/favicon.ico",
-    apple: "/favicon.ico",
-    other: [{ rel: "icon", url: "/favicon.ico" }],
+    icon: [{ url: "/tally-icon.svg", type: "image/svg+xml" }],
+    apple: "/tally-icon.svg",
   },
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://stockly-inventory.vercel.app",
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
   ),
   openGraph: {
     type: "website",
     locale: "en_US",
-    title: "Stockly — Warehouse & Stock Inventory Management System",
+    title: "Tally — Warehouse & Stock Inventory Management System",
     description:
-      "Efficiently manage products, orders, invoices, and warehouses with Stockly. Secure, responsive, role-based inventory system. By Arnob Mahmud.",
-    url: "https://stockly-inventory.vercel.app",
-    siteName: "Stockly",
+      "Efficiently manage products, orders, invoices, and warehouses with Tally. Secure, responsive, role-based inventory system.",
+    url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+    siteName: "Tally",
     images: [
       {
-        url: "/favicon.ico",
-        width: 32,
-        height: 32,
-        alt: "Stockly — Stock Inventory Management",
+        url: "/tally-icon.svg",
+        width: 64,
+        height: 64,
+        alt: "Tally — Stock Inventory Management",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Stockly — Warehouse & Stock Inventory Management System",
+    title: "Tally — Warehouse & Stock Inventory Management System",
     description:
-      "Efficiently manage products, orders, invoices, and warehouses. Secure, responsive inventory system. By Arnob Mahmud.",
-    images: ["/favicon.ico"],
+      "Efficiently manage products, orders, invoices, and warehouses. Secure, responsive inventory system.",
+    images: ["/tally-icon.svg"],
   },
   robots: {
     index: true,
@@ -138,7 +130,7 @@ export default async function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} antialiased`}
         suppressHydrationWarning
         style={{ overscrollBehavior: "none" }}
       >

@@ -5,7 +5,6 @@
  * Dashboard for suppliers to view their products, orders, and revenue
  */
 
-import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,6 +27,8 @@ import {
   Clock,
   Truck,
   ArrowRight,
+  Tag,
+  Calendar,
 } from "lucide-react";
 import {
   Area,
@@ -51,10 +52,14 @@ import {
   GLASS_BUTTON_SHELL_RESET,
   ClientCompactDateTime,
   RecentOrderStatusColumn,
+  AvatarInlineLink,
+  DenseCatalogProductCell,
 } from "@/components/shared";
+import { ProductThumb } from "@/components/products/ProductOptionRow";
 import {
   CARD_LIST_DIVIDE_CLASS,
   CARD_LIST_META_CLASS,
+  CARD_LIST_META_ROW_CLASS,
   CARD_LIST_ROW_CLASS,
 } from "@/lib/ui/card-list-styles";
 import { ProductStockFromQuantityBadge } from "@/lib/ui/semantic-badges";
@@ -71,10 +76,11 @@ import {
   CHART_LABEL_TOP_MARGIN,
 } from "@/lib/ui/chart-point-label";
 import { buildPortalOrderStatusBadges } from "@/lib/ui/portal-order-status-badges";
+import { formatStableCurrency } from "@/lib/format";
 import type { SupplierPortalDashboard } from "@/types";
 
 export type SupplierPortalPageProps = {
-  /** REQ-0025 — SSR-passed supplier dashboard */
+  /** SSR-passed supplier dashboard */
   initialDashboard?: SupplierPortalDashboard;
 };
 
@@ -104,7 +110,7 @@ export default function SupplierPortalPage({
             </h1>
             <article
               className={cn(
-                "rounded-[28px] border border-white/10 dark:border-white/20 p-2 sm:p-4 backdrop-blur-md bg-white/60 dark:bg-white/5 shadow-[0_15px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_30px_80px_rgba(255,255,255,0.08)]",
+                "rounded-lg border border-white/10 dark:border-white/20 p-2 sm:p-4 bg-white/60 dark:bg-white/5 ",
               )}
             >
               <p className="text-muted-foreground text-center">
@@ -181,10 +187,7 @@ export default function SupplierPortalPage({
                 },
                 {
                   label: "Product value",
-                  value: `$${(dashboard?.productValue ?? 0).toLocaleString(
-                    undefined,
-                    { minimumFractionDigits: 2, maximumFractionDigits: 2 },
-                  )}`,
+                  value: formatStableCurrency(dashboard?.productValue ?? 0),
                 },
               ]}
             />
@@ -231,7 +234,7 @@ export default function SupplierPortalPage({
             />
             <StatisticsCard
               title="Total Revenue"
-              value={`$${(dashboard?.totalRevenue ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+              value={formatStableCurrency(dashboard?.totalRevenue ?? 0)}
               description="Revenue from your products (excl. cancelled)"
               icon={DollarSign}
               variant="violet"
@@ -240,68 +243,50 @@ export default function SupplierPortalPage({
               badges={[
                 {
                   label: "Paid",
-                  value: `$${(
+                  value: formatStableCurrency(
                     dashboard?.revenueBreakdown?.paid ??
-                    dashboard?.paidRevenue ??
-                    0
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`,
+                      dashboard?.paidRevenue ??
+                      0,
+                  ),
                 },
                 {
                   label: "Partial",
-                  value: `$${(
-                    dashboard?.revenueBreakdown?.partial ?? 0
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`,
+                  value: formatStableCurrency(
+                    dashboard?.revenueBreakdown?.partial ?? 0,
+                  ),
                 },
                 {
                   label: "Due",
-                  value: `$${(
-                    dashboard?.revenueBreakdown?.due ?? 0
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`,
+                  value: formatStableCurrency(
+                    dashboard?.revenueBreakdown?.due ?? 0,
+                  ),
                 },
                 {
                   label: "Refund",
-                  value: `$${(
-                    dashboard?.revenueBreakdown?.refund ?? 0
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`,
+                  value: formatStableCurrency(
+                    dashboard?.revenueBreakdown?.refund ?? 0,
+                  ),
                 },
                 {
                   label: "Pending",
-                  value: `$${(
+                  value: formatStableCurrency(
                     dashboard?.revenueBreakdown?.pending ??
-                    dashboard?.unpaidRevenue ??
-                    0
-                  ).toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}`,
+                      dashboard?.unpaidRevenue ??
+                      0,
+                  ),
                 },
                 ...((dashboard?.totalOrders ?? 0) > 0
                   ? [
                       {
                         label: "Avg/Order",
-                        value: `$${(
+                        value: formatStableCurrency(
                           (dashboard?.totalRevenue ?? 0) /
-                          Math.max(
-                            1,
-                            (dashboard?.totalOrders ?? 0) -
-                              (dashboard?.orderStatusCounts?.cancelled ?? 0),
-                          )
-                        ).toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}`,
+                            Math.max(
+                              1,
+                              (dashboard?.totalOrders ?? 0) -
+                                (dashboard?.orderStatusCounts?.cancelled ?? 0),
+                            ),
+                        ),
                       },
                     ]
                   : []),
@@ -313,10 +298,10 @@ export default function SupplierPortalPage({
           <div className="pb-6">
             <article
               className={cn(
-                "rounded-[28px] border border-emerald-400/20 dark:border-emerald-400/30 p-2 sm:p-4 backdrop-blur-md transition-all",
+                "rounded-lg border border-emerald-400/20 dark:border-emerald-400/30 p-2 sm:p-4 transition-all",
                 "bg-white/60 dark:bg-white/5",
-                "bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-transparent dark:from-emerald-500/25 dark:via-emerald-500/10 dark:to-emerald-500/5",
-                "shadow-[0_15px_40px_rgba(16,185,129,0.15)] dark:shadow-[0_30px_80px_rgba(16,185,129,0.25)]",
+                " bg-emerald-500/15 dark:bg-emerald-500/25 ",
+                " ",
                 "hover:border-emerald-300/40",
               )}
             >
@@ -338,7 +323,7 @@ export default function SupplierPortalPage({
               >
                 <ResponsiveChartContainer>
                   <AreaChart
-                    data={dashboard!.monthlyRevenue}
+                    data={dashboard?.monthlyRevenue ?? []}
                     margin={{
                       top: CHART_LABEL_TOP_MARGIN,
                       right: 30,
@@ -351,18 +336,18 @@ export default function SupplierPortalPage({
                     <YAxis />
                     <Tooltip
                       formatter={(value) => [
-                        `$${Number(value).toLocaleString()}`,
+                        formatStableCurrency(Number(value)),
                         "Revenue",
                       ]}
                     />
                     <Area
                       type="monotone"
                       dataKey="revenue"
-                      stroke="#10b981"
-                      fill="#10b98133"
-                      dot={{ r: 4, fill: "#10b981", strokeWidth: 0 }}
+                      stroke="var(--accent-purple)"
+                      fill="var(--accent-purple)33"
+                      dot={{ r: 4, fill: "var(--accent-purple)", strokeWidth: 0 }}
                       label={createChartDotLabelRenderer(
-                        dashboard!.monthlyRevenue.length,
+                        dashboard?.monthlyRevenue?.length ?? 0,
                       )}
                     />
                   </AreaChart>
@@ -376,10 +361,10 @@ export default function SupplierPortalPage({
               {/* Recent Orders — glassmorphic */}
               <article
                 className={cn(
-                  "rounded-[28px] border border-sky-400/20 dark:border-sky-400/30 p-2 sm:p-4 backdrop-blur-md transition-all",
+                  "rounded-lg border border-sky-400/20 dark:border-sky-400/30 p-2 sm:p-4 transition-all",
                   "bg-white/60 dark:bg-white/5",
-                  "bg-gradient-to-br from-sky-500/15 via-sky-500/5 to-transparent dark:from-sky-500/25 dark:via-sky-500/10 dark:to-sky-500/5",
-                  "shadow-[0_15px_40px_rgba(2,132,199,0.15)] dark:shadow-[0_30px_80px_rgba(2,132,199,0.25)]",
+                  " bg-sky-500/15 dark:bg-sky-500/25 ",
+                  " ",
                   "hover:border-sky-300/40",
                 )}
               >
@@ -406,41 +391,125 @@ export default function SupplierPortalPage({
                     </p>
                   ) : (
                     <ul className={CARD_LIST_DIVIDE_CLASS}>
-                      {dashboard!.recentOrders.slice(0, 5).map((order) => (
-                        <li key={order.id} className={CARD_LIST_ROW_CLASS}>
-                          <div className="min-w-0">
-                            <CopyableText
-                              value={order.orderNumber}
-                              className="max-w-full"
-                            >
-                              <Link
-                                href={`/orders/${order.id}`}
-                                prefetch
-                                className="font-normal text-xs text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 truncate block"
+                      {dashboard?.recentOrders.slice(0, 5).map((order) => {
+                        const productLabel = order.productPreview?.trim() || null;
+                        const buyerLabel =
+                          order.placedByName?.trim() ||
+                          order.placedByEmail?.trim() ||
+                          null;
+                        return (
+                          <li key={order.id} className={CARD_LIST_ROW_CLASS}>
+                            <div className="min-w-0 flex-1 flex flex-col gap-1.5 overflow-visible">
+                              <CopyableText
+                                value={order.orderNumber}
+                                className="max-w-full"
                               >
-                                {order.orderNumber}
-                              </Link>
-                            </CopyableText>
-                            <span className={CARD_LIST_META_CLASS}>
-                              {order.productCount} products ·{" "}
-                              <ClientCompactDateTime
-                                date={order.createdAt}
-                                semantic="created"
-                              />
-                            </span>
-                          </div>
-                          <RecentOrderStatusColumn
-                            status={order.status}
-                            statusAt={order.statusAt}
-                            paymentStatus={order.paymentStatus}
-                            trailing={
-                              <span className="text-xs font-normal text-gray-700 dark:text-white">
-                                ${order.total.toFixed(2)}
-                              </span>
-                            }
-                          />
-                        </li>
-                      ))}
+                                <Link
+                                  href={`/orders/${order.id}`}
+                                  prefetch
+                                  className="font-normal text-xs text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 truncate block"
+                                >
+                                  {order.orderNumber}
+                                </Link>
+                              </CopyableText>
+                              {/* Store Overview densify parity */}
+                              <div className={CARD_LIST_META_ROW_CLASS}>
+                                {order.productId && productLabel ? (
+                                  <span className="inline-flex items-center gap-1 min-w-0">
+                                    <ProductThumb
+                                      name={productLabel}
+                                      imageUrl={order.productImageUrl}
+                                      size="sm"
+                                    />
+                                    <Link
+                                      href={`/products/${order.productId}`}
+                                      prefetch
+                                      className="text-sm font-normal text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 truncate"
+                                    >
+                                      {productLabel}
+                                    </Link>
+                                  </span>
+                                ) : productLabel ? (
+                                  <span className="truncate text-xs">
+                                    {productLabel}
+                                  </span>
+                                ) : (
+                                  <span className={CARD_LIST_META_CLASS}>
+                                    {order.productCount} products
+                                  </span>
+                                )}
+                                {order.categoryId && order.categoryName ? (
+                                  <>
+                                    <span aria-hidden>·</span>
+                                    <Link
+                                      href={`/categories/${order.categoryId}`}
+                                      prefetch
+                                      className="inline-flex items-center gap-1 text-xs font-normal text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 min-w-0"
+                                    >
+                                      <Tag
+                                        className="h-3 w-3 shrink-0"
+                                        aria-hidden
+                                      />
+                                      <span className="truncate">
+                                        {order.categoryName}
+                                      </span>
+                                    </Link>
+                                  </>
+                                ) : null}
+                                {order.supplierId && order.supplierName ? (
+                                  <>
+                                    <span aria-hidden>·</span>
+                                    <AvatarInlineLink showAvatar={false}
+                                      seed={order.supplierId}
+                                      image={order.supplierImage}
+                                      label={order.supplierName}
+                                      href={`/suppliers/${order.supplierId}`}
+                                      size={20}
+                                      linkClassName="text-xs"
+                                      className="gap-1.5"
+                                    />
+                                  </>
+                                ) : null}
+                              </div>
+                              <div className={CARD_LIST_META_ROW_CLASS}>
+                                <span className="inline-flex items-center gap-1 min-w-0">
+                                  <Calendar
+                                    className="h-3 w-3 shrink-0 text-gray-500 dark:text-gray-400"
+                                    aria-hidden
+                                  />
+                                  <ClientCompactDateTime
+                                    date={order.createdAt}
+                                    semantic="created"
+                                  />
+                                </span>
+                                {buyerLabel && order.placedById ? (
+                                  <>
+                                    <span aria-hidden>·</span>
+                                    <AvatarInlineLink
+                                      label={buyerLabel}
+                                      seed={order.placedById}
+                                      image={order.placedByImage}
+                                      size={20}
+                                      linkClassName="text-xs"
+                                      className="gap-1.5"
+                                    />
+                                  </>
+                                ) : null}
+                              </div>
+                            </div>
+                            <RecentOrderStatusColumn
+                              status={order.status}
+                              statusAt={order.statusAt}
+                              paymentStatus={order.paymentStatus}
+                              trailing={
+                                <span className="text-xs font-normal text-gray-700 dark:text-white">
+                                  {formatStableCurrency(order.total)}
+                                </span>
+                              }
+                            />
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                   <div className="mt-4">
@@ -468,10 +537,10 @@ export default function SupplierPortalPage({
               <article
                 id="products"
                 className={cn(
-                  "rounded-[28px] border border-amber-400/20 dark:border-amber-400/30 p-2 sm:p-4 backdrop-blur-md transition-all",
+                  "rounded-lg border border-amber-400/20 dark:border-amber-400/30 p-2 sm:p-4 transition-all",
                   "bg-white/60 dark:bg-white/5",
-                  "bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-transparent dark:from-amber-500/25 dark:via-amber-500/10 dark:to-amber-500/5",
-                  "shadow-[0_15px_40px_rgba(245,158,11,0.15)] dark:shadow-[0_30px_80px_rgba(245,158,11,0.2)]",
+                  " bg-amber-500/15 dark:bg-amber-500/25 ",
+                  " ",
                   "hover:border-amber-300/40",
                 )}
               >
@@ -513,21 +582,25 @@ export default function SupplierPortalPage({
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {dashboard!.lowStockProducts
+                          {dashboard?.lowStockProducts
                             .slice(0, 5)
                             .map((product) => (
                               <TableRow key={product.id}>
                                 <TableCell>
-                                  <Link
-                                    href={`/products/${product.id}`}
-                                    prefetch
-                                    className="text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300"
-                                  >
-                                    {product.name}
-                                  </Link>
-                                  <p className="text-xs text-muted-foreground">
-                                    {product.sku}
-                                  </p>
+                                  <DenseCatalogProductCell
+                                    productId={product.id}
+                                    productName={product.name}
+                                    sku={product.sku}
+                                    imageUrl={product.imageUrl}
+                                    categoryId={product.categoryId}
+                                    categoryName={product.categoryName}
+                                    supplierId={product.supplierId}
+                                    supplierName={product.supplierName}
+                                    supplierImage={product.supplierImage}
+                                    productHref={(id) => `/products/${id}`}
+                                    categoryHref={(id) => `/categories/${id}`}
+                                    supplierHref={(id) => `/suppliers/${id}`}
+                                  />
                                 </TableCell>
                                 <TableCell className="text-right font-normal text-red-600">
                                   {product.quantity}

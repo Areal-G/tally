@@ -6,6 +6,13 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Shared empty array for `query.data ?? EMPTY_LIST` fallbacks. A literal `[]`
+ * would be a new array every render and re-run any useMemo that depends on it.
+ * Never mutate it.
+ */
+export const EMPTY_LIST: never[] = [];
+
+/**
  * Clears Radix UI (and similar) scroll lock / pointer-events from document.body.
  * Call after closing a dialog before navigation, or when the page is left unclickable after a dialog closes.
  * See: https://github.com/radix-ui/primitives/issues/3797

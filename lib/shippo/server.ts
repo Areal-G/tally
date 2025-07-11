@@ -25,7 +25,7 @@ export const DEFAULT_FROM_ADDRESS = {
 };
 
 /**
- * REQ-0211 — Shippo free-tier test keys (`shippo_test_*`) only return reliable
+ * Shippo free-tier test keys (`shippo_test_*`) only return reliable
  * domestic USPS rates. Auto Generate uses this recipient silently; order UI / email
  * still show the customer's shipping address from the order record.
  */
@@ -54,7 +54,7 @@ export type ShippoAddressPayload = {
 };
 
 /**
- * REQ-0211 — Resolve from/to for label purchase.
+ * Resolve from/to for label purchase.
  * Test API key → always DEFAULT_FROM + DEFAULT_TEST_TO (ignore order UI address).
  * Live key → real from defaults + order/request to-address.
  */
@@ -109,7 +109,7 @@ export function resolveShippoLabelAddresses(options: {
 }
 
 /**
- * REQ-0211 — Prefer USPS in test mode (UPS/FedEx/DHL need carrier accounts).
+ * Prefer USPS in test mode (UPS/FedEx/DHL need carrier accounts).
  * Falls back to cheapest rate when preferred provider missing.
  */
 export function selectShippoRateForLabel<

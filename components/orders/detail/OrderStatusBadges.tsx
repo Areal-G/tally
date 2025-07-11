@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0146 — `layout="stack"` when tracking sibling needs equal-height column.
+ * `layout="stack"` when tracking sibling needs equal-height column.
  */
 
 import React from "react";
@@ -17,7 +17,7 @@ export type OrderStatusBadgesProps = {
   paymentStatus?: PaymentStatus;
   dataLoading: boolean;
   statusControl?: React.ReactNode;
-  /** grid = side-by-side; stack = vertical fill for tracking column (REQ-0146) */
+  /** Grid = side-by-side; stack = vertical fill for tracking column */
   layout?: "grid" | "stack";
   className?: string;
 };

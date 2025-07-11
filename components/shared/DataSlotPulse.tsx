@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
 import { cn } from "@/lib/utils";
 
-/** Preset widths/heights for inline data-slot pulse (REQ-0021 — shell-first nav). */
+/** Preset widths/heights for inline data-slot pulse (shell-first nav). */
 export type DataSlotPulseVariant =
   | "metric"
   | "currency"

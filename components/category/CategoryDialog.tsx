@@ -64,14 +64,14 @@ import { Category } from "@/types";
 import { createCategoryColumns } from "./CategoryTableColumns";
 import { Plus, Tag, X, FileText, StickyNote } from "lucide-react";
 
-const CATEGORY_DIALOG_CONTENT_CLASS = `${DIALOG_EDGE_SCROLL_SHELL} poppins border-sky-400/30 dark:border-sky-400/30 shadow-[0_30px_80px_rgba(2,132,199,0.35)] dark:shadow-[0_30px_80px_rgba(2,132,199,0.25)]`;
+const CATEGORY_DIALOG_CONTENT_CLASS = `${DIALOG_EDGE_SCROLL_SHELL} poppins border-sky-400/30 dark:border-sky-400/30 `;
 
 interface AddCategoryDialogProps {
   children?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   editingCategory?: Category | null;
-  onEditCategory?: (category: Category) => void;
+  onEditCategory?: (category: Category | null) => void;
 }
 
 export default function AddCategoryDialog({
@@ -110,10 +110,6 @@ export default function AddCategoryDialog({
       ? externalEditingCategory
       : internalEditingCategory;
 
-  const setEditingCategory =
-    externalEditingCategory !== undefined && onEditCategory
-      ? onEditCategory
-      : setInternalEditingCategory;
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryDescription, setNewCategoryDescription] = useState("");
   const [newCategoryNotes, setNewCategoryNotes] = useState("");
@@ -154,7 +150,7 @@ export default function AddCategoryDialog({
   const updateCategoryMutation = useUpdateCategory();
 
   const { toast } = useToast();
-  const { user, isLoggedIn } = useAuth();
+  const { user } = useAuth();
 
   // Determine loading states from mutations
   const isSubmitting = createCategoryMutation.isPending;
@@ -249,7 +245,7 @@ export default function AddCategoryDialog({
       if (externalEditingCategory === undefined) {
         setInternalEditingCategory(null);
       } else if (onEditCategory) {
-        onEditCategory(null as any);
+        onEditCategory(null);
       }
       setNewCategoryName("");
       setNewCategoryDescription("");
@@ -270,7 +266,7 @@ export default function AddCategoryDialog({
     if (externalEditingCategory === undefined) {
       setInternalEditingCategory(null);
     } else if (onEditCategory) {
-      onEditCategory(null as any);
+      onEditCategory(null);
     }
     setNewCategoryName("");
     setNewCategoryDescription("");
@@ -346,7 +342,11 @@ export default function AddCategoryDialog({
                   />
                 </div>
                 <div className="pb-4">
-                  <DialogFormLabel icon={FileText} optional wrapperClassName="mb-2">
+                  <DialogFormLabel
+                    icon={FileText}
+                    optional
+                    wrapperClassName="mb-2"
+                  >
                     Description
                   </DialogFormLabel>
                   <Textarea
@@ -359,7 +359,11 @@ export default function AddCategoryDialog({
                   />
                 </div>
                 <div className="pb-4">
-                  <DialogFormLabel icon={StickyNote} optional wrapperClassName="mb-2">
+                  <DialogFormLabel
+                    icon={StickyNote}
+                    optional
+                    wrapperClassName="mb-2"
+                  >
                     Notes
                   </DialogFormLabel>
                   <Textarea
@@ -378,7 +382,7 @@ export default function AddCategoryDialog({
                     onCheckedChange={(checked) =>
                       setNewCategoryStatus(checked === true)
                     }
-                    className="mt-0.5 shrink-0 border-sky-400/30 data-[state=checked]:bg-sky-500/70"
+                    className="shrink-0 border-sky-400/30 data-[state=checked]:bg-sky-500/70"
                   />
                   <Label
                     htmlFor="edit-category-status"
@@ -392,7 +396,10 @@ export default function AddCategoryDialog({
                   <Button
                     onClick={handleCancelEdit}
                     variant="secondary"
-                    className={cn("w-full sm:w-auto px-11 gap-2", GLASS_GHOST_BUTTON)}
+                    className={cn(
+                      "w-full sm:w-auto px-11 gap-2",
+                      GLASS_GHOST_BUTTON,
+                    )}
                   >
                     <X className="h-4 w-4 shrink-0" aria-hidden />
                     Cancel
@@ -424,7 +431,11 @@ export default function AddCategoryDialog({
                   />
                 </div>
                 <div className="pb-4">
-                  <DialogFormLabel icon={FileText} optional wrapperClassName="mb-2">
+                  <DialogFormLabel
+                    icon={FileText}
+                    optional
+                    wrapperClassName="mb-2"
+                  >
                     Description
                   </DialogFormLabel>
                   <Textarea
@@ -437,7 +448,11 @@ export default function AddCategoryDialog({
                   />
                 </div>
                 <div className="pb-4">
-                  <DialogFormLabel icon={StickyNote} optional wrapperClassName="mb-2">
+                  <DialogFormLabel
+                    icon={StickyNote}
+                    optional
+                    wrapperClassName="mb-2"
+                  >
                     Notes
                   </DialogFormLabel>
                   <Textarea
@@ -456,7 +471,7 @@ export default function AddCategoryDialog({
                     onCheckedChange={(checked) =>
                       setCategoryStatus(checked === true)
                     }
-                    className="mt-0.5 shrink-0 border-sky-400/30 data-[state=checked]:bg-sky-500/70"
+                    className="shrink-0 border-sky-400/30 data-[state=checked]:bg-sky-500/70"
                   />
                   <Label
                     htmlFor="category-status"
@@ -470,7 +485,10 @@ export default function AddCategoryDialog({
                   <DialogClose asChild>
                     <Button
                       variant={"secondary"}
-                      className={cn("w-full sm:w-auto px-11 gap-2", GLASS_GHOST_BUTTON)}
+                      className={cn(
+                        "w-full sm:w-auto px-11 gap-2",
+                        GLASS_GHOST_BUTTON,
+                      )}
                     >
                       <X className="h-4 w-4 shrink-0" aria-hidden />
                       Cancel

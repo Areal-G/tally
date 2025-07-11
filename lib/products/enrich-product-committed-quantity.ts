@@ -1,5 +1,5 @@
 /**
- * REQ-0103 — display-only committed quantity for product lists.
+ * Display-only committed quantity for product lists.
  * DB fields stay disjoint; lists expose committedQuantity for badges/available.
  */
 
@@ -74,7 +74,7 @@ export async function enrichProductsWithCommittedQuantity<
   );
 }
 
-/** REQ-0105 — single product detail/API enrich (one allocation sum query). */
+/** Single product detail/API enrich (one allocation sum query). */
 export async function enrichProductDetailWithCommittedQuantity<
   T extends { id: string; reservedQuantity?: number | null },
 >(product: T): Promise<T & { committedQuantity: number }> {

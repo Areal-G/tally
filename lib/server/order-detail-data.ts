@@ -62,7 +62,7 @@ async function enrichOrder(orderId: string, order: NonNullable<Awaited<ReturnTyp
       : [];
   const userMap = new Map(users.map((u) => [u.id, u]));
 
-  // REQ-0158 — placedBy = buyer (clientId) when distinct; else store owner
+  // placedBy = buyer (clientId) when distinct; else store owner
   const placedBy = userMap.get(buyerUserId) ?? null;
 
   const productOwnerUsers = productOwnerIds
@@ -151,7 +151,7 @@ export async function getOrderDetailForPage(
 
   if (!order) return null;
 
-  // REQ-0215 — linked invoice fully settled but order still unpaid/partial → heal + sync
+  // Linked invoice fully settled but order still unpaid/partial → heal + sync
   if (
     order.paymentStatus !== "paid" &&
     order.paymentStatus !== "refunded"

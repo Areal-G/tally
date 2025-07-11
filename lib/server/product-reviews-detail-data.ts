@@ -1,7 +1,7 @@
 /**
- * SSR product reviews + eligibility for detail pages (REQ-0026).
+ * SSR product reviews + eligibility for detail pages.
  * Mirrors GET /api/product-reviews/by-product and /api/product-reviews/eligibility.
- * REQ-0202 — reviewerEmail densify (parity with review detail).
+ * reviewerEmail densify (parity with review detail).
  */
 import { prisma } from "@/prisma/client";
 import {

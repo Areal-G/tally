@@ -1,5 +1,5 @@
 /**
- * Browser-locale formatters (REQ-0020).
+ * Browser-locale formatters.
  * Call only on the client after mount or in event handlers — not during SSR.
  * USD base; grouping/decimals follow visitor locale for global demo users.
  */

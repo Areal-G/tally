@@ -24,9 +24,9 @@ export interface ProductDemandForecast {
   productId: string;
   productName: string;
   sku: string;
-  /** REQ-0170 — optional thumb for admin forecast tables */
+  /** Optional thumb for admin forecast tables */
   imageUrl?: string | null;
-  /** REQ-0171 — denser Product column (admin forecast tables) */
+  /** Denser Product column (admin forecast tables) */
   categoryId?: string | null;
   categoryName?: string | null;
   supplierId?: string | null;
@@ -50,9 +50,9 @@ export interface SalesAnomaly {
   productId: string;
   productName: string;
   sku: string;
-  /** REQ-0170 — optional thumb for admin forecast tables */
+  /** Optional thumb for admin forecast tables */
   imageUrl?: string | null;
-  /** REQ-0171 — denser Product column (admin forecast tables) */
+  /** Denser Product column (admin forecast tables) */
   categoryId?: string | null;
   categoryName?: string | null;
   supplierId?: string | null;

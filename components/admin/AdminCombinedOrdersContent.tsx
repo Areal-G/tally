@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import OrderList from "@/components/orders/OrderList";
 import { PageContentWrapper } from "@/components/shared";
 import FloatingActionButtons from "@/components/shared/FloatingActionButtons";
@@ -13,7 +12,7 @@ export type AdminCombinedOrdersContentProps = {
   initialStats?: DashboardStats | null;
 };
 
-/** Admin combined Orders — personal + client orders with Order type filter (REQ-0025 SSR). */
+/** Admin combined Orders — personal + client orders with Order type filter (SSR). */
 export default function AdminCombinedOrdersContent({
   initialOrders,
   initialClientOrders,

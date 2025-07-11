@@ -63,7 +63,7 @@ export async function GET(
         { status: 404 },
       );
     }
-    // REQ-0191 — admin OR creator OR assignee may read replies
+    // Admin OR creator OR assignee may read replies
     const sessionId = session.id ?? "";
     const sessionRole = session.role ?? "";
     if (
@@ -131,7 +131,7 @@ export async function POST(
         { status: 404 },
       );
     }
-    // REQ-0191 — admin OR creator OR assignee may post replies
+    // Admin OR creator OR assignee may post replies
     const sessionId = session.id ?? "";
     const sessionRole = session.role ?? "";
     if (

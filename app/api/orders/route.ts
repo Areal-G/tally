@@ -27,6 +27,7 @@ import {
   resolveBuyerUserId,
   resolveStoreOwnerUserId,
 } from "@/lib/orders/order-party";
+import { isDiscountValidationError } from "@/lib/orders/order-money-validation";
 import { getOrderDetailForPage } from "@/lib/server/order-detail-data";
 import { resolveOrderStatusAtFromSource } from "@/lib/orders/order-status-display-date";
 
@@ -80,11 +81,11 @@ export async function GET(request: NextRequest) {
         ? await getOrdersContainingSupplierProducts(supplier!.id)
         : await getOrdersByUser(userId);
 
-    // REQ-0159 — placedBy = buyer (clientId when set), not store owner
+    // placedBy = buyer (clientId when set), not store owner
     const buyerIds = [
       ...new Set(orders.map((o) => resolveBuyerUserId(o)).filter(Boolean)),
     ];
-    // Batch invoice linkage (REQ-0061) alongside buyer lookup — one query each
+    // Batch invoice linkage alongside buyer lookup — one query each
     const [users, invoiceLinkMap] = await Promise.all([
       buyerIds.length > 0
         ? prisma.user.findMany({
@@ -247,7 +248,7 @@ export async function POST(request: NextRequest) {
     const role = session.role;
     const isClientRole = role === "client";
 
-    // REQ-0158 — resolve store owner from line products; buyer = client or null (self)
+    // Resolve store owner from line products; buyer = client or null (self)
     const productIdsForParty = orderData.items.map((i) => i.productId);
     const productsForParty = await prisma.product.findMany({
       where: { id: { in: productIdsForParty } },
@@ -383,7 +384,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // REQ-0221 — densified 201 (parties + creator + list Store owner fields)
+    // Densified 201 (parties + creator + list Store owner fields)
     const densified = await getOrderDetailForPage(
       { id: session.id, role: session.role },
       order.id,
@@ -413,6 +414,18 @@ export async function POST(request: NextRequest) {
       { status: 201 },
     );
   } catch (error) {
+    if (isDiscountValidationError(error)) {
+      logger.warn("Invalid order discount", {
+        error: error instanceof Error ? error.message : error,
+      });
+      return NextResponse.json(
+        {
+          error:
+            error instanceof Error ? error.message : "Invalid discount amount",
+        },
+        { status: 400 },
+      );
+    }
     logger.error("Error creating order:", error);
     return NextResponse.json(
       {

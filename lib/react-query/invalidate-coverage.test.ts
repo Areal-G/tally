@@ -4,12 +4,12 @@
  * invalidate-all registry, per-route Redis invalidation (31 routes), spec/exempt
  * completeness, update detail touch, delete cancel/remove.
  * Dynamic test count varies when inline-fetch components change (e.g. AdminSidebar
- * logout fetch removed REQ-0094 → 205 vs prior 206).
+ * Logout fetch removed → 205 vs prior 206).
  * Run: npm run test:invalidate
  */
 
 import { readFileSync, readdirSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative, sep } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = process.cwd();
@@ -51,6 +51,7 @@ const API_WRITE_ROUTE_INVALIDATION_SPEC: Record<string, readonly string[]> = {
   "app/api/products/import/route.ts": ["scheduleInvalidateImportCaches"],
   "app/api/products/image/route.ts": ["scheduleInvalidateProductCaches"],
   "app/api/products/qr-code/route.ts": ["scheduleInvalidateProductCaches"],
+  "app/api/products/barcode/route.ts": ["scheduleInvalidateProductCaches"],
   "app/api/categories/route.ts": ["scheduleInvalidateCategoryCaches"],
   "app/api/suppliers/route.ts": ["scheduleInvalidateSupplierCaches"],
   "app/api/orders/route.ts": ["invalidateOnOrderChange"],
@@ -63,6 +64,11 @@ const API_WRITE_ROUTE_INVALIDATION_SPEC: Record<string, readonly string[]> = {
   "app/api/stock-allocations/route.ts": ["scheduleInvalidateStockAllocationCaches"],
   "app/api/stock-allocations/[id]/route.ts": ["scheduleInvalidateStockAllocationCaches"],
   "app/api/stock-transfers/route.ts": ["scheduleInvalidateStockAllocationCaches"],
+  // Inventory operations — receiving, adjustments, posted counts and restocked returns move stock
+  "app/api/purchase-orders/[id]/route.ts": ["scheduleInvalidateStockAllocationCaches"],
+  "app/api/stock-movements/route.ts": ["scheduleInvalidateStockAllocationCaches"],
+  "app/api/stock-counts/[id]/route.ts": ["scheduleInvalidateStockAllocationCaches"],
+  "app/api/returns/[id]/route.ts": ["scheduleInvalidateStockAllocationCaches"],
   "app/api/product-reviews/route.ts": ["scheduleInvalidateProductReviewCaches"],
   "app/api/product-reviews/[id]/route.ts": ["scheduleInvalidateProductReviewCaches"],
   "app/api/support-tickets/route.ts": ["scheduleInvalidateSupportTicketCaches"],
@@ -115,6 +121,10 @@ const API_WRITE_EXEMPT = new Set([
   "app/api/shipping/rates/route.ts",
   "app/api/notifications/route.ts",
   "app/api/email/queue/process/route.ts",
+  // Create drafts/requests only (no stock change, nothing Redis-cached) — stock writes are in [id] routes
+  "app/api/purchase-orders/route.ts",
+  "app/api/stock-counts/route.ts",
+  "app/api/returns/route.ts",
 ]);
 
 const SERVER_INVALIDATE_PATTERNS = [
@@ -137,7 +147,7 @@ const SERVER_INVALIDATE_PATTERNS = [
   "scheduleInvalidateImportCaches",
   "scheduleInvalidateAllServerCaches",
   "invalidateCache(",
-  /** REQ-0209 — confirm-session / webhook delegate Redis clear inside helper */
+  /** Confirm-session / webhook delegate Redis clear inside helper */
   "confirmCheckoutSessionById",
 ];
 
@@ -209,7 +219,7 @@ describe("mutation invalidation coverage (components using hooks)", () => {
   );
 
   for (const absPath of componentFiles) {
-    const rel = relative(ROOT, absPath);
+    const rel = relative(ROOT, absPath).split(sep).join("/");
     const content = readFileSync(absPath, "utf8");
     const usesMutate =
       content.includes(".mutate(") || content.includes("mutateAsync(");
@@ -234,7 +244,7 @@ describe("mutation invalidation coverage (inline fetch CRUD components)", () => 
   );
 
   for (const absPath of componentFiles) {
-    const rel = relative(ROOT, absPath);
+    const rel = relative(ROOT, absPath).split(sep).join("/");
     const content = readFileSync(absPath, "utf8");
     if (!DIRECT_FETCH_WRITE.test(content)) continue;
 
@@ -360,7 +370,7 @@ describe("API write routes — spec/exempt completeness", () => {
   const routeFiles = walkFiles(API_DIR, (n) => n === "route.ts");
 
   for (const absPath of routeFiles) {
-    const rel = relative(ROOT, absPath);
+    const rel = relative(ROOT, absPath).split(sep).join("/");
     const content = readFileSync(absPath, "utf8");
     if (!hasWriteHandler(content)) continue;
 
@@ -374,7 +384,7 @@ describe("API write routes server cache invalidation", () => {
   const routeFiles = walkFiles(API_DIR, (n) => n === "route.ts");
 
   for (const absPath of routeFiles) {
-    const rel = relative(ROOT, absPath);
+    const rel = relative(ROOT, absPath).split(sep).join("/");
     const content = readFileSync(absPath, "utf8");
     if (!hasWriteHandler(content)) continue;
 
@@ -456,7 +466,7 @@ describe("invalidateAfterOrderGraphChange", () => {
   for (const rel of orderGraphPages) {
     it(`${rel} uses Stripe return hook or invalidateAfterOrderGraphChange`, () => {
       const content = readRepoFile(rel);
-      // REQ-0209 — payment return via useStripeCheckoutReturn (invalidates inside hook)
+      // Payment return via useStripeCheckoutReturn (invalidates inside hook)
       const ok =
         content.includes("useStripeCheckoutReturn") ||
         content.includes("invalidateAfterOrderGraphChange");
@@ -472,7 +482,7 @@ describe("invalidateAfterOrderGraphChange", () => {
   });
 });
 
-describe("invalidateAfterCatalogChange (REQ-0133)", () => {
+describe("invalidateAfterCatalogChange", () => {
   it("invalidates catalog detail keys embedded in product/category/supplier pages", () => {
     const content = readRepoFile("lib/react-query/invalidate-all.ts");
     expect(content).toContain("invalidateAfterCatalogChange");

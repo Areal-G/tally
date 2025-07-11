@@ -3,7 +3,6 @@
  * Skeleton loading component that matches exact badge dimensions
  */
 
-import React from "react";
 import { Skeleton } from "./skeleton";
 import { cn } from "@/lib/utils";
 

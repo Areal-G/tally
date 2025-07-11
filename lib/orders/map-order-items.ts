@@ -1,5 +1,5 @@
 /**
- * REQ-0063 — shared Prisma order-item → API OrderItem mapper.
+ * Shared Prisma order-item → API OrderItem mapper.
  * Used by order detail transform and invoice detail enrichment (linked order line items).
  */
 
@@ -34,7 +34,7 @@ export type MapOrderItemsContext = {
   total: number;
 };
 
-/** Map Prisma order items to the shared OrderItem JSON shape (incl. REQ-0059 imageUrl). */
+/** Map Prisma order items to the shared OrderItem JSON shape (incl. imageUrl). */
 export function mapOrderItemsFromRaw(
   items: OrderItemRaw[] | undefined,
   orderContext?: MapOrderItemsContext,

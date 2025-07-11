@@ -1,5 +1,5 @@
 /**
- * REQ-0211 — Merge linked-order densify onto an invoice create/update row
+ * Merge linked-order densify onto an invoice create/update row
  * from a cached Order (detail or list). Keeps Invoice table Order # / badges
  * instant before invalidate refetch returns the enriched GET list shape.
  */

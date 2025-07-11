@@ -1,8 +1,8 @@
 /**
- * REQ-0068 — per-warehouse order picking sync between OrderItem and StockAllocation.
+ * Per-warehouse order picking sync between OrderItem and StockAllocation.
  * Reserves allocation rows on pending create; fulfills/restores on confirm/cancel.
  *
- * REQ-0102 reservation invariant:
+ * Reservation invariant:
  * - Warehouse-pick orders → `StockAllocation.reservedQuantity` only
  * - No warehouse pick (greedy fallback) → `Product.reservedQuantity` only
  * These paths are disjoint; catalog reconcile sums both for the reserved floor.

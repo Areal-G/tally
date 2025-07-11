@@ -1,5 +1,5 @@
 /**
- * REQ-0085 — warehouse KPIs, stock pie, and category mix from allocation rows (no DB).
+ * Warehouse KPIs, stock pie, and category mix from allocation rows (no DB).
  * Client-safe: imported by WarehouseDetailPage for live stock CRUD updates.
  */
 
@@ -58,7 +58,7 @@ export function computeWarehouseInsights(
 }
 
 /**
- * REQ-0115 — map insights KPIs to warehouse detail stat cards; null when no rows.
+ * Map insights KPIs to warehouse detail stat cards; null when no rows.
  */
 export function mapWarehouseStockSummary(
   insights: WarehouseInsights,

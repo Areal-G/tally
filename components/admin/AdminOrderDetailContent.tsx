@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * REQ-0208 / REQ-0209 — Admin order detail parity with `/orders/[id]`:
+ * Admin order detail parity with `/orders/[id]`:
  * read-only status badges; OrderDialog for edits; shared OrderDetailActionBar
  * (Cancel unpaid|partial; Process Refund when fully paid); no Customer/Invoice side cards.
  */
 
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -54,7 +54,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { Order } from "@/types";
 import type { OrderReviewContext } from "@/lib/server/order-review-context-data";
 import { cn } from "@/lib/utils";
-import { toDateOrNull } from "@/lib/format";
+import { formatStableCurrency, toDateOrNull } from "@/lib/format";
 import { OrderTrackingInfo, ShippingManagement } from "@/components/shipping";
 import { AlertDialogWrapper } from "@/components/dialogs";
 import {
@@ -92,13 +92,13 @@ export type AdminOrderDetailContentProps = {
   /** Back link target (e.g. "/admin/orders") */
   backHref?: string;
   initialOrder?: Order;
-  /** REQ-0026 — batch SSR review context for order line items */
+  /** Batch SSR review context for order line items */
   initialReviewContext?: OrderReviewContext;
 };
 
 /**
  * Admin Order Detail — view and manage a single order.
- * Status/fields via OrderDialog; footer actions via OrderDetailActionBar (REQ-0208).
+ * Status/fields via OrderDialog; footer actions via OrderDetailActionBar.
  */
 export default function AdminOrderDetailContent({
   backHref = "/admin/orders",
@@ -106,7 +106,6 @@ export default function AdminOrderDetailContent({
   initialReviewContext,
 }: AdminOrderDetailContentProps = {}) {
   const params = useParams();
-  const searchParams = useSearchParams();
   const orderId = params?.id as string;
   const { toast } = useToast();
   // Log-proven: admin must pass fallbackPath so Back always returns to list (not router.back history)
@@ -119,7 +118,7 @@ export default function AdminOrderDetailContent({
   const { isError, error } = orderQuery;
 
   useSyncSsrQueryData(queryKeys.orders.detail(orderId), initialOrder);
-  // REQ-0209 — confirm session on return (webhook may hit production, not localhost)
+  // Confirm session on return (webhook may hit production, not localhost)
   useStripeCheckoutReturn({ entityId: orderId, entity: "order" });
 
   const updateOrderMutation = useUpdateOrder();
@@ -243,7 +242,7 @@ export default function AdminOrderDetailContent({
             <ArrowLeft className="h-4 w-4" />
             Back to Orders
           </Button>
-          <div className="rounded-[20px] border border-gray-200/50 dark:border-white/10 bg-white/60 dark:bg-white/5 backdrop-blur-md p-4 sm:p-6 text-center">
+          <div className="rounded-xl border border-gray-200/50 dark:border-white/10 bg-white/60 dark:bg-white/5 p-4 sm:p-6 text-center">
             <p className="text-muted-foreground">
               {error instanceof Error ? error.message : "Order not found"}
             </p>
@@ -265,7 +264,7 @@ export default function AdminOrderDetailContent({
             <ArrowLeft className="h-4 w-4" />
             Back to Orders
           </Button>
-          <div className="rounded-[20px] border border-gray-200/50 dark:border-white/10 bg-white/60 dark:bg-white/5 backdrop-blur-md p-4 sm:p-6 text-center">
+          <div className="rounded-xl border border-gray-200/50 dark:border-white/10 bg-white/60 dark:bg-white/5 p-4 sm:p-6 text-center">
             <p className="text-muted-foreground">
               The order you are looking for does not exist or was removed.
             </p>
@@ -279,7 +278,7 @@ export default function AdminOrderDetailContent({
   const isRefunding = deleteOrderMutation.isPending && refundDialogOpen;
   const isCancelling = deleteOrderMutation.isPending && cancelDialogOpen;
 
-  // REQ-0136 — never fall back to `new Date()` ("now"): SSR/client render at different
+  // Never fall back to `new Date()` ("now"): SSR/client render at different
   // instants and that non-determinism is a classic hydration-mismatch source.
   const createdAt = toDateOrNull(order?.createdAt);
   const updatedAt = order?.updatedAt ? new Date(order.updatedAt) : null;
@@ -289,7 +288,7 @@ export default function AdminOrderDetailContent({
       order?.trackingNumber &&
       (order.status === "shipped" || order.status === "delivered")
     );
-  // REQ-0211 — hide clickable Auto Generate until confirm or money collected
+  // Hide clickable Auto Generate until confirm or money collected
   const canShipLabel = canGenerateShippingLabel(order);
   const shipBlockedHint = shippingLabelBlockedReason(order);
 
@@ -303,7 +302,7 @@ export default function AdminOrderDetailContent({
           dataLoading={dataLoading}
         />
 
-        {/* REQ-0146 — equal-height status stack + tracking when shipped; REQ-0208 read-only badges */}
+        {/* Equal-height status stack + tracking when shipped; read-only badges */}
         {hasShipping && order ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-stretch">
             <OrderStatusBadges
@@ -335,7 +334,7 @@ export default function AdminOrderDetailContent({
           <OrderSummaryCard order={order} dataLoading={dataLoading} />
         </div>
 
-        {/* REQ-0208 — Info | Parties + ShipAddr + Shipping card (invoice slot) */}
+        {/* Info | Parties + ShipAddr + Shipping card (invoice slot) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4 items-start">
           <div className="flex flex-col gap-2 sm:gap-4 min-w-0">
             <GlassCard variant="orange">
@@ -405,7 +404,8 @@ export default function AdminOrderDetailContent({
                         label="Payment:"
                         tone="amber"
                       >
-                        Partial payment — total ${order.total.toFixed(2)}
+                        Partial payment — total{" "}
+                        {formatStableCurrency(order.total)}
                         {order.invoiceForOrder && (
                           <>
                             {" · "}
@@ -426,22 +426,22 @@ export default function AdminOrderDetailContent({
                     icon={Calendar}
                     label="Created:"
                     tone="orange"
-                    loading={dataLoading}
+                    loading={dataLoading && !createdAt}
                   >
-                    {!dataLoading && createdAt && (
+                    {createdAt ? (
                       <ClientDateTime date={createdAt} semantic="created" />
-                    )}
+                    ) : null}
                   </DetailInfoRow>
                   {(dataLoading || updatedAt) && (
                     <DetailInfoRow
                       icon={Calendar}
                       label="Updated:"
                       tone="amber"
-                      loading={dataLoading}
+                      loading={dataLoading && !updatedAt}
                     >
-                      {!dataLoading && updatedAt && (
+                      {updatedAt ? (
                         <ClientDateTime date={updatedAt} semantic="updated" />
-                      )}
+                      ) : null}
                     </DetailInfoRow>
                   )}
                 </DetailInfoRowGroup>
@@ -483,7 +483,7 @@ export default function AdminOrderDetailContent({
               isAdminRole
             />
             <OrderShippingAddressCard order={order} dataLoading={dataLoading} />
-            {/* REQ-0208 / REQ-0211 — Shipping & Tracking; Auto Generate gated */}
+            {/* Shipping & Tracking; Auto Generate gated */}
             {!dataLoading &&
               order &&
               order.status !== "cancelled" &&

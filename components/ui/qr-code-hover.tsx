@@ -31,7 +31,7 @@ interface QRCodeHoverProps {
    * Size of QR code in pixels
    */
   size?: number;
-  /** REQ-0127 — icon-only trigger (e.g. product table stock column) */
+  /** Icon-only trigger (e.g. product table stock column) */
   iconOnly?: boolean;
 }
 
@@ -51,7 +51,7 @@ export function QRCodeHover({
   }, []);
 
   // Don't render anything until mounted to prevent hydration mismatch
-  // REQ-0139 — light sky border matching QR icon hue
+  // Light sky border matching QR icon hue
   const iconOnlyBoxClass =
     "inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg border border-sky-400/25 bg-sky-50/80 dark:border-sky-400/30 dark:bg-sky-950/30";
 
@@ -90,7 +90,7 @@ export function QRCodeHover({
       {/* Dialog — same glassmorphic style as Product/Category dialogs */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
-          className="p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto border-violet-400/30 dark:border-violet-400/30 shadow-[0_30px_80px_rgba(139,92,246,0.35)] dark:shadow-[0_30px_80px_rgba(139,92,246,0.25)] bg-gradient-to-br from-gray-700/98 via-gray-700/95 to-gray-700/98 dark:from-black/20 dark:via-black/10 dark:to-black/5"
+          className="p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto border-violet-400/30 dark:border-violet-400/30 bg-gray-700/98 dark:bg-black/20 "
           onOpenAutoFocus={(e) => e.preventDefault()}
         >
           <DialogHeader>

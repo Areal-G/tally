@@ -5,12 +5,11 @@
 
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Loader2,
   Package,
   Calendar,
   Tag,
@@ -19,7 +18,6 @@ import {
   ShoppingCart,
   BarChart3,
   QrCode,
-  Image as ImageIcon,
   Edit,
   Copy,
   Trash2,
@@ -29,6 +27,9 @@ import {
   Hash,
   Activity,
   Layers,
+  Barcode,
+  BellRing,
+  History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,7 +38,6 @@ import {
   WarehouseTypeBadge,
   productStockAvailableTextClass,
 } from "@/lib/ui/semantic-badges";
-import { Separator } from "@/components/ui/separator";
 import {
   useProduct,
   useCreateProduct,
@@ -72,7 +72,6 @@ import {
   DetailInfoRowGroup,
   GlassCard,
   GlassCardBody,
-  GLASS_CARD_VARIANT_CONFIG as variantConfig,
 } from "@/components/shared";
 import { CatalogDetailRecentOrdersList } from "@/components/shared/catalog-detail/CatalogDetailRecentOrdersList";
 import type { CatalogDetailRecentOrderItem } from "@/types/catalog-detail-lists";
@@ -80,7 +79,7 @@ import { findProductForecast } from "@/lib/forecasting/entity-forecast";
 import { enrichProductInsightsWithWarehouseStock } from "@/lib/insights/product-insights-enrich";
 import { sumAllocatedQuantity } from "@/lib/insights/warehouse-stock-aggregate";
 import { formatCatalogCommitWarehouseHint } from "@/lib/stock-allocation/catalog-allocation-copy";
-import { toDateOrNull } from "@/lib/format";
+import { formatStableCurrency, toDateOrNull } from "@/lib/format";
 import {
   computeCommittedQuantity,
   getDisplayCommittedQuantity,
@@ -106,7 +105,7 @@ import type {
   ForecastingSummary,
 } from "@/types";
 import type { ReviewEligibilityResult } from "@/lib/server/product-reviews-detail-data";
-import { cn } from "@/lib/utils";
+import { cn, EMPTY_LIST } from "@/lib/utils";
 import {
   TYPO_BODY_MUTED,
   TYPO_CARD_TITLE,
@@ -119,6 +118,7 @@ import {
 import { getWarehouseTypeIcon } from "@/lib/ui/warehouse-type-styles";
 import { CARD_EMPTY_MESSAGE_CLASS } from "@/lib/ui/card-empty-styles";
 import { SafeImage } from "@/components/ui/safe-image";
+import QRCode from "qrcode";
 import ProductFormDialog from "@/components/products/ProductFormDialog";
 import { AlertDialogWrapper } from "@/components/dialogs";
 import ProductReviewsSection from "@/components/product-reviews/ProductReviewsSection";
@@ -126,12 +126,12 @@ import ProductReviewsSection from "@/components/product-reviews/ProductReviewsSe
 export type ProductDetailPageProps = {
   embedInAdmin?: boolean;
   initialProduct?: Product;
-  /** REQ-0026 — SSR reviews for product detail */
+  /** SSR reviews for product detail */
   initialReviews?: ProductReview[];
   initialEligibility?: ReviewEligibilityResult;
-  /** REQ-0066 — per-warehouse stock breakdown */
+  /** Per-warehouse stock breakdown */
   initialStockByProduct?: StockAllocation[];
-  /** REQ-0084 — cache-read forecast for admin embed (non-blocking SSR). */
+  /** Cache-read forecast for admin embed (non-blocking SSR). */
   initialForecasting?: ForecastingSummary | null;
 };
 
@@ -154,12 +154,33 @@ export default function ProductDetailPage({
   // Fetch product details
   const productQuery = useProduct(productId, initialProduct);
   const product = productQuery.data;
+
+  // Products without a stored QR image (e.g. no ImageKit locally) get one drawn in the
+  // browser from the same payload the API encodes: { productId, sku, name }.
+  const [generatedQr, setGeneratedQr] = useState<string | null>(null);
+  useEffect(() => {
+    if (!product || product.qrCodeUrl) return;
+    let cancelled = false;
+    QRCode.toDataURL(
+      JSON.stringify({ productId: product.id, sku: product.sku, name: product.name }),
+      { width: 480, margin: 1, color: { dark: "#141629", light: "#ffffff" } },
+    )
+      .then((url) => {
+        if (!cancelled) setGeneratedQr(url);
+      })
+      .catch(() => {
+        if (!cancelled) setGeneratedQr(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [product]);
   const dataLoading = isDataSlotLoading(productQuery, initialProduct);
   const stockByProductQuery = useStockByProduct(
     productId,
     initialStockByProduct,
   );
-  const warehouseAllocations = stockByProductQuery.data ?? [];
+  const warehouseAllocations = stockByProductQuery.data ?? EMPTY_LIST;
   const warehouseStockLoading = isDataSlotUnsettled(
     stockByProductQuery,
     initialStockByProduct,
@@ -232,25 +253,29 @@ export default function ProductDetailPage({
     () => sumAllocatedQuantity(warehouseAllocations),
     [warehouseAllocations],
   );
-  // REQ-0105 — shared display helper; warehouse fallback when TanStack lags stock hook
+  // When stock rows are loaded, derive committed from
+  // allocations (instant after reserve); product.committedQuantity alone can lag.
   const displayCommitted = useMemo(() => {
-    if (product?.committedQuantity != null) {
-      return getDisplayCommittedQuantity(product);
-    }
     const allocationReservedSum = warehouseAllocations.reduce(
       (sum, row) => sum + row.reservedQuantity,
       0,
     );
-    return computeCommittedQuantity(
-      product?.reservedQuantity ?? 0,
-      allocationReservedSum,
-    );
+    if (warehouseAllocations.length > 0) {
+      return computeCommittedQuantity(
+        product?.reservedQuantity ?? 0,
+        allocationReservedSum,
+      );
+    }
+    if (product?.committedQuantity != null) {
+      return getDisplayCommittedQuantity(product);
+    }
+    return computeCommittedQuantity(product?.reservedQuantity ?? 0, 0);
   }, [product, warehouseAllocations]);
   const catalogAvailableQty = useMemo(() => {
     if (catalogQuantity == null) return undefined;
     return Math.max(0, catalogQuantity - displayCommitted);
   }, [catalogQuantity, displayCommitted]);
-  /** REQ-0138 — structured summary for colored CatalogAllocationSummaryText */
+  /** Structured summary for colored CatalogAllocationSummaryText */
   const allocationSummaryParts = useMemo(() => {
     if (catalogQuantity == null) return null;
     return {
@@ -295,7 +320,7 @@ export default function ProductDetailPage({
         productName: product.name ?? "",
         productSku: product.sku ?? null,
         productImageUrl: product.imageUrl ?? null,
-        // REQ-0143 — prefer SSR owner/category/invoice; fall back for older cache
+        // Prefer SSR owner/category/invoice; fall back for older cache
         owner:
           row.owner ??
           (product.creator
@@ -389,8 +414,8 @@ export default function ProductDetailPage({
     );
   }
 
-  // Format dates — REQ-0021 shell-first
-  // REQ-0136 — never fall back to `new Date()` ("now"): SSR/client render at different
+  // Format dates — shell-first
+  // Never fall back to `new Date()` ("now"): SSR/client render at different
   // instants and that non-determinism is a classic hydration-mismatch source.
   const createdAt = toDateOrNull(product?.createdAt);
   const updatedAt = product?.updatedAt ? new Date(product?.updatedAt) : null;
@@ -480,8 +505,8 @@ export default function ProductDetailPage({
             }
           />
 
-          {/* REQ-0139 — Status/Stock/Price stretch to image/QR column height */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-4 items-stretch">
+          {/* Status/Stock/Price stretch to image/QR column height */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4 items-stretch">
             <div className="flex flex-col gap-2 min-w-0 h-full">
               <GlassCard variant="emerald" className="flex-1 flex flex-col">
                 <GlassCardBody className="flex-1 flex flex-col justify-center">
@@ -544,39 +569,11 @@ export default function ProductDetailPage({
                     Price
                   </p>
                   <p className="text-sm sm:text-base font-medium text-gray-700 dark:text-white">
-                    ${product?.price.toFixed(2)}
+                    {formatStableCurrency(product?.price ?? 0)}
                   </p>
                 </GlassCardBody>
               </GlassCard>
             </div>
-
-            <GlassCard variant="sky" className="h-full flex flex-col">
-              <GlassCardBody className="flex-1 flex flex-col">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-sky-300/30 bg-sky-100/50 dark:border-white/15 dark:bg-white/10">
-                    <ImageIcon className="h-4 w-4 text-gray-700 dark:text-white" />
-                  </div>
-                  <h3 className={TYPO_CARD_TITLE}>Product Image</h3>
-                </div>
-                {product?.imageUrl ? (
-                  <div className="relative w-full flex-1 min-h-64 rounded-xl overflow-hidden bg-white/50 dark:bg-white/5 border border-gray-300/20 dark:border-white/10">
-                    <SafeImage
-                      src={product?.imageUrl}
-                      alt={product?.name}
-                      fill
-                      className="object-contain"
-                      sizes="(max-width: 1024px) 100vw, 33vw"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full flex-1 min-h-64 rounded-xl bg-white/30 dark:bg-white/5 border border-gray-300/20 dark:border-white/10 flex items-center justify-center">
-                    <p className="text-gray-500 dark:text-white/80">
-                      No image available
-                    </p>
-                  </div>
-                )}
-              </GlassCardBody>
-            </GlassCard>
 
             <GlassCard variant="violet" className="h-full flex flex-col">
               <GlassCardBody className="flex-1 flex flex-col">
@@ -596,12 +593,17 @@ export default function ProductDetailPage({
                       sizes="(max-width: 1024px) 100vw, 33vw"
                     />
                   </div>
-                ) : (
-                  <div className="w-full flex-1 min-h-64 rounded-xl bg-white/30 dark:bg-white/5 border border-gray-300/20 dark:border-white/10 flex items-center justify-center">
-                    <p className="text-gray-500 dark:text-white/80">
-                      No QR code available
-                    </p>
+                ) : generatedQr ? (
+                  <div className="flex w-full flex-1 min-h-64 items-center justify-center rounded-xl border border-gray-300/20 bg-white p-4 dark:border-white/10">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- local data: URL */}
+                    <img
+                      src={generatedQr}
+                      alt={`QR Code for ${product?.sku}`}
+                      className="h-full max-h-56 w-auto object-contain"
+                    />
                   </div>
+                ) : (
+                  <div className="w-full flex-1 min-h-64 animate-pulse rounded-xl bg-[var(--bg-elevated)]" />
                 )}
               </GlassCardBody>
             </GlassCard>
@@ -694,22 +696,22 @@ export default function ProductDetailPage({
                       icon={Calendar}
                       label="Created:"
                       tone="teal"
-                      loading={dataLoading}
+                      loading={dataLoading && !createdAt}
                     >
-                      {!dataLoading && createdAt && (
+                      {createdAt ? (
                         <ClientDateTime date={createdAt} semantic="created" />
-                      )}
+                      ) : null}
                     </DetailInfoRow>
                     {(dataLoading || updatedAt) && (
                       <DetailInfoRow
                         icon={Calendar}
                         label="Updated:"
                         tone="sky"
-                        loading={dataLoading}
+                        loading={dataLoading && !updatedAt}
                       >
-                        {!dataLoading && updatedAt && (
+                        {updatedAt ? (
                           <ClientDateTime date={updatedAt} semantic="updated" />
-                        )}
+                        ) : null}
                       </DetailInfoRow>
                     )}
                     {!dataLoading && expirationDate && (
@@ -755,6 +757,31 @@ export default function ProductDetailPage({
                       >
                         {(product.quantity ?? 0) - displayCommitted}
                       </DetailInfoRow>
+                      <DetailInfoRow icon={BellRing} label="Reorder at:" tone="amber">
+                        {product.reorderPoint ?? 20}
+                        {product.reorderQuantity ? ` · order ${product.reorderQuantity}` : ""}
+                        {product.reorderPoint == null ? " (default)" : ""}
+                      </DetailInfoRow>
+                      {product.lotNumber && (
+                        <DetailInfoRow icon={Hash} label="Lot:" tone="sky">
+                          {product.lotNumber}
+                        </DetailInfoRow>
+                      )}
+                      {product.barcode && (
+                        <DetailInfoRow icon={Barcode} label="Barcode:" tone="violet">
+                          <span className="font-mono">{product.barcode}</span>
+                        </DetailInfoRow>
+                      )}
+                      {!isClientRole && !isSupplierRole && (
+                        <DetailInfoRow icon={History} label="History:" tone="violet">
+                          <Link
+                            href={`/stock-movements?productId=${product.id}`}
+                            className="text-[var(--accent-blue)] hover:underline"
+                          >
+                            View stock movements
+                          </Link>
+                        </DetailInfoRow>
+                      )}
                     </DetailInfoRowGroup>
                   )}
                   {!dataLoading && product?.deletedAt && (
@@ -825,7 +852,7 @@ export default function ProductDetailPage({
                   >
                     {!dataLoading && (
                       <span className="text-emerald-600 dark:text-emerald-400">
-                        ${stats.totalRevenue.toFixed(2)}
+                        {formatStableCurrency(stats.totalRevenue)}
                       </span>
                     )}
                   </DetailInfoRow>
@@ -846,7 +873,7 @@ export default function ProductDetailPage({
                     {!dataLoading && (
                       <span className="inline-flex flex-wrap items-baseline gap-x-1.5">
                         <span className="text-sky-600 dark:text-sky-400">
-                          ${(stats.totalValue ?? 0).toFixed(2)}
+                          {formatStableCurrency(stats.totalValue ?? 0)}
                         </span>
                         <span className={cn("text-xs", TYPO_BODY_MUTED)}>
                           (price × on-hand qty)
@@ -862,7 +889,7 @@ export default function ProductDetailPage({
           {insights && (
             <CatalogInsightsSection
               insights={insights}
-              // REQ-0221 — densify present → no metric pulse
+              // Densify present → no metric pulse
               dataLoading={false}
               isAdminRole={isAdminRole}
               forecastLoading={forecastLoading}
@@ -961,7 +988,7 @@ export default function ProductDetailPage({
                       return (
                         <div
                           key={row.id}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl border border-teal-200/30 dark:border-teal-400/10 bg-gradient-to-r from-teal-100/40 via-teal-50/20 to-transparent dark:from-teal-500/10 dark:via-teal-500/5 dark:to-transparent"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl border border-teal-200/30 dark:border-teal-400/10 bg-teal-100/40 dark:bg-teal-500/10 "
                         >
                           <div className="flex items-start gap-3 min-w-0 flex-1">
                             <div className="p-2 rounded-xl border border-teal-400/30 bg-teal-500/20 shrink-0">
@@ -1051,7 +1078,7 @@ export default function ProductDetailPage({
             </GlassCard>
           )}
 
-          {/* Recent Orders — always show card; empty state centered (REQ-0077) */}
+          {/* Recent Orders — always show card; empty state centered */}
           <GlassCard variant="rose">
             <GlassCardBody>
               <SectionTitleRow

@@ -1,5 +1,5 @@
 /**
- * REQ-0210 — Remaining charge for Pay dialog / Pay button.
+ * Remaining charge for Pay dialog / Pay button.
  * Prefer invoice.amountDue when positive; else total − amountPaid so partial
  * rows never show $0.00 due while money is still outstanding.
  */

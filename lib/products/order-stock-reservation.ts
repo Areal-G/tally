@@ -1,5 +1,5 @@
 /**
- * REQ-0103 — disjoint pending-order stock reservation (REQ-0102 AC6).
+ * Disjoint pending-order stock reservation.
  * Warehouse pick → allocation.reservedQuantity only.
  * No warehouse pick → product.reservedQuantity only.
  */

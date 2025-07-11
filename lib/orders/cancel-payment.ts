@@ -1,5 +1,5 @@
 /**
- * REQ-0208 / REQ-0211 — refund Stripe + set paymentStatus refunded only when money
+ * Refund Stripe + set paymentStatus refunded only when money
  * was collected (paid|partial). Confirmed+unpaid cancel keeps paymentStatus unpaid
  * (no refund; do not show Refunded badge).
  */

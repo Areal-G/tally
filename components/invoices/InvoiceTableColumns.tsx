@@ -1,8 +1,8 @@
 /**
- * REQ-0150 — Invoice table columns densified to match Order table:
+ * Invoice table columns densified to match Order table:
  * Invoice # (OrderTableInvoiceCell) · Order # (products + meta) · Status + statusAt · Total · Actions.
- * REQ-0151 — Order # row: OrderStatusBadge + PaymentStatusBadge + event dates inline.
- * REQ-0161 — HelpTooltip on dense column headers (Invoice # / Order # / Status / Total)
+ * Order # row: OrderStatusBadge + PaymentStatusBadge + event dates inline.
+ * HelpTooltip on dense column headers (Invoice # / Order # / Status / Total)
  */
 
 "use client";
@@ -22,12 +22,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ArrowUpDown, Boxes, Calendar, Package } from "lucide-react";
+import { ArrowUpDown, Boxes, Package } from "lucide-react";
 import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
 import Link from "next/link";
 import {
   CopyableText,
-  ClientDate,
   HelpTooltip,
   SemanticEventDate,
   PaymentMoneyBreakdown,
@@ -49,7 +48,7 @@ import {
 } from "@/lib/ui/order-invoice-column-tooltips";
 import { cn } from "@/lib/utils";
 
-const META_MUTED = "text-xs text-gray-500 dark:text-gray-300";
+const META_MUTED = "text-xs text-gray-600 dark:text-gray-300";
 
 type SortableHeaderProps = {
   column: Column<Invoice, unknown>;
@@ -123,7 +122,7 @@ export const createInvoiceColumns = (
   return [
     {
       accessorKey: "invoiceNumber",
-      // REQ-0161 — HelpTooltip sibling of sort (catalog Products pattern)
+      // HelpTooltip sibling of sort (catalog Products pattern)
       header: ({ column }) => (
         <div className="flex items-center gap-1">
           <SortableHeader column={column} label="Invoice #" />
@@ -202,7 +201,7 @@ export const createInvoiceColumns = (
             )}
             {showIssuedBy && (
               <span className={META_MUTED}>
-                {/* REQ-0159 — Store · issuer so client list does not look like Admin is the customer */}
+                {/* Store · issuer so client list does not look like Admin is the customer */}
                 {formatStoreOwnerLabel(
                   invoice.issuedByName,
                   invoice.issuedByEmail,
@@ -257,7 +256,7 @@ export const createInvoiceColumns = (
 
         return (
           <div className="flex flex-col gap-0.5 min-w-0 max-w-[320px]">
-            {/* REQ-0151 — ORD-# · status · payment (+ dates) */}
+            {/* ORD-# · created date on row 1; badges on row 2 */}
             <div className="flex flex-wrap items-center gap-1.5 min-w-0">
               <CopyableText value={orderNumber}>
                 <Link
@@ -268,13 +267,27 @@ export const createInvoiceColumns = (
                   {orderNumber}
                 </Link>
               </CopyableText>
-              {orderStatus ? (
-                <OrderStatusBadge status={orderStatus} size="compact" />
-              ) : null}
-              {paymentStatus ? (
-                <PaymentStatusBadge status={paymentStatus} size="compact" />
+              {orderCreatedAt ? (
+                <>
+                  <span aria-hidden className={META_MUTED}>·</span>
+                  <SemanticEventDate
+                    date={orderCreatedAt}
+                    kind="created"
+                    mode="date"
+                  />
+                </>
               ) : null}
             </div>
+            {(orderStatus || paymentStatus) ? (
+              <div className="flex flex-wrap items-center gap-1.5 min-w-0">
+                {orderStatus ? (
+                  <OrderStatusBadge status={orderStatus} size="compact" />
+                ) : null}
+                {paymentStatus ? (
+                  <PaymentStatusBadge status={paymentStatus} size="compact" />
+                ) : null}
+              </div>
+            ) : null}
             {(orderStatusAt || showPaymentEvent) && (
               <div className="flex flex-wrap items-center gap-1.5 min-w-0">
                 {orderStatusAt ? (
@@ -312,7 +325,7 @@ export const createInvoiceColumns = (
                 />
                 {productLinks.map((p, i) => (
                   <span
-                    key={p.productId}
+                    key={`${p.productId}-${i}`}
                     className="inline-flex items-center gap-1 min-w-0"
                   >
                     {i > 0 ? (
@@ -350,13 +363,6 @@ export const createInvoiceColumns = (
               <span>
                 {unitCount} unit{unitCount !== 1 ? "s" : ""}
               </span>
-              {orderCreatedAt ? (
-                <>
-                  <span aria-hidden>·</span>
-                  <Calendar className="h-3 w-3 shrink-0" aria-hidden />
-                  <ClientDate date={orderCreatedAt} semantic="created" />
-                </>
-              ) : null}
             </div>
           </div>
         );

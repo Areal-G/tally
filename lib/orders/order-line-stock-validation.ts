@@ -1,5 +1,5 @@
 /**
- * REQ-0106/0110/0111 — shared order-line stock validation (client + server-safe).
+ * Shared order-line stock validation (client + server-safe).
  * Auto mode: catalog committed available (incl. unallocated pool).
  * Manual mode: per-warehouse quantity − reservedQuantity.
  */
@@ -14,7 +14,7 @@ import type { StockAllocation } from "@/types";
 /** Sentinel for auto-assign warehouse mode (Radix Select requires non-empty value). */
 export const AUTO_WAREHOUSE_VALUE = "__auto__";
 
-/** REQ-0126 — warehouse picker label: "Main Warehouse · 20 avail." */
+/** Warehouse picker label: "Main Warehouse · 20 avail." */
 export function formatWarehouseAvailLabel(
   name: string,
   available: number,
@@ -28,7 +28,7 @@ export type OrderLineAllocationRow = {
   reservedQuantity?: number | null;
   warehouse?: {
     name?: string | null;
-    /** REQ-0187 — for DialogWarehouseOptionRow type badge */
+    /** For DialogWarehouseOptionRow type badge */
     type?: string | null;
   } | null;
 };
@@ -36,7 +36,7 @@ export type OrderLineAllocationRow = {
 export type OrderLineStockProduct = {
   quantity: number;
   reservedQuantity?: number | null;
-  /** REQ-0110 — browse/list enrich; fallback when allocation cache empty */
+  /** Browse/list enrich; fallback when allocation cache empty */
   committedQuantity?: number;
 };
 
@@ -49,7 +49,7 @@ export type ValidateOrderLineStockInput = {
   warehouseId?: string | null;
   /** Override; when omitted, inferred via resolveOrderLineHasAllocations */
   hasAllocations?: boolean;
-  /** REQ-0110 — manual-pick error label */
+  /** Manual-pick error label */
   warehouseName?: string | null;
 };
 
@@ -67,7 +67,7 @@ export type OrderLineStockItem = {
   warehouseId?: string;
 };
 
-/** Map TanStack/API allocation rows for shared validation (REQ-0111). */
+/** Map TanStack/API allocation rows for shared validation. */
 export function mapStockAllocationsToOrderLineRows(
   rows: StockAllocation[] | undefined,
 ): OrderLineAllocationRow[] {
@@ -79,7 +79,7 @@ export function mapStockAllocationsToOrderLineRows(
   }));
 }
 
-/** Build validator input — centralizes committedQuantity + warehouse name (REQ-0111). */
+/** Build validator input — centralizes committedQuantity + warehouse name. */
 export function buildOrderLineStockValidationInput(
   product: OrderLineStockProduct,
   item: OrderLineStockItem,
@@ -107,7 +107,7 @@ export function buildOrderLineStockValidationInput(
   };
 }
 
-/** Validate one order line from product + item + allocation rows (REQ-0111). */
+/** Validate one order line from product + item + allocation rows. */
 export function validateOrderLineStockForItem(
   product: OrderLineStockProduct,
   item: OrderLineStockItem,
@@ -119,7 +119,7 @@ export function validateOrderLineStockForItem(
 }
 
 /**
- * Submit path — ensure allocation cache is fresh before validating (REQ-0111).
+ * Submit path — ensure allocation cache is fresh before validating.
  * Uses same queryKey/queryFn as useStockByProduct.
  */
 export async function ensureStockAllocationsAndValidate(
@@ -138,7 +138,7 @@ export async function ensureStockAllocationsAndValidate(
   );
 }
 
-/** Catalog-level available for auto-assign orders (REQ-0103 disjoint commitment). */
+/** Catalog-level available for auto-assign orders (disjoint commitment). */
 export function getOrderLineCatalogAvailable(
   catalogQty: number,
   productReserved: number,
@@ -154,7 +154,7 @@ export function getOrderLineCatalogAvailable(
 }
 
 /**
- * REQ-0110 — catalog available with committedQuantity fallback when cache empty.
+ * Catalog available with committedQuantity fallback when cache empty.
  */
 export function getOrderLineCatalogAvailableFromProduct(
   product: OrderLineStockProduct,
@@ -178,7 +178,7 @@ export function getOrderLineCatalogAvailableFromProduct(
   return Math.max(0, catalogQty - productReserved);
 }
 
-/** REQ-0110 — infer warehouse-tracked product before allocation cache loads. */
+/** Infer warehouse-tracked product before allocation cache loads. */
 export function resolveOrderLineHasAllocations(
   product: OrderLineStockProduct,
   allocationRows: OrderLineAllocationRow[],
@@ -197,7 +197,7 @@ export function getOrderLineWarehouseAvailable(
   return Math.max(0, pickQty - pickReserved);
 }
 
-/** Warehouse picker row for order-line manual override (REQ-0112 / REQ-0187). */
+/** Warehouse picker row for order-line manual override. */
 export type OrderLineWarehousePickOption = {
   warehouseId: string;
   name: string;

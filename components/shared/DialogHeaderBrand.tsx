@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0117 — consistent dialog header: icon tile + title + subtitle.
+ * Consistent dialog header: icon tile + title + subtitle.
  */
 
 import type { LucideIcon } from "lucide-react";

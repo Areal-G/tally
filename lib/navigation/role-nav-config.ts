@@ -1,5 +1,5 @@
 /**
- * Role-scoped navbar items + paths (REQ-0093, REQ-0094).
+ * Role-scoped navbar items + paths.
  * Single source for Navbar rendering and RouteWarmPrefetch RSC warm.
  */
 import { getAdminSidebarWarmPaths } from "@/lib/navigation/admin-nav-config";
@@ -40,7 +40,7 @@ const SUPPLIER_NAV_ITEMS: RoleNavItem[] = [
   { label: "Supplier Portal", path: "/supplier", hasDropdown: false },
   { label: "My Products", path: "/products", hasDropdown: false },
   { label: "View Orders", path: "/orders", hasDropdown: false },
-  // REQ-0204 — related invoices list (view-only detail via same /invoices/[id])
+  // Related invoices list (view-only detail via same /invoices/[id])
   { label: "Related Invoices", path: "/invoices", hasDropdown: false },
 ];
 
@@ -58,7 +58,7 @@ export function getNavPathsForRole(role: string | null | undefined): string[] {
   return getNavItemsForRole(role).map((item) => item.path);
 }
 
-/** Profile dropdown paths — all roles (REQ-0094). */
+/** Profile dropdown paths — all roles. */
 export const PROFILE_MENU_PATHS = [
   "/support-tickets",
   "/settings/email-preferences",

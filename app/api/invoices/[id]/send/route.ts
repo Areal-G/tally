@@ -9,7 +9,6 @@ import { logger } from "@/lib/logger";
 import { getInvoiceById, markInvoiceAsSent } from "@/prisma/invoice";
 import { withRateLimit, defaultRateLimits } from "@/lib/api/rate-limit";
 import { sendInvoiceEmail } from "@/lib/email/notifications";
-import { getOrderById } from "@/prisma/order";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { createInvoiceSentNotification } from "@/lib/notifications/in-app";
 import { scheduleInvalidateInvoiceCaches } from "@/lib/cache";

@@ -1,12 +1,13 @@
 "use client";
 
 /**
- * REQ-0152 — Paid / remaining / due money lines with semantic colors.
+ * Paid / remaining / due money lines with semantic colors.
  * Used in Invoice Total column and compact Order Total when mid-pay.
  */
 
 import { CircleDollarSign, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatStableCurrency } from "@/lib/format";
 
 export type PaymentMoneyBreakdownProps = {
   total: number;
@@ -30,7 +31,7 @@ export function PaymentMoneyBreakdown({
       ? Math.max(0, Number(amountDue) || 0)
       : Math.max(0, total - paid);
   const showBreakdown = paid > 0 || due > 0;
-  // REQ-0154 — table meta matches other column secondary lines (text-xs font-normal)
+  // Table meta matches other column secondary lines (text-xs font-normal)
   const isTable = variant === "table";
   const textSize = isTable ? "text-xs font-normal" : "text-sm";
 
@@ -44,7 +45,7 @@ export function PaymentMoneyBreakdown({
             : "text-sm sm:text-base font-medium text-gray-900 dark:text-gray-100",
         )}
       >
-        ${total.toFixed(2)}
+        {formatStableCurrency(total)}
       </span>
       {showBreakdown && (
         <>
@@ -56,7 +57,7 @@ export function PaymentMoneyBreakdown({
               )}
             >
               <CircleDollarSign className="h-3 w-3 shrink-0" aria-hidden />
-              Paid ${paid.toFixed(2)}
+              Paid {formatStableCurrency(paid)}
             </span>
           )}
           {due > 0 && (
@@ -67,7 +68,7 @@ export function PaymentMoneyBreakdown({
               )}
             >
               <Clock className="h-3 w-3 shrink-0" aria-hidden />
-              Due ${due.toFixed(2)}
+              Due {formatStableCurrency(due)}
             </span>
           )}
         </>

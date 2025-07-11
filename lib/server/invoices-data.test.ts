@@ -103,7 +103,7 @@ describe("getInvoicesForSupplierId", () => {
     ] as never);
   });
 
-  it("returns invoices for supplier orders and caches with supplierId key (REQ-0076)", async () => {
+  it("returns invoices for supplier orders and caches with supplierId key", async () => {
     vi.mocked(getOrdersContainingSupplierProducts).mockResolvedValue([
       { id: "ord-1" },
     ] as never);

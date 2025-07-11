@@ -1,5 +1,5 @@
 /**
- * Maps Prisma session user → app User for SSR AuthProvider hydration (REQ-0025).
+ * Maps Prisma session user → app User for SSR AuthProvider hydration.
  * Keeps navbar avatar (incl. RoboHash fallback) visible on first paint without client /api/auth/session.
  */
 import type { User as PrismaUser } from "@prisma/client";

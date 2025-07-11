@@ -1,7 +1,7 @@
 /**
  * Server-side support ticket detail fetch for SSR prefetch.
  * Mirrors GET /api/support-tickets/:id auth + response shape.
- * REQ-0024 · REQ-0191 — admin OR creator OR assignee (canMutateSupportTicket).
+ * Admin OR creator OR assignee (canMutateSupportTicket).
  */
 
 import { prisma } from "@/prisma/client";

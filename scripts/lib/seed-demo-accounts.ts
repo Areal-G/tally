@@ -1,5 +1,5 @@
 /**
- * REQ-0092 — shared accounts-only demo seed (users + global Test Supplier entity).
+ * Shared accounts-only demo seed (users + global Test Supplier entity).
  * Used by reset-demo-db (after wipe) and create-demo-accounts (incremental).
  */
 
@@ -139,7 +139,7 @@ export async function ensureTestSupplierEntity(
 
 /**
  * Fresh accounts-only seed after DB wipe: 3 users + Test Supplier entity.
- * Does not create catalog, orders, or invoices (REQ-0092).
+ * Does not create catalog, orders, or invoices.
  */
 export async function seedDemoAccountsOnly(
   prisma: PrismaClient,

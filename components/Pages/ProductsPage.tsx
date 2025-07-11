@@ -7,7 +7,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Navbar from "@/components/layouts/Navbar";
 import ProductList from "@/components/products/ProductList";
 import ClientProductList from "@/components/products/ClientProductList";
@@ -28,18 +28,18 @@ export type ProductsPageProps = {
   userRole?: string;
   /** Pre-select product owner when client lands from catalog link /products?ownerId= */
   initialOwnerId?: string;
-  /** SSR dashboard stats for admin/user stat cards (REQ-0025 P2) */
+  /** SSR dashboard stats for admin/user stat cards (P2) */
   initialStats?: DashboardStats;
   /** SSR supplier portal stats for supplier /products cards */
   initialSupplierPortal?: SupplierPortalDashboard | null;
-  /** REQ-0026 — SSR client browse meta + products */
+  /** SSR client browse meta + products */
   initialBrowseMeta?: ClientBrowseMeta;
   initialBrowseProducts?: ClientBrowseProductsResponse;
 };
 
 /**
  * Products page client component.
- * REQ-0021 — shell-first; SSR initialData passed to hooks and ProductList.
+ * Shell-first; SSR initialData passed to hooks and ProductList.
  */
 export default function ProductsPage({
   initialProducts,
@@ -64,7 +64,7 @@ export default function ProductsPage({
     setSelectedOwnerId(initialOwnerId);
   }, [initialOwnerId]);
 
-  /** Shallow URL sync — shareable deep link without RSC refetch (REQ-0027). */
+  /** Shallow URL sync — shareable deep link without RSC refetch. */
   const handleOwnerChange = useCallback((ownerId: string) => {
     setSelectedOwnerId(ownerId);
     replaceShallowSearchParam("ownerId", ownerId);

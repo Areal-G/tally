@@ -5,11 +5,11 @@
  * Initiates Stripe Checkout for orders or invoices
  */
 
-import React from "react";
 import { Button } from "@/components/ui/button";
 import { useCreateCheckout } from "@/hooks/queries";
 import { CreditCard, Loader2 } from "lucide-react";
 import type { CheckoutType } from "@/types";
+import { formatStableCurrency } from "@/lib/format";
 
 interface PaymentButtonProps {
   type: CheckoutType;
@@ -54,7 +54,7 @@ export default function PaymentButton({
       ) : (
         <>
           <CreditCard className="mr-2 h-4 w-4" />
-          Pay {amount ? `$${amount.toFixed(2)}` : "Now"}
+          Pay {amount ? formatStableCurrency(amount) : "Now"}
         </>
       )}
     </Button>

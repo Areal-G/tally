@@ -1,5 +1,5 @@
 /**
- * Admin sidebar nav config (REQ-0094).
+ * Admin sidebar nav config.
  * Single source for AdminSidebar hrefs and RouteWarmPrefetch admin RSC warm.
  */
 

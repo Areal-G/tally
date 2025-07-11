@@ -1,5 +1,5 @@
 /**
- * REQ-0164 / REQ-0166 — role-aware owner product list href (catalog detail + Parties & Roles).
+ * Role-aware owner product list href (catalog detail + Parties & Roles).
  * Admin → /admin/products?ownerId=; client/supplier/store owner → /products?ownerId=.
  */
 

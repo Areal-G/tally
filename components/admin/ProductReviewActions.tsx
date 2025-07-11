@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0182 — Product review table Actions (MoreVertical).
+ * Product review table Actions (MoreVertical).
  * View Details · Edit Review (dialog + allowStatusEdit) · Delete (confirm).
  * Invalidation/toasts via useDeleteProductReview / WriteEditReviewDialog update hook.
  */
@@ -61,7 +61,7 @@ export default function ProductReviewActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/5 backdrop-blur-md shadow-lg"
+          className="border border-white/10 bg-white/5 shadow-lg"
         >
           <DropdownMenuItem asChild>
             <Link href={detailHref} className="flex items-center gap-2">

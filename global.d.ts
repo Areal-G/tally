@@ -6,13 +6,7 @@
 // CSS side-effect imports (for global styles like import "./globals.css")
 // This allows TypeScript to recognize CSS files as valid imports
 declare module "*.css" {
-  const content: any;
-  export default content;
-}
-
-// SCSS side-effect imports
-declare module "*.scss" {
-  const content: any;
+  const content: { [className: string]: string };
   export default content;
 }
 

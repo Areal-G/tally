@@ -24,7 +24,7 @@ export interface StockAllocation {
     id: string;
     name: string;
     sku: string;
-    /** Product image for allocation row thumbnails (REQ-0059) */
+    /** Product image for allocation row thumbnails */
     imageUrl?: string | null;
     price?: number;
     /** Global product stock (not warehouse allocation qty) */
@@ -33,22 +33,22 @@ export interface StockAllocation {
     categoryName?: string | null;
     supplierId?: string | null;
     supplierName?: string | null;
-    /** REQ-0102 — soft-deleted product still visible on warehouse detail */
+    /** Soft-deleted product still visible on warehouse detail */
     deletedAt?: string | null;
     isArchived?: boolean;
     /** Derived when all product allocations are loaded */
     allocatedTotal?: number;
     unallocated?: number;
-    /** REQ-0114 — catalog-level order commitment for warehouse row hints */
+    /** Catalog-level order commitment for warehouse row hints */
     committedQuantity?: number;
     reservedQuantity?: number;
   };
   warehouse?: {
     id: string;
     name: string;
-    /** Warehouse active flag for product-detail inline badge (REQ-0077) */
+    /** Warehouse active flag for product-detail inline badge */
     status?: boolean;
-    /** REQ-0127 — address + type for product detail warehouse stock rows */
+    /** Address + type for product detail warehouse stock rows */
     address?: string | null;
     type?: string | null;
   };
@@ -117,6 +117,8 @@ export interface CreateStockTransferInput {
 export interface WarehouseStockSummary {
   warehouseId: string;
   warehouseName: string;
+  /** Warehouse type for BI breakdown label (e.g. "main", "storage") */
+  warehouseType?: string | null;
   totalProducts: number;
   totalQuantity: number;
   totalReserved: number;

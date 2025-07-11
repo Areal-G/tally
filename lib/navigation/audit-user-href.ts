@@ -1,6 +1,6 @@
 /**
- * REQ-0089 — admin-only user-management href (narrow use).
- * REQ-0165/0166 — detail audit Created by / Updated by for order, invoice, catalog:
+ * Admin-only user-management href (narrow use).
+ * Detail audit Created by / Updated by for order, invoice, catalog:
  * admin → user management; non-admin → /products?ownerId=.
  */
 

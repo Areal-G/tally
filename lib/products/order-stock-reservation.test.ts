@@ -1,5 +1,5 @@
 /**
- * REQ-0103 — disjoint order stock reservation tests.
+ * Disjoint order stock reservation tests.
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -74,7 +74,7 @@ describe("order-stock-reservation", () => {
     expect(mockReserveAllocation).not.toHaveBeenCalled();
   });
 
-  it("REQ-0106 auto-assign reserves catalog pool only (qty 40, no warehouse pick)", async () => {
+  it("auto-assign reserves catalog pool only (qty 40, no warehouse pick)", async () => {
     await reservePendingOrderLine({
       productId: "prod1",
       quantity: 40,

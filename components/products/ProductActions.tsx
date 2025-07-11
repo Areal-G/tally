@@ -170,7 +170,7 @@ export default function ProductsDropDown({
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/5 backdrop-blur-md shadow-lg"
+          className="border border-white/10 bg-white/5 shadow-lg"
         >
           <DropdownMenuItem asChild>
             <Link

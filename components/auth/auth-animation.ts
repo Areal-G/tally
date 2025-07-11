@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 
-/** Base stagger step between auth entrance blocks (ms). REQ-0030 */
+/** Base stagger step between auth entrance blocks (ms). */
 export const AUTH_STAGGER_MS = 80;
 
 /** Form column starts slightly after first promo card. */

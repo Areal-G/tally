@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { shouldDeferRadixSelectMount } from "./use-deferred-radix-select";
 
-describe("shouldDeferRadixSelectMount (REQ-0198)", () => {
+describe("shouldDeferRadixSelectMount", () => {
   it("does not defer on first mount (no prior path)", () => {
     expect(shouldDeferRadixSelectMount(undefined, "/orders")).toBe(false);
   });

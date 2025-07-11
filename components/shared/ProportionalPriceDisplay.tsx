@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * REQ-0116 — list-price strikethrough + adjusted line amount when order fees apply.
- * REQ-0149 — final amount text-sm sm:text-base; strike text-xs sm:text-sm (all call sites).
+ * List-price strikethrough + adjusted line amount when order fees apply.
+ * Final amount text-sm sm:text-base; strike text-xs sm:text-sm (all call sites).
  */
 
-import React from "react";
 import { cn } from "@/lib/utils";
+import { formatStableCurrency } from "@/lib/format";
 
 export type ProportionalPriceDisplayProps = {
   /** Catalog/list line subtotal before tax/shipping/discount. */
@@ -14,7 +14,7 @@ export type ProportionalPriceDisplayProps = {
   /** Adjusted share of order.total; defaults to listAmount when omitted. */
   adjustedAmount?: number;
   /**
-   * @deprecated REQ-0149 — typography is unified; kept for call-site compat.
+   * @deprecated typography is unified; kept for call-site compat.
    */
   size?: "sm" | "md";
   className?: string;
@@ -28,12 +28,12 @@ export const PROPORTIONAL_PRICE_FINAL_CLASS = "text-sm sm:text-base";
 export const PROPORTIONAL_PRICE_STRIKE_CLASS = "text-xs sm:text-sm";
 
 function formatMoney(amount: number): string {
-  return `$${Number(amount).toFixed(2)}`;
+  return formatStableCurrency(Number(amount));
 }
 
 /**
  * Dual-price (strike + final) only when list is greater than adjusted (discount).
- * REQ-0146 — never strike a lower list when tax/shipping makes adjusted higher.
+ * Never strike a lower list when tax/shipping makes adjusted higher.
  */
 export function shouldShowAdjustedPrice(
   listAmount: number,

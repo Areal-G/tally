@@ -1,6 +1,6 @@
 /**
  * Supplier read-only access gates for catalog entity detail pages.
- * REQ-0029 — Option B: suppliers view category/supplier detail when tied to assigned products.
+ * Option B: suppliers view category/supplier detail when tied to assigned products.
  */
 
 import { getSupplierByUserId } from "@/prisma/supplier";

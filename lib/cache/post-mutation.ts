@@ -43,7 +43,7 @@ const ORDER_GRAPH_PATTERNS = [
 
 /**
  * Invoice CRUD / send / reminders / mark-paid stock fulfill.
- * REQ-0135: include stock-allocation — paid invoices call fulfillPendingOrderLines;
+ * Include stock-allocation — paid invoices call fulfillPendingOrderLines;
  * omitting it left TanStack refill from stale Redis → UI revert.
  */
 const INVOICE_PATTERNS = [
@@ -85,7 +85,7 @@ const USER_PATTERNS = [
 
 const NOTIFICATION_PATTERNS = [cacheKeys.notifications.pattern] as const;
 
-/** REQ-0135: align with USER — register/OAuth must clear admin portal overviews. */
+/** Align with USER — register/OAuth must clear admin portal overviews. */
 const AUTH_PATTERNS = [
   cacheKeys.userManagement.pattern,
   cacheKeys.sessions.pattern,
@@ -103,7 +103,7 @@ const SYSTEM_CONFIG_PATTERNS = [
   "forecasting:*",
 ] as const;
 
-/** REQ-0135: product import creates catalog qty — clear portals like PRODUCT_PATTERNS. */
+/** Product import creates catalog qty — clear portals like PRODUCT_PATTERNS. */
 const IMPORT_PATTERNS = [
   cacheKeys.products.pattern,
   cacheKeys.history.pattern,
@@ -130,7 +130,7 @@ const PRODUCT_PATTERNS = [
   "forecasting:*",
 ] as const;
 
-/** REQ-0135: +stockAllocation so enrich labels (categoryName) do not linger after rename. */
+/** +stockAllocation so enrich labels (categoryName) do not linger after rename. */
 const CATEGORY_PATTERNS = [
   cacheKeys.categories.pattern,
   cacheKeys.products.pattern,
@@ -143,7 +143,7 @@ const CATEGORY_PATTERNS = [
 ] as const;
 
 /**
- * REQ-0135: +clientPortal (admin client overview) + stockAllocation (supplierName enrich).
+ * +clientPortal (admin client overview) + stockAllocation (supplierName enrich).
  */
 const SUPPLIER_PATTERNS = [
   cacheKeys.suppliers.pattern,
@@ -157,7 +157,7 @@ const SUPPLIER_PATTERNS = [
   "forecasting:*",
 ] as const;
 
-/** REQ-0135: +supplierPortal for admin supplier overview after warehouse CRUD. */
+/** +supplierPortal for admin supplier overview after warehouse CRUD. */
 const WAREHOUSE_PATTERNS = [
   cacheKeys.stockAllocation.pattern,
   cacheKeys.products.pattern,

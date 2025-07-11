@@ -136,7 +136,7 @@ export default function SupportTicketFilters({
               variant="ghost"
               size="sm"
               onClick={() => setSearchTerm("")}
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 backdrop-blur-md"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 "
             >
               <IoClose className="h-4 w-4 text-gray-700 dark:text-white/80" />
             </Button>
@@ -146,7 +146,7 @@ export default function SupportTicketFilters({
           <DeferredSelectGate
             placeholder={
               <div
-                className="h-10 w-[180px] rounded-[28px] border border-violet-400/30 bg-white/10 dark:bg-white/5 text-gray-700 dark:text-white flex items-center justify-between px-2 py-2"
+                className="h-10 w-[180px] rounded-lg border border-slate-200 bg-white/10 dark:bg-white/5 text-slate-700 dark:text-slate-200 flex items-center justify-between px-2 py-2"
                 aria-hidden
               >
                 <span>
@@ -165,7 +165,7 @@ export default function SupportTicketFilters({
                   onViewFilterChange(v as SupportTicketViewFilter)
                 }
               >
-                <SelectTrigger className="h-10 w-[180px] rounded-[28px] border border-violet-400/30 dark:border-violet-400/30 bg-white/10 dark:bg-white/5 text-gray-700 dark:text-white">
+                <SelectTrigger className="h-10 w-[180px] rounded-lg border border-slate-200 dark:border-slate-700 bg-white/10 dark:bg-white/5 text-slate-700 dark:text-slate-200">
                   <SelectValue placeholder="View" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl border-violet-400/20">

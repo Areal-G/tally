@@ -1,5 +1,5 @@
 /**
- * REQ-0137 — seed full explore catalog onto existing demo accounts.
+ * Seed full explore catalog onto existing demo accounts.
  *
  * Prerequisites: demo users + Test Supplier already exist
  *   (npm run script:reset-demo-db).
@@ -58,7 +58,7 @@ async function resolveDemoIds() {
 }
 
 async function main() {
-  console.log("\n🌱 Seed demo explore catalog (REQ-0137)\n");
+  console.log("\n🌱 Seed demo explore catalog\n");
 
   const existingProducts = await prisma.product.count();
   if (existingProducts > 0) {

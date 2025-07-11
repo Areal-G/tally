@@ -1,11 +1,12 @@
 /**
- * SSR client browse meta + products (REQ-0026).
+ * SSR client browse meta + products.
  * Mirrors GET /api/portal/client/browse-meta and browse-products.
  */
 import { prisma } from "@/prisma/client";
 import { mergeProductListWhere } from "@/lib/products/product-query";
 import { enrichProductsWithCommittedQuantity } from "@/lib/products/enrich-product-committed-quantity";
 import type { ClientBrowseMeta, ClientBrowseProductsResponse } from "@/types";
+import { DEMO_ADMIN_EMAIL } from "@/lib/auth/demo-seed-users";
 
 /** Admins/users who own at least one active catalog product (client browse picker). */
 export async function getProductOwnerAdminsForBrowse() {
@@ -90,7 +91,7 @@ export async function resolveDefaultBrowseOwnerId(
 ): Promise<string> {
   const admins = meta?.admins ?? (await getClientBrowseMetaForPage()).admins;
   if (admins.length === 0) return "";
-  const preferred = admins.find((a) => a.email === "test@admin.com");
+  const preferred = admins.find((a) => a.email === DEMO_ADMIN_EMAIL);
   return preferred?.id ?? admins[0]!.id;
 }
 

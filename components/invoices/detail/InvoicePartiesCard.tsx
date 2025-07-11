@@ -1,11 +1,10 @@
 "use client";
 
 /**
- * REQ-0162 / REQ-0164 — Parties & Roles on invoice detail.
+ * Parties & Roles on invoice detail.
  * Owner-products links for all roles; self name gray/white; others sky.
  */
 
-import React from "react";
 import { FileText } from "lucide-react";
 import type { Invoice } from "@/types";
 import { GlassCard } from "@/components/orders/detail/order-detail-primitives";

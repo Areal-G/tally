@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
     const error = searchParams.get("error");
 
     // Check for OAuth errors — access_denied means the user cancelled the Google consent screen;
-    // this is expected UX, not a system error, so it must not be sent to Sentry
+    // this is expected UX, not a system error, so it is only a warning
     if (error) {
       if (error !== "access_denied") {
         // Only log unexpected OAuth errors (e.g. server_error from Google)
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Validate state (CSRF protection). Warn only — expired cookie, back-button, or
-    // interrupted OAuth are expected UX paths, not server failures (no Sentry).
+    // interrupted OAuth are expected UX paths, not server failures (warning only).
     const storedState = request.cookies.get("oauth_state")?.value;
     if (!state || !storedState || state !== storedState) {
       logger.warn("OAuth state mismatch - possible CSRF attack");
@@ -271,7 +271,7 @@ export async function GET(request: NextRequest) {
       // Create response and set cookies
       const response = NextResponse.redirect(redirectUrl);
 
-      // REQ-0134: cookie TTL matches JWT (both 1d via sessionCookieOptions)
+      // Cookie TTL matches JWT (both 1d via sessionCookieOptions)
       response.cookies.set(
         "session_id",
         token,

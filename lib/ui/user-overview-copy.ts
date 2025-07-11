@@ -1,5 +1,5 @@
 /**
- * REQ-0160 — Role-aware Overview card blurbs on admin user-management detail.
+ * Role-aware Overview card blurbs on admin user-management detail.
  * Numbers/KPI math unchanged (see user-detail-data); copy only.
  */
 

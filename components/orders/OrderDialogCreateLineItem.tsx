@@ -1,12 +1,12 @@
 "use client";
 
 /**
- * REQ-0111 — single create-order line row with reactive stock validation hook.
- * REQ-0187 — Product Combobox densify (DialogProductOptionRow + search); Subtotal under Product;
+ * Single create-order line row with reactive stock validation hook.
+ * Product Combobox densify (DialogProductOptionRow + search); Subtotal under Product;
  * warehouse Max/hint under Warehouse column.
  */
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -51,7 +51,7 @@ import type { OrderLineStockProduct } from "@/lib/orders/order-line-stock-valida
 import { formatOrderLineAutoAssignHint } from "@/lib/orders/order-line-stock-validation";
 import type { Product } from "@/types";
 
-/** Create-order form shape shared with OrderDialog (REQ-0111/0113). */
+/** Create-order form shape shared with OrderDialog. */
 export type OrderFormData = {
   items: Array<{
     productId: string;
@@ -73,14 +73,11 @@ export type OrderFormData = {
     country: string;
   };
   useSameAddress?: boolean;
-  tax?: number;
-  shipping?: number;
-  discount?: number;
   notes?: string;
 };
 
 /**
- * Product shape for create-order line UI + stock hook (REQ-0111 / REQ-0187 densify).
+ * Product shape for create-order line UI + stock hook (densify).
  * Compatible with Product list/browse rows from useProducts / useClientBrowseProducts.
  */
 export type OrderDialogLineProduct = OrderLineStockProduct & {
@@ -168,7 +165,7 @@ export function OrderDialogCreateLineItem({
     !isManualPick &&
     validation?.maxQty != null;
 
-  // REQ-0112 / Sentry — manual pick "Max N at Warehouse" must disable Create (not only catalog stockError)
+  // A manual warehouse pick over its stock ("Max N at Warehouse") must disable Create (not only catalog stockError)
   useEffect(() => {
     onStockValidityChange(lineId, Boolean(stockError || manualPickError));
   }, [lineId, onStockValidityChange, stockError, manualPickError]);
@@ -197,7 +194,7 @@ export function OrderDialogCreateLineItem({
             <DialogFormLabel icon={Package} required>
               Product {index + 1}
             </DialogFormLabel>
-            {/* REQ-0187 — Allocate-style searchable Combobox + DialogProductOptionRow */}
+            {/* Allocate-style searchable Combobox + DialogProductOptionRow */}
             <Popover
               open={dialogOpen && pickerOpen}
               onOpenChange={(next) => {
@@ -314,7 +311,7 @@ export function OrderDialogCreateLineItem({
                 {String(createErrors.items[index]?.productId?.message)}
               </p>
             )}
-            {/* REQ-0187 gap — Subtotal under Product column */}
+            {/* Subtotal under Product column */}
             {selectedProduct ? (
               <div className="text-sm text-white/70 min-w-0 inline-flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span>Subtotal:</span>

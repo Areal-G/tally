@@ -1,5 +1,5 @@
 /**
- * REQ-0209 — Build Stripe Checkout success/cancel URLs from the page that started pay.
+ * Build Stripe Checkout success/cancel URLs from the page that started pay.
  * Admin pay → `/admin/orders|invoices/[id]`; store/client → `/orders|invoices/[id]`.
  */
 

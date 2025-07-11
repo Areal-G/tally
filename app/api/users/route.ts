@@ -4,6 +4,7 @@
  * POST /api/users — create new user (admin-only)
  */
 
+import { isPlatformAdmin } from "@/lib/auth/platform-admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromRequest } from "@/utils/auth";
 import { logger } from "@/lib/logger";
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    if (session.role !== "admin") {
+    if (!isPlatformAdmin(session)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    if (session.role !== "admin") {
+    if (!isPlatformAdmin(session)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

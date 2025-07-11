@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0119 — shared shipping/billing address grid for OrderDialog create mode.
+ * Shared shipping/billing address grid for OrderDialog create mode.
  * Keep 2-col layout (street|city, state|zip, country full width) — do not stack.
  */
 

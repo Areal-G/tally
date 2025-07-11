@@ -28,8 +28,8 @@ type LoginRoleSelectProps = {
 };
 
 /**
- * REQ-0030 — test-account role Select with icons in trigger and menu items.
- * Static /login route — mount immediately (REQ-0028; no DeferredSelectGate).
+ * Test-account role Select with icons in trigger and menu items.
+ * Static /login route — mount immediately (; no DeferredSelectGate).
  */
 export function LoginRoleSelect({
   selectedRole,

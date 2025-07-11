@@ -43,16 +43,16 @@ export type InvoiceDetailEnrichment = {
     name: string | null;
     email: string;
   }[];
-  /** REQ-0063 — from linked order (same query as party enrichment) */
+  /** From linked order (same query as party enrichment) */
   linkedOrderNumber: string | null;
   linkedOrderItems: OrderItem[];
-  /** REQ-0152 — linked order payment for line-item / Pay UI */
+  /** Linked order payment for line-item / Pay UI */
   linkedOrderStatus?: string | null;
   linkedOrderPaymentStatus?: string | null;
-  /** REQ-0210 — display addresses (invoice billing may fall back to order) */
+  /** Display addresses (invoice billing may fall back to order) */
   resolvedBillingAddress?: BillingAddress | null;
   shippingAddress?: BillingAddress | null;
-  /** REQ-0096 — DB audit fields */
+  /** DB audit fields */
   creator?: Invoice["creator"];
   updater?: Invoice["updater"];
 };
@@ -83,7 +83,7 @@ export function transformInvoiceDetail(
     paymentLink: invoice.paymentLink,
     stripePaymentIntentId: invoice.stripePaymentIntentId ?? null,
     notes: invoice.notes,
-    // REQ-0210 — prefer invoice.billing, else order billing/shipping from enrichment
+    // Prefer invoice.billing, else order billing/shipping from enrichment
     billingAddress:
       enrichment.resolvedBillingAddress ??
       (invoice.billingAddress as Invoice["billingAddress"]),

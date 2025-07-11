@@ -1,7 +1,7 @@
 /**
- * REQ-0078 — section title row with optional trailing badges.
- * REQ-0079 — count + optional countHue render SectionCountBadge (default slate per REQ-0080).
- * REQ-0138 — optional subtitle + icon tile (h-9) spanning title+subtitle block.
+ * Section title row with optional trailing badges.
+ * Count + optional countHue render SectionCountBadge (default slate per).
+ * Optional subtitle + icon tile (h-9) spanning title+subtitle block.
  * Badge (shadcn) renders a <div>; never nest it inside <p> or heading phrasing-only tags.
  */
 import React from "react";

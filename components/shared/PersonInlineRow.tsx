@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * REQ-0127 — inline avatar + sky name link + muted copyable email (detail/audit/party rows).
- * REQ-0208 — layout: [avatar] | name · email / User ID (start-aligned under name).
+ * Inline avatar + sky name link + muted copyable email (detail/audit/party rows).
+ * Layout: [avatar] | name · email / User ID (start-aligned under name).
  */
 
 import Link from "next/link";
@@ -21,7 +21,7 @@ export type PersonInlineRowProps = {
   linkClassName?: string;
   avatarSize?: number;
   className?: string;
-  /** REQ-0208 — mono User ID under name/email, start-aligned with text column */
+  /** Mono User ID under name/email, start-aligned with text column */
   userId?: string | null;
 };
 

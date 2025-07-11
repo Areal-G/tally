@@ -7,7 +7,7 @@ import AdminSupportTicketDetailContent from "@/components/admin/AdminSupportTick
 
 type Props = { params: Promise<{ id: string }> };
 
-/** REQ-0025 — blocking SSR detail prefetch (no Suspense shell flash). */
+/** Blocking SSR detail prefetch (no Suspense shell flash). */
 export const dynamic = "force-dynamic";
 
 export default async function AdminSupportTicketDetailPage({ params }: Props) {
@@ -15,7 +15,7 @@ export default async function AdminSupportTicketDetailPage({ params }: Props) {
   if (!user) redirect("/login");
   const { id } = await params;
 
-  // REQ-0191 — productOwners for footer Reassign
+  // productOwners for footer Reassign
   const [initialTicket, initialReplies, productOwners] = await Promise.all([
     getSupportTicketDetailForPage({ id: user.id, role: user.role }, id),
     getSupportTicketRepliesForPage(id),

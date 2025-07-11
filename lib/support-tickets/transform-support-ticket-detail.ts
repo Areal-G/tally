@@ -1,6 +1,6 @@
 /**
  * Shared support ticket detail response transform — used by API GET/PUT and SSR prefetch.
- * REQ-0024: single source of truth for support ticket detail JSON shape.
+ * Single source of truth for support ticket detail JSON shape.
  */
 
 import type { SupportTicket } from "@/types";

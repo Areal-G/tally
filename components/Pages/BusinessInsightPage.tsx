@@ -1,6 +1,6 @@
 "use client";
 
-import React, {
+import {
   useState,
   useEffect,
   useMemo,
@@ -55,12 +55,10 @@ import {
   CHART_LABEL_TOP_MARGIN,
   createChartBarLabelRenderer,
   createChartDotLabelRenderer,
+  createChartPiePercentLabel,
   formatChartCountLabel,
 } from "@/lib/ui/chart-point-label";
-import { useAuth } from "@/contexts";
 import Navbar from "@/components/layouts/Navbar";
-import PageWithSidebar from "@/components/layouts/PageWithSidebar";
-import BusinessInsightsSidebar from "@/components/layouts/BusinessInsightsSidebar";
 import {
   PageContentWrapper,
   DataSlotPulse,
@@ -86,18 +84,19 @@ import {
   queryKeys,
   useSyncSsrQueryDataMany,
 } from "@/lib/react-query";
-import { exportToExcel, exportToCSV } from "@/lib/export";
+import { exportToCSV } from "@/lib/export";
 import type { Product, Order } from "@/types";
 import type { ProductForHome } from "@/lib/server/home-data";
 import type { OrderForPage } from "@/lib/server/orders-data";
 import type { WarehouseStockSummary } from "@/types/stock-allocation";
 import { BusinessInsightsWarehouseSection } from "@/components/business-insights/BusinessInsightsWarehouseSection";
+import { DenseCatalogProductCell } from "@/components/shared/DenseCatalogProductCell";
 import {
   buildWarehouseQuantityChartData,
   buildWarehouseRollupMetrics,
   formatWarehouseRollupForAi,
 } from "@/lib/insights/business-insights-warehouse-rollup";
-import { cn } from "@/lib/utils";
+import { cn, EMPTY_LIST } from "@/lib/utils";
 import {
   FOCUS_NO_LAYOUT_SHIFT_CLASS,
   GLASS_FOCUS_RING,
@@ -107,20 +106,39 @@ import {
   GLASS_BUTTON_SHELL_RESET,
   GLASS_PRIMARY_BUTTON,
 } from "@/lib/ui/glass-button-styles";
+import {
+  DIALOG_NATIVE_DATE_HIDE_INDICATOR,
+} from "@/components/shared/dialog-form-field";
+import { formatStableCurrency } from "@/lib/format";
 
-/** Date range inputs — violet hue ring, no border-width shift (REQ-0046). */
+/** Date range inputs — violet hue ring; hide native indicator + one Lucide icon. */
 const BUSINESS_INSIGHT_DATE_INPUT_CLASS = cn(
-  "flex-1 sm:flex-none px-2 py-2 text-sm rounded-xl border border-gray-300/30 bg-white/50 dark:bg-white/5 dark:border-white/10 text-gray-700 dark:text-white backdrop-blur-md transition",
+  "w-full h-10 pr-10 px-2 py-2 text-sm rounded-xl border border-gray-300/30 bg-white/50 dark:bg-white/5 dark:border-white/10 text-gray-700 dark:text-white transition",
+  DIALOG_NATIVE_DATE_HIDE_INDICATOR,
   FOCUS_NO_LAYOUT_SHIFT_CLASS,
   GLASS_FOCUS_RING.violet,
 );
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
+const COLORS = ["var(--accent-purple)", "var(--accent-teal)", "var(--accent-blue)", "var(--accent-amber)", "var(--accent-pink)"];
+
+/** Resolve product.category to a display name (string | {name} | null). */
+function resolveProductCategoryName(product: Product): string | null {
+  if (!product.category) return null;
+  if (typeof product.category === "object") return product.category.name;
+  return product.category || null;
+}
+
+/** Resolve product.supplier to a display name. */
+function resolveProductSupplierName(product: Product): string | null {
+  if (!product.supplier) return null;
+  if (typeof product.supplier === "object") return product.supplier.name;
+  return (product.supplier as string) || null;
+}
 
 export type BusinessInsightPageProps = {
   initialProducts?: ProductForHome[];
   initialOrders?: OrderForPage[];
-  /** REQ-0119 — warehouse stock summary for Warehouses tab SSR */
+  /** Warehouse stock summary for Warehouses tab SSR */
   initialWarehouseSummary?: WarehouseStockSummary[];
 };
 
@@ -141,10 +159,10 @@ export default function BusinessInsightPage({
   );
   const allProducts = (productsQuery.data ??
     initialProducts ??
-    []) as Product[];
-  const allOrders = (ordersQuery.data ?? initialOrders ?? []) as Order[];
+    EMPTY_LIST) as Product[];
+  const allOrders = (ordersQuery.data ?? initialOrders ?? EMPTY_LIST) as Order[];
   const warehouseSummaryRows =
-    warehouseSummaryQuery.data ?? initialWarehouseSummary ?? [];
+    warehouseSummaryQuery.data ?? initialWarehouseSummary ?? EMPTY_LIST;
   const productsLoading = isDataSlotLoading(productsQuery, initialProducts);
   const ordersLoading = isDataSlotUnsettled(ordersQuery, initialOrders);
   const warehouseSummaryLoading = isDataSlotUnsettled(
@@ -153,7 +171,7 @@ export default function BusinessInsightPage({
   );
   const dataLoading = productsLoading;
 
-  // REQ-0120 — SSR snapshots for products/orders/warehouse summary (post-CRUD nav parity)
+  // SSR snapshots for products/orders/warehouse summary (post-CRUD nav parity)
   useSyncSsrQueryDataMany([
     { queryKey: queryKeys.products.lists(), serverData: initialProducts },
     { queryKey: queryKeys.orders.lists(), serverData: initialOrders },
@@ -162,7 +180,6 @@ export default function BusinessInsightPage({
       serverData: initialWarehouseSummary,
     },
   ]);
-  const { user } = useAuth();
   const { toast } = useToast();
 
   // State for QR code URL - set on client side to avoid SSR window error
@@ -182,6 +199,9 @@ export default function BusinessInsightPage({
     startDate: "",
     endDate: "",
   });
+  // Custom calendar button targets for From/To
+  const startDateInputRef = useRef<HTMLInputElement | null>(null);
+  const endDateInputRef = useRef<HTMLInputElement | null>(null);
 
   // Set QR URL after component mounts (client-side only)
   useEffect(() => {
@@ -245,6 +265,7 @@ export default function BusinessInsightPage({
         monthlyTrend: [],
         topProducts: [],
         lowStockProducts: [],
+        outOfStockProducts: [],
         stockUtilization: 0,
         valueDensity: 0,
         stockCoverage: 0,
@@ -433,6 +454,11 @@ export default function BusinessInsightPage({
       .sort((a, b) => Number(a.quantity) - Number(b.quantity))
       .slice(0, 5);
 
+    // Out of stock products (quantity === 0)
+    const outOfStockProducts = filteredProducts
+      .filter((product) => Number(product.quantity) === 0)
+      .slice(0, 5);
+
     // Supplier distribution (by quantity and value) - same pattern as category
     const supplierMap = new Map<
       string,
@@ -479,6 +505,7 @@ export default function BusinessInsightPage({
       monthlyTrend,
       topProducts,
       lowStockProducts,
+      outOfStockProducts,
     };
   }, [filteredProducts]);
 
@@ -574,7 +601,7 @@ export default function BusinessInsightPage({
         {
           Section: "Key Metrics",
           Metric: "Total Value",
-          Value: `$${analyticsData.totalValue.toLocaleString()}`,
+          Value: formatStableCurrency(analyticsData.totalValue),
           "Additional Info": "",
         },
         {
@@ -598,7 +625,7 @@ export default function BusinessInsightPage({
         {
           Section: "Key Metrics",
           Metric: "Average Price",
-          Value: `$${analyticsData.averagePrice.toFixed(2)}`,
+          Value: formatStableCurrency(analyticsData.averagePrice),
           "Additional Info": "",
         },
         {
@@ -610,7 +637,7 @@ export default function BusinessInsightPage({
         {
           Section: "Key Metrics",
           Metric: "Value Density",
-          Value: `$${analyticsData.valueDensity.toFixed(2)}`,
+          Value: formatStableCurrency(analyticsData.valueDensity),
           "Additional Info": "",
         },
         {
@@ -628,7 +655,7 @@ export default function BusinessInsightPage({
           Section: "Category Distribution",
           Metric: cat.name,
           Value: cat.value.toString(),
-          "Additional Info": `Count: ${cat.count}, Value: $${cat.totalValue.toLocaleString()}`,
+          "Additional Info": `Count: ${cat.count}, Value: ${formatStableCurrency(cat.totalValue)}`,
         })),
 
         // Empty row separator
@@ -657,10 +684,10 @@ export default function BusinessInsightPage({
         { Section: "", Metric: "", Value: "", "": "" },
 
         // Top Products Section
-        ...analyticsData.topProducts.map((product, index) => ({
+        ...analyticsData.topProducts.map((product) => ({
           Section: "Top Products",
           Metric: product.name,
-          Value: `$${product.value.toLocaleString()}`,
+          Value: formatStableCurrency(product.value),
           "Additional Info": `Quantity: ${product.quantity}`,
         })),
 
@@ -683,7 +710,7 @@ export default function BusinessInsightPage({
         { header: "Additional Info", key: "Additional Info" },
       ];
 
-      exportToCSV(csvData, columns, "stockly-analytics");
+      exportToCSV(csvData, columns, "tally-analytics");
 
       toast({
         title: "CSV Export Successful!",
@@ -694,76 +721,6 @@ export default function BusinessInsightPage({
         title: "Export Failed",
         description:
           "Failed to export analytics data to CSV. Please try again.",
-        variant: "destructive",
-      });
-    }
-  }, [analyticsData, toast]);
-
-  /**
-   * Export analytics data to Excel
-   * Includes multiple sheets with different analytics sections
-   */
-  const handleExportToExcel = useCallback(async () => {
-    try {
-      if (analyticsData.totalProducts === 0) {
-        toast({
-          title: "No Data to Export",
-          description: "There is no analytics data to export.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Key Metrics Sheet
-      const keyMetricsData = [
-        { Metric: "Total Products", Value: analyticsData.totalProducts },
-        {
-          Metric: "Total Value",
-          Value: `$${analyticsData.totalValue.toLocaleString()}`,
-        },
-        { Metric: "Low Stock Items", Value: analyticsData.lowStockItems },
-        { Metric: "Out of Stock Items", Value: analyticsData.outOfStockItems },
-        {
-          Metric: "Total Quantity",
-          Value: analyticsData.totalQuantity.toLocaleString(),
-        },
-        {
-          Metric: "Average Price",
-          Value: `$${analyticsData.averagePrice.toFixed(2)}`,
-        },
-        {
-          Metric: "Stock Utilization",
-          Value: `${analyticsData.stockUtilization.toFixed(1)}%`,
-        },
-        {
-          Metric: "Value Density",
-          Value: `$${analyticsData.valueDensity.toFixed(2)}`,
-        },
-        {
-          Metric: "Stock Coverage",
-          Value: `${analyticsData.stockCoverage.toFixed(1)} units avg`,
-        },
-      ];
-
-      await exportToExcel({
-        sheetName: "Key Metrics",
-        fileName: "stockly-analytics",
-        columns: [
-          { header: "Metric", key: "Metric", width: 25 },
-          { header: "Value", key: "Value", width: 20 },
-        ],
-        data: keyMetricsData,
-      });
-
-      toast({
-        title: "Excel Export Successful!",
-        description: "Analytics data exported to Excel file.",
-      });
-    } catch (error) {
-      toast({
-        title: "Export Failed",
-        description:
-          "Failed to export analytics data to Excel. Please try again.",
         variant: "destructive",
       });
     }
@@ -781,7 +738,7 @@ export default function BusinessInsightPage({
   const buildAiSummary = useCallback(() => {
     const parts = [
       `Total products: ${analyticsData.totalProducts}.`,
-      `Total inventory value: $${analyticsData.totalValue.toLocaleString()}.`,
+      `Total inventory value: ${formatStableCurrency(analyticsData.totalValue)}.`,
       `Low stock items (qty ≤ 20): ${analyticsData.lowStockItems}.`,
       `Out of stock: ${analyticsData.outOfStockItems}.`,
       `Stock utilization: ${analyticsData.stockUtilization.toFixed(1)}%.`,
@@ -870,7 +827,7 @@ export default function BusinessInsightPage({
     }
   }, [buildAiSummary, toast]);
 
-  // Radix Tabs: defer until mounted to avoid ID hydration mismatch (REQ-0021 — tabs only, not full page)
+  // Radix Tabs: defer until mounted to avoid ID hydration mismatch (tabs only, not full page)
   const isMountedRef = useRef(false);
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
@@ -882,25 +839,10 @@ export default function BusinessInsightPage({
 
   return (
     <Navbar>
-      <PageWithSidebar
-        sidebarContent={
-          <BusinessInsightsSidebar
-            value={insightsTab}
-            onValueChange={setInsightsTab}
-          />
-        }
-        sidebarCollapsed={
-          <BusinessInsightsSidebar
-            value={insightsTab}
-            onValueChange={setInsightsTab}
-            collapsed
-          />
-        }
-      >
         <PageContentWrapper className="px-1 sm:px-0">
-          {/* REQ-0168 — parent gap-6 owns section rhythm (match AdminAnalyticsContent) */}
+          {/* Parent gap-6 owns section rhythm (match AdminAnalyticsContent) */}
           <div className="flex flex-col gap-6">
-          {/* Header — REQ-0098 PageSectionHeader icon parity */}
+          {/* Header — PageSectionHeader icon parity */}
           <PageSectionHeader
             as="h1"
             icon={BarChart3}
@@ -926,7 +868,7 @@ export default function BusinessInsightPage({
 
           {/* Date Range Filter */}
           <div>
-            <div className="rounded-[16px] border border-violet-400/20 bg-gradient-to-r from-violet-500/10 via-violet-500/5 to-transparent p-4 backdrop-blur-md shadow-[0_10px_30px_rgba(139,92,246,0.1)]">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-700/70 bg-card p-4 ">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                 <div className="flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-violet-300/30 bg-violet-100/50 dark:border-white/15 dark:bg-white/10">
@@ -944,19 +886,36 @@ export default function BusinessInsightPage({
                     >
                       From:
                     </label>
-                    <input
-                      id="start-date"
-                      type="date"
-                      value={dateRange.startDate}
-                      onChange={(e) =>
-                        setDateRange((prev) => ({
-                          ...prev,
-                          startDate: e.target.value,
-                        }))
-                      }
-                      className={BUSINESS_INSIGHT_DATE_INPUT_CLASS}
-                      max={dateRange.endDate || undefined}
-                    />
+                    <div className="relative flex-1 sm:flex-none sm:min-w-[10.5rem]">
+                      <input
+                        ref={startDateInputRef}
+                        id="start-date"
+                        type="date"
+                        value={dateRange.startDate}
+                        onChange={(e) =>
+                          setDateRange((prev) => ({
+                            ...prev,
+                            startDate: e.target.value,
+                          }))
+                        }
+                        className={BUSINESS_INSIGHT_DATE_INPUT_CLASS}
+                        max={dateRange.endDate || undefined}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          startDateInputRef.current?.focus();
+                          startDateInputRef.current?.showPicker?.();
+                        }}
+                        className={cn(
+                          "absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded",
+                          "text-violet-600/80 hover:text-violet-700 dark:text-white/80 dark:hover:text-white",
+                        )}
+                        aria-label="Open start date calendar"
+                      >
+                        <Calendar className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <label
@@ -965,19 +924,36 @@ export default function BusinessInsightPage({
                     >
                       To:
                     </label>
-                    <input
-                      id="end-date"
-                      type="date"
-                      value={dateRange.endDate}
-                      onChange={(e) =>
-                        setDateRange((prev) => ({
-                          ...prev,
-                          endDate: e.target.value,
-                        }))
-                      }
-                      className={BUSINESS_INSIGHT_DATE_INPUT_CLASS}
-                      min={dateRange.startDate || undefined}
-                    />
+                    <div className="relative flex-1 sm:flex-none sm:min-w-[10.5rem]">
+                      <input
+                        ref={endDateInputRef}
+                        id="end-date"
+                        type="date"
+                        value={dateRange.endDate}
+                        onChange={(e) =>
+                          setDateRange((prev) => ({
+                            ...prev,
+                            endDate: e.target.value,
+                          }))
+                        }
+                        className={BUSINESS_INSIGHT_DATE_INPUT_CLASS}
+                        min={dateRange.startDate || undefined}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          endDateInputRef.current?.focus();
+                          endDateInputRef.current?.showPicker?.();
+                        }}
+                        className={cn(
+                          "absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded",
+                          "text-violet-600/80 hover:text-violet-700 dark:text-white/80 dark:hover:text-white",
+                        )}
+                        aria-label="Open end date calendar"
+                      >
+                        <Calendar className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                   {(dateRange.startDate || dateRange.endDate) && (
                     <Button
@@ -997,7 +973,7 @@ export default function BusinessInsightPage({
             </div>
           </div>
 
-          {/* Key Metrics — REQ-0169 shell token (gap-6 parent, no pb-6) */}
+          {/* Key Metrics — shell token (gap-6 parent, no pb-6) */}
           <div
             className={cn(
               PAGE_STATS_GRID_IN_SHELL_CLASS,
@@ -1014,7 +990,7 @@ export default function BusinessInsightPage({
             />
             <AnalyticsCard
               title="Total Value"
-              value={`$${analyticsData.totalValue.toLocaleString()}`}
+              value={formatStableCurrency(analyticsData.totalValue)}
               icon={DollarSign}
               variant="emerald"
               description="Total inventory value"
@@ -1059,7 +1035,7 @@ export default function BusinessInsightPage({
               </>
             ) : (
               <Tabs value={insightsTab} onValueChange={setInsightsTab}>
-                <TabsList className="hidden sm:grid w-full grid-cols-5 mb-4">
+                <TabsList className="mb-4 flex w-fit max-w-full justify-start overflow-x-auto">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="distribution">Distribution</TabsTrigger>
                   <TabsTrigger value="trends">Trends</TabsTrigger>
@@ -1086,19 +1062,9 @@ export default function BusinessInsightPage({
                               cx="50%"
                               cy="50%"
                               labelLine={false}
-                              label={({ name, percent, x, y, textAnchor }) => (
-                                <text
-                                  x={x}
-                                  y={y}
-                                  textAnchor={textAnchor}
-                                  dominantBaseline="central"
-                                  className="fill-gray-700 dark:fill-white text-xs font-normal"
-                                >
-                                  {`${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                                </text>
-                              )}
-                              outerRadius="100%"
-                              fill="#8884d8"
+                              label={createChartPiePercentLabel()}
+                              outerRadius="85%"
+                              fill="var(--accent-purple)"
                               dataKey="value"
                             >
                               {analyticsData.categoryDistribution.map(
@@ -1143,13 +1109,12 @@ export default function BusinessInsightPage({
                             <Area
                               type="monotone"
                               dataKey="products"
-                              stroke="#8884d8"
-                              fill="#8884d8"
-                              dot={{ r: 3, fill: "#8884d8" }}
+                              stroke="var(--accent-purple)"
+                              fill="var(--accent-purple)"
+                              dot={{ r: 3, fill: "var(--accent-purple)" }}
                               label={createChartDotLabelRenderer(
                                 analyticsData.monthlyTrend.length,
                                 formatChartCountLabel,
-                                false,
                               )}
                             />
                           </AreaChart>
@@ -1185,7 +1150,7 @@ export default function BusinessInsightPage({
                               <Tooltip
                                 formatter={(value) => [
                                   value != null
-                                    ? `$${Number(value).toLocaleString()}`
+                                    ? formatStableCurrency(Number(value))
                                     : "$0",
                                   "Revenue",
                                 ]}
@@ -1193,9 +1158,9 @@ export default function BusinessInsightPage({
                               <Area
                                 type="monotone"
                                 dataKey="totalValue"
-                                stroke="#00C49F"
-                                fill="#00C49F"
-                                dot={{ r: 3, fill: "#00C49F" }}
+                                stroke="var(--accent-teal)"
+                                fill="var(--accent-teal)"
+                                dot={{ r: 3, fill: "var(--accent-teal)" }}
                                 label={createChartDotLabelRenderer(
                                   orderTrendByMonth.length,
                                 )}
@@ -1215,14 +1180,22 @@ export default function BusinessInsightPage({
                           pulseClassName="min-h-[300px]"
                         >
                           <ResponsiveChartContainer>
-                            <BarChart data={orderTrendByMonth}>
+                            <BarChart
+                              data={orderTrendByMonth}
+                              margin={{
+                                top: CHART_LABEL_TOP_MARGIN,
+                                right: 8,
+                                left: 0,
+                                bottom: 0,
+                              }}
+                            >
                               <CartesianGrid strokeDasharray="3 3" />
                               <XAxis dataKey="month" />
                               <YAxis />
                               <Tooltip />
                               <Bar
                                 dataKey="orderCount"
-                                fill="#8884D8"
+                                fill="var(--accent-purple)"
                                 label={createChartBarLabelRenderer(
                                   formatChartCountLabel,
                                 )}
@@ -1263,15 +1236,25 @@ export default function BusinessInsightPage({
                         pulseClassName="min-h-[300px]"
                       >
                         <ResponsiveChartContainer>
-                          <BarChart data={analyticsData.statusDistribution}>
+                          <BarChart
+                            data={analyticsData.statusDistribution}
+                            margin={{
+                              top: CHART_LABEL_TOP_MARGIN,
+                              right: 30,
+                              left: 20,
+                              bottom: 5,
+                            }}
+                          >
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="name" />
                             <YAxis />
                             <Tooltip />
                             <Bar
                               dataKey="value"
-                              fill="#8884d8"
-                              label={createChartBarLabelRenderer()}
+                              fill="var(--accent-purple)"
+                              label={createChartBarLabelRenderer(
+                                formatChartCountLabel,
+                              )}
                             />
                           </BarChart>
                         </ResponsiveChartContainer>
@@ -1292,15 +1275,25 @@ export default function BusinessInsightPage({
                         pulseClassName="min-h-[300px]"
                       >
                         <ResponsiveChartContainer>
-                          <BarChart data={analyticsData.priceRangeDistribution}>
+                          <BarChart
+                            data={analyticsData.priceRangeDistribution}
+                            margin={{
+                              top: CHART_LABEL_TOP_MARGIN,
+                              right: 30,
+                              left: 20,
+                              bottom: 5,
+                            }}
+                          >
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="name" />
                             <YAxis />
                             <Tooltip />
                             <Bar
                               dataKey="value"
-                              fill="#00C49F"
-                              label={createChartBarLabelRenderer()}
+                              fill="var(--accent-teal)"
+                              label={createChartBarLabelRenderer(
+                                formatChartCountLabel,
+                              )}
                             />
                           </BarChart>
                         </ResponsiveChartContainer>
@@ -1334,14 +1327,14 @@ export default function BusinessInsightPage({
                             <Tooltip
                               formatter={(value) => [
                                 value != null
-                                  ? `$${Number(value).toLocaleString()}`
+                                  ? formatStableCurrency(Number(value))
                                   : "$0",
                                 "Value",
                               ]}
                             />
                             <Bar
                               dataKey="totalValue"
-                              fill="#FFBB28"
+                              fill="var(--accent-blue)"
                               label={createChartBarLabelRenderer()}
                             />
                           </BarChart>
@@ -1376,14 +1369,14 @@ export default function BusinessInsightPage({
                             <Tooltip
                               formatter={(value) => [
                                 value != null
-                                  ? `$${Number(value).toLocaleString()}`
+                                  ? formatStableCurrency(Number(value))
                                   : "$0",
                                 "Value",
                               ]}
                             />
                             <Bar
                               dataKey="totalValue"
-                              fill="#FF8042"
+                              fill="var(--accent-blue)"
                               label={createChartBarLabelRenderer()}
                             />
                           </BarChart>
@@ -1422,7 +1415,7 @@ export default function BusinessInsightPage({
                             <Tooltip
                               formatter={(value) => [
                                 value
-                                  ? `$${Number(value).toLocaleString()}`
+                                  ? formatStableCurrency(Number(value))
                                   : "$0",
                                 "Value",
                               ]}
@@ -1430,7 +1423,7 @@ export default function BusinessInsightPage({
                             />
                             <Bar
                               dataKey="value"
-                              fill="#FFBB28"
+                              fill="var(--accent-blue)"
                               label={createChartBarLabelRenderer()}
                             />
                           </BarChart>
@@ -1466,13 +1459,12 @@ export default function BusinessInsightPage({
                             <Line
                               type="monotone"
                               dataKey="monthlyAdded"
-                              stroke="#FF8042"
+                              stroke="var(--accent-blue)"
                               strokeWidth={2}
-                              dot={{ r: 3, fill: "#FF8042" }}
+                              dot={{ r: 3, fill: "var(--accent-blue)" }}
                               label={createChartDotLabelRenderer(
                                 analyticsData.monthlyTrend.length,
                                 formatChartCountLabel,
-                                false,
                               )}
                             />
                           </LineChart>
@@ -1490,48 +1482,109 @@ export default function BusinessInsightPage({
                 </TabsContent>
 
                 <TabsContent value="alerts">
-                  {/* Low Stock Alerts */}
-                  <ChartCard
-                    title="Low Stock Alerts"
-                    icon={AlertTriangle}
-                    variant="rose"
-                  >
-                    <div>
-                      {analyticsData.lowStockProducts.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 pb-4 text-xs sm:text-sm">
-                          {analyticsData.lowStockProducts.map(
-                            (product, index) => (
-                              <div
-                                key={index}
-                                className="rounded-xl border border-amber-400/30 bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-transparent p-4 backdrop-blur-md"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <h4 className="font-medium text-sm text-gray-700 dark:text-white">
-                                      {product.name}
-                                    </h4>
-                                    <p className="text-xs text-gray-600 dark:text-white/80">
-                                      SKU: {product.sku}
-                                    </p>
+                  <div className="flex flex-col gap-4">
+                    {/* Low Stock Alerts */}
+                    <ChartCard
+                      title="Low Stock Alerts"
+                      icon={AlertTriangle}
+                      variant="amber"
+                    >
+                      <div>
+                        {analyticsData.lowStockProducts.length > 0 ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 pb-4 text-xs sm:text-sm">
+                            {analyticsData.lowStockProducts.map(
+                              (product, index) => (
+                                <div
+                                  key={index}
+                                  className="rounded-xl border border-amber-400/30 bg-amber-500/15 p-3 "
+                                >
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1 min-w-0">
+                                      <DenseCatalogProductCell
+                                        productId={product.id}
+                                        productName={product.name}
+                                        sku={product.sku}
+                                        imageUrl={product.imageUrl}
+                                        categoryId={product.categoryId}
+                                        categoryName={resolveProductCategoryName(product)}
+                                        supplierId={product.supplierId}
+                                        supplierName={resolveProductSupplierName(product)}
+                                        supplierImage={product.supplierImage}
+                                        productHref={(id) => `/products/${id}`}
+                                        categoryHref={(id) => `/categories/${id}`}
+                                        supplierHref={(id) => `/suppliers/${id}`}
+                                      />
+                                    </div>
+                                    <StockQuantityLeftBadge
+                                      quantity={product.quantity}
+                                    />
                                   </div>
-                                  <StockQuantityLeftBadge
-                                    quantity={product.quantity}
-                                  />
                                 </div>
-                              </div>
-                            ),
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8">
-                          <AlertTriangle className="h-12 w-12 text-emerald-500 mx-auto mb-4" />
-                          <p className="text-gray-600 dark:text-white/80">
-                            No low stock alerts at the moment!
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </ChartCard>
+                              ),
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <AlertTriangle className="h-12 w-12 text-emerald-500 mx-auto mb-4" />
+                            <p className="text-gray-600 dark:text-white/80">
+                              No low stock alerts at the moment!
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </ChartCard>
+
+                    {/* Out of Stock Alerts */}
+                    <ChartCard
+                      title="Out of Stock"
+                      icon={Package}
+                      variant="rose"
+                    >
+                      <div>
+                        {analyticsData.outOfStockProducts.length > 0 ? (
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 pb-4 text-xs sm:text-sm">
+                            {analyticsData.outOfStockProducts.map(
+                              (product, index) => (
+                                <div
+                                  key={index}
+                                  className="rounded-xl border border-rose-400/30 bg-rose-500/15 p-3 "
+                                >
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1 min-w-0">
+                                      <DenseCatalogProductCell
+                                        productId={product.id}
+                                        productName={product.name}
+                                        sku={product.sku}
+                                        imageUrl={product.imageUrl}
+                                        categoryId={product.categoryId}
+                                        categoryName={resolveProductCategoryName(product)}
+                                        supplierId={product.supplierId}
+                                        supplierName={resolveProductSupplierName(product)}
+                                        supplierImage={product.supplierImage}
+                                        productHref={(id) => `/products/${id}`}
+                                        categoryHref={(id) => `/categories/${id}`}
+                                        supplierHref={(id) => `/suppliers/${id}`}
+                                      />
+                                    </div>
+                                    <StockQuantityLeftBadge
+                                      quantity={product.quantity}
+                                    />
+                                  </div>
+                                </div>
+                              ),
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8">
+                            <Package className="h-12 w-12 text-emerald-500 mx-auto mb-4" />
+                            <p className="text-gray-600 dark:text-white/80">
+                              No out of stock products!
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </ChartCard>
+                  </div>
                 </TabsContent>
               </Tabs>
             )}
@@ -1540,7 +1593,7 @@ export default function BusinessInsightPage({
           {/* Additional Insights */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-2">
             {/* Quick Insights Card */}
-            <article className="rounded-[20px] border border-sky-400/20 bg-gradient-to-br from-sky-500/15 via-sky-500/5 to-transparent p-2 sm:p-4 backdrop-blur-md shadow-[0_15px_40px_rgba(2,132,199,0.15)] dark:shadow-[0_15px_40px_rgba(2,132,199,0.1)] transition hover:border-sky-300/40">
+            <article className="rounded-xl border border-slate-200 dark:border-slate-700/70 bg-card p-2 sm:p-4 transition hover:border-slate-300 dark:hover:border-slate-600">
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-sky-300/30 bg-sky-100/50 dark:border-white/15 dark:bg-white/10">
                   <Eye className="h-4 w-4 text-gray-700 dark:text-white" />
@@ -1558,7 +1611,7 @@ export default function BusinessInsightPage({
                     {dataLoading ? (
                       <DataSlotPulse variant="currency" />
                     ) : (
-                      `$${analyticsData.averagePrice.toFixed(2)}`
+                      formatStableCurrency(analyticsData.averagePrice)
                     )}
                   </span>
                 </div>
@@ -1590,7 +1643,7 @@ export default function BusinessInsightPage({
             </article>
 
             {/* Performance Card */}
-            <article className="rounded-[20px] border border-emerald-400/20 bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-transparent p-2 sm:p-4 backdrop-blur-md shadow-[0_15px_40px_rgba(16,185,129,0.15)] dark:shadow-[0_15px_40px_rgba(16,185,129,0.1)] transition hover:border-emerald-300/40">
+            <article className="rounded-xl border border-slate-200 dark:border-slate-700/70 bg-card p-2 sm:p-4 transition hover:border-slate-300 dark:hover:border-slate-600">
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-300/30 bg-emerald-100/50 dark:border-white/15 dark:bg-white/10">
                   <Users className="h-4 w-4 text-gray-700 dark:text-white" />
@@ -1632,7 +1685,7 @@ export default function BusinessInsightPage({
                     {dataLoading ? (
                       <DataSlotPulse variant="currency" />
                     ) : (
-                      `$${analyticsData.valueDensity.toFixed(2)} per product`
+                      `${formatStableCurrency(analyticsData.valueDensity)} per product`
                     )}
                   </span>
                 </div>
@@ -1640,7 +1693,7 @@ export default function BusinessInsightPage({
             </article>
 
             {/* QR Code Card */}
-            <article className="rounded-[20px] border border-violet-400/20 bg-gradient-to-br from-violet-500/15 via-violet-500/5 to-transparent p-2 sm:p-4 backdrop-blur-md shadow-[0_15px_40px_rgba(139,92,246,0.15)] dark:shadow-[0_15px_40px_rgba(139,92,246,0.1)] transition hover:border-violet-300/40">
+            <article className="rounded-xl border border-slate-200 dark:border-slate-700/70 bg-card p-2 sm:p-4 transition hover:border-slate-300 dark:hover:border-slate-600">
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-violet-300/30 bg-violet-100/50 dark:border-white/15 dark:bg-white/10">
                   <QrCode className="h-4 w-4 text-gray-700 dark:text-white" />
@@ -1658,7 +1711,7 @@ export default function BusinessInsightPage({
             </article>
 
             {/* AI Insights Card */}
-            <article className="rounded-[20px] border border-amber-400/20 bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-transparent p-2 sm:p-4 backdrop-blur-md shadow-[0_15px_40px_rgba(245,158,11,0.12)] dark:shadow-[0_15px_40px_rgba(245,158,11,0.08)] transition hover:border-amber-300/40">
+            <article className="rounded-xl border border-slate-200 dark:border-slate-700/70 bg-card p-2 sm:p-4 transition hover:border-slate-300 dark:hover:border-slate-600">
               <div className="flex items-center gap-2 mb-4">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-300/30 bg-amber-100/50 dark:border-white/15 dark:bg-white/10">
                   <Sparkles className="h-4 w-4 text-gray-700 dark:text-white" />
@@ -1746,7 +1799,6 @@ export default function BusinessInsightPage({
           </div>
           </div>
         </PageContentWrapper>
-      </PageWithSidebar>
     </Navbar>
   );
 }

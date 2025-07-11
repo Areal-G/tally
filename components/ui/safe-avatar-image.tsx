@@ -1,5 +1,5 @@
 /**
- * REQ-0038/0039 — avatar with primary src (e.g. Google) and robohash fallback on error.
+ * Avatar with primary src (e.g. Google) and robohash fallback on error.
  * referrerPolicy=no-referrer helps Google CDN hotlink reliability.
  */
 "use client";

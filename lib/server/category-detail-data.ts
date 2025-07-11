@@ -1,8 +1,8 @@
 /**
  * Server-side category detail fetch for SSR prefetch.
  * Mirrors GET /api/categories/:id auth + response shape (includes Redis cache).
- * REQ-0024, REQ-0081 — party enrichment + category insights.
- * REQ-0082 — forecast rollup removed from SSR (client TanStack + cache-read prefetch).
+ * Party enrichment + category insights.
+ * Forecast rollup removed from SSR (client TanStack + cache-read prefetch).
  */
 
 import { getCategoryById } from "@/prisma/category";
@@ -72,7 +72,7 @@ function transformCategoryDetail(
     { orderNumber: string; status: string; total: number; createdAt: Date }
   >();
 
-  // REQ-0140 — sold stats = delivered or paid only
+  // Sold stats = delivered or paid only
   products.forEach((product) => {
     product.orderItems?.forEach((item) => {
       const order = item.order;
@@ -100,7 +100,7 @@ function transformCategoryDetail(
     0,
   );
 
-  // Stock buckets refined after enrich with committedQuantity (REQ-0140)
+  // Stock buckets refined after enrich with committedQuantity
   const categoryInsights = computeCatalogInsights(
     products.map((p) => ({
       quantity: p.quantity,
@@ -154,7 +154,7 @@ function transformCategoryDetail(
         supplier: supplierRow
           ? { id: supplierRow.id, name: supplierRow.name }
           : null,
-        // REQ-0143 — category for recent-order meta line
+        // Category for recent-order meta line
         category: { id: category.id, name: category.name },
       };
     });
@@ -206,7 +206,7 @@ function transformCategoryDetail(
         supplier: supplierRow
           ? { id: supplierRow.id, name: supplierRow.name }
           : null,
-        // REQ-0141 — grid category link (this detail's category)
+        // Grid category link (this detail's category)
         category: { id: category.id, name: category.name },
       };
     }),
@@ -361,7 +361,7 @@ export async function getCategoryDetailForPage(
     transformedCategory.products,
   );
 
-  // REQ-0140 — insights stock buckets use qty − committed (alloc + product reserved)
+  // Insights stock buckets use qty − committed (alloc + product reserved)
   const committedById = new Map(
     enrichedProducts.map((p) => [p.id, p.committedQuantity]),
   );
@@ -377,7 +377,7 @@ export async function getCategoryDetailForPage(
     transformedCategory.statistics.totalQuantitySold,
   );
 
-  // REQ-0143 — batch invoice links for recent-order indicators
+  // Batch invoice links for recent-order indicators
   const invoiceMap = await getInvoiceLinkMap(
     transformedCategory.recentOrders.map((o) => o.orderId).filter(Boolean),
   );

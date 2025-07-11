@@ -1,7 +1,7 @@
 /**
- * REQ-0081/0082/0083 — client-safe rollup for CategoryDetailPage.
+ * Client-safe rollup for CategoryDetailPage.
  * Filters TanStack/API ForecastingSummary.forecasts by category product IDs.
- * Server category SSR does not embed forecast (REQ-0082); rollup runs client-side only.
+ * Server category SSR does not embed forecast; rollup runs client-side only.
  */
 
 import type { ProductDemandForecast } from "@/types";
@@ -31,6 +31,12 @@ export function buildCategoryForecastRollup(
       productId: f.productId,
       productName: f.productName,
       sku: f.sku,
+      imageUrl: f.imageUrl ?? null,
+      categoryId: f.categoryId ?? null,
+      categoryName: f.categoryName ?? null,
+      supplierId: f.supplierId ?? null,
+      supplierName: f.supplierName ?? null,
+      supplierImage: f.supplierImage ?? null,
       availableStock: f.availableStock,
       daysUntilStockout: f.daysUntilStockout,
       reorderRecommendation: f.reorderRecommendation,

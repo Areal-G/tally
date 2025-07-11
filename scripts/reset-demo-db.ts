@@ -7,8 +7,8 @@
  *   test@client.com   / 12345678 / client
  *   test@supplier.com / 12345678 / supplier (+ linked "Test Supplier" entity)
  *
- * Default (REQ-0092): accounts only — empty catalog.
- * Explore seed (REQ-0137): pass --with-catalog for 1–2 rows per entity.
+ * Default: accounts only — empty catalog.
+ * Explore seed: pass --with-catalog for 1–2 rows per entity.
  *
  * Usage:
  *   npm run script:reset-demo-db
@@ -58,7 +58,7 @@ async function main() {
   console.log("\n🔄 Reset demo database\n");
   console.log("   ⚠  This deletes ALL data in DATABASE_URL.\n");
   if (withCatalog) {
-    console.log("   Mode: accounts + explore catalog (REQ-0137)\n");
+    console.log("   Mode: accounts + explore catalog\n");
   } else {
     console.log("   Mode: accounts only (add --with-catalog for explore data)\n");
   }

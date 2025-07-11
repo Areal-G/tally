@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * REQ-0068/0111/0113/0126 — warehouse picker in order line grid (presentation-only).
+ * Warehouse picker in order line grid (presentation-only).
  * Parent hook owns fetch + validation; receives allocationRows from useOrderLineStockValidation.
  *
- * REQ-0187 gap — column-scoped feedback under this control only (Max / stockError / Auto-assign hint).
- * REQ-0187 densify — DialogWarehouseOptionRow (name; type badge · muted avail) in trigger + items.
+ * Column-scoped feedback under this control only (Max / stockError / Auto-assign hint).
+ * Densify — DialogWarehouseOptionRow (name; type badge · muted avail) in trigger + items.
  */
 
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Warehouse } from "lucide-react";
 import {
   Select,
@@ -40,18 +40,18 @@ export type OrderLineWarehouseSelectProps = {
   onChange: (warehouseId: string | undefined) => void;
   dialogOpen: boolean;
   disabled?: boolean;
-  /** REQ-0111 — manual-pick cap error from parent validator. */
+  /** Manual-pick cap error from parent validator. */
   manualPickError?: string | null;
-  /** REQ-0187 — catalog/auto-assign stock error (non-manual); supersedes hint. */
+  /** Catalog/auto-assign stock error (non-manual); supersedes hint. */
   catalogStockError?: string | null;
-  /** REQ-0187 — Auto-assign hint under Warehouse when no error. */
+  /** Auto-assign hint under Warehouse when no error. */
   hintText?: string | null;
-  /** REQ-0113 — required; parent injects from useOrderLineStockValidation. */
+  /** Required; parent injects from useOrderLineStockValidation. */
   allocationRows: OrderLineAllocationRow[];
   allocationsLoading: boolean;
 };
 
-/** Priority: Max → catalog stockError → Auto-assign hint (REQ-0187). */
+/** Priority: Max → catalog stockError → Auto-assign hint. */
 function WarehouseColumnFeedback({
   manualPickError,
   catalogStockError,

@@ -16,6 +16,8 @@ import {
   reservePendingOrderLines,
 } from "@/lib/products/order-stock-reservation";
 import { getOrderLineCatalogAvailable } from "@/lib/orders/order-line-stock-validation";
+import { assertDiscountWithinSubtotal } from "@/lib/orders/order-money-validation";
+import { computeOrderFeesFromSubtotal } from "@/lib/orders/order-fees";
 import {
   productRequiresWarehousePick,
   resolveWarehouseName,
@@ -57,7 +59,7 @@ export async function generateOrderNumber(): Promise<string> {
   return `ORD-${year}-${month}${day}-${hours}${minutes}${seconds}-${sequence}`;
 }
 
-/** REQ-0158 — party fields for order create (store owner ≠ always session). */
+/** Party fields for order create (store owner ≠ always session). */
 export type CreateOrderParty = {
   storeOwnerUserId: string;
   createdByUserId: string;
@@ -69,7 +71,7 @@ export type CreateOrderParty = {
  * Create a new order with order items
  * Includes validation and automatic calculations
  *
- * REQ-0158: `userId` = store owner; `clientId` = buyer (null = self); `createdBy` = actor.
+ * `userId` = store owner; `clientId` = buyer (null = self); `createdBy` = actor.
  */
 export async function createOrder(
   data: CreateOrderInput,
@@ -113,7 +115,7 @@ export async function createOrder(
     let availableStock: number;
 
     if (needsPick) {
-      // REQ-0111 — live DB rows; client uses TanStack cache + committedQuantity fallback
+      // Live DB rows; client uses TanStack cache + committedQuantity fallback
       const allocationRows = await prisma.stockAllocation.findMany({
         where: { productId: item.productId },
         select: { reservedQuantity: true },
@@ -146,7 +148,7 @@ export async function createOrder(
           throw new Error(`Warehouse not found or unauthorized: ${warehouseId}`);
         }
       } else {
-        // REQ-0106 — auto-assign: reserve on product path; fulfill greedily across warehouses
+        // Auto-assign: reserve on product path; fulfill greedily across warehouses
         warehouseId = null;
       }
     } else {
@@ -171,13 +173,15 @@ export async function createOrder(
     });
   }
 
-  // Calculate total
-  const tax = data.tax || 0;
-  const shipping = data.shipping || 0;
-  const discount = data.discount || 0;
-  const total = subtotal + tax + shipping - discount;
+  // Server-authoritative fees (ignore any client tax/shipping/discount)
+  const fees = computeOrderFeesFromSubtotal(subtotal);
+  assertDiscountWithinSubtotal(fees.discountAmount, subtotal);
+  const tax = fees.taxAmount;
+  const shipping = fees.shippingAmount;
+  const discount = fees.discountAmount;
+  const total = fees.total;
 
-  // Create order with items (REQ-0158 party semantics)
+  // Create order with items (party semantics)
   const order = await prisma.order.create({
     data: {
       orderNumber,
@@ -211,7 +215,7 @@ export async function createOrder(
     },
   });
 
-  // REQ-0103 — disjoint reserve: allocation OR product, never both
+  // Disjoint reserve: allocation OR product, never both
   await reservePendingOrderLines(
     productsToReserve.map((p) => ({
       productId: p.id,
@@ -236,7 +240,7 @@ export async function createOrder(
 
 /**
  * Get Self orders for a store owner (personal /orders list).
- * REQ-0158: userId = owner AND (clientId null OR clientId = owner).
+ * userId = owner AND (clientId null OR clientId = owner).
  * Client-buyer orders on the same store are excluded (see /admin/orders merge).
  *
  * @param userId - Store owner user ID
@@ -473,7 +477,7 @@ export async function getOrderByIdForProductOwner(
 
 /**
  * Shared include for client order detail (own + catalog-history read).
- * REQ-0221 — `userId` required so enrichOrder can resolve orderProductOwners
+ * `userId` required so enrichOrder can resolve orderProductOwners
  * (parity with admin/supplier includes + invoice-detail product select).
  */
 const clientOrderDetailInclude = {
@@ -497,7 +501,7 @@ const clientOrderDetailInclude = {
 
 /**
  * Get order by ID for client.
- * REQ-0214 — own buyer (`clientId`) first; else any order with line items so
+ * Own buyer (`clientId`) first; else any order with line items so
  * product/category/supplier recent-order chips open read-only (mutations stay off in UI).
  */
 export async function getOrderByIdForClient(orderId: string, clientId: string) {
@@ -681,7 +685,7 @@ export async function updateOrder(
               price: true,
               categoryId: true,
               supplierId: true,
-              imageUrl: true, // REQ-0059: keep thumbnails stable after status updates
+              imageUrl: true, // Keep thumbnails stable after status updates
             },
           },
         },
@@ -823,7 +827,7 @@ export async function cancelOrder(orderId: string, userId: string) {
   }
 
   // Cancel order (soft delete).
-  // REQ-0208/0209 — refund Stripe + paymentStatus refunded for paid OR partial.
+  // Refund Stripe + paymentStatus refunded for paid OR partial.
   const shouldRefund = orderCancelShouldRefundPayment(
     orderWithItems.paymentStatus,
     orderWithItems.status,
@@ -877,7 +881,7 @@ export async function cancelOrder(orderId: string, userId: string) {
     });
   }
 
-  // REQ-0209 — First money (partial|paid) fulfills reserved stock + sets confirmed.
+  // First money (partial|paid) fulfills reserved stock + sets confirmed.
   // Cancel/refund therefore restores catalog qty + warehouse allocations when confirmed/paid.
   const wasPending = orderWithItems.status === "pending";
   const wasConfirmedOrPaid =

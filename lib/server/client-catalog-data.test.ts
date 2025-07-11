@@ -49,7 +49,7 @@ describe("getClientCatalogOverview", () => {
     ] as never);
   });
 
-  it("returns meta totals separate from capped list lengths (REQ-0077)", async () => {
+  it("returns meta totals separate from capped list lengths", async () => {
     const result = await getClientCatalogOverview("client-user");
 
     expect(result.meta).toEqual({

@@ -95,9 +95,9 @@ import {
 export type WarehouseDetailPageProps = {
   embedInAdmin?: boolean;
   initialWarehouse?: WarehouseType;
-  /** REQ-0026 — SSR stock allocations for warehouse detail */
+  /** SSR stock allocations for warehouse detail */
   initialStockAllocations?: StockAllocation[];
-  /** REQ-0084 — cache-read forecast for admin (non-blocking SSR). */
+  /** Cache-read forecast for admin (non-blocking SSR). */
   initialForecasting?: ForecastingSummary | null;
 };
 
@@ -144,7 +144,7 @@ export default function WarehouseDetailPage({
   const isDeleting = deleteWarehouseMutation.isPending;
   const isRemovingAllocation = deleteAllocationMutation.isPending;
 
-  // REQ-0069 — SSR snapshots beat stale TanStack cache on warehouse navigation
+  // SSR snapshots beat stale TanStack cache on warehouse navigation
   useSyncSsrQueryData(
     queryKeys.warehouses.detail(warehouseId),
     initialWarehouse,
@@ -210,7 +210,7 @@ export default function WarehouseDetailPage({
         : `/suppliers/${supplierId}`
       : null;
 
-  // REQ-0203 — store owners (user) + admin/supplier manage warehouse stock CRUD
+  // Store owners (user) + admin/supplier manage warehouse stock CRUD
   const canManageStock =
     user?.role === "admin" ||
     user?.role === "user" ||
@@ -285,7 +285,7 @@ export default function WarehouseDetailPage({
     );
   }
 
-  // REQ-0136 — never fall back to `new Date()` ("now"): SSR/client render at different
+  // Never fall back to `new Date()` ("now"): SSR/client render at different
   // instants and that non-determinism is a classic hydration-mismatch source.
   const createdAt = toDateOrNull(warehouse?.createdAt);
   const updatedAt = warehouse?.updatedAt
@@ -294,7 +294,7 @@ export default function WarehouseDetailPage({
       : warehouse?.updatedAt
     : null;
 
-  // REQ-0114/0115 — stat cards share computeWarehouseInsights (SSR fallback when query empty)
+  // Stat cards share computeWarehouseInsights (SSR fallback when query empty)
   const stockSummary = mapWarehouseStockSummary(
     warehouseInsights,
     allocationRows.length,
@@ -338,7 +338,7 @@ export default function WarehouseDetailPage({
               dataLoading ? (
                 <DataSlotPulse variant="badge" className="self-center" />
               ) : warehouse != null ? (
-                // REQ-0203 — compact status chip; matches title+Created row height
+                // Compact status chip; matches title+Created row height
                 <div className="flex shrink-0 flex-col items-end justify-center gap-0.5 self-center">
                   <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide text-gray-500 dark:text-white/60">
                     <CheckCircle2 className="h-3 w-3 shrink-0" aria-hidden />
@@ -456,7 +456,7 @@ export default function WarehouseDetailPage({
             </div>
           )}
 
-          {/* REQ-0203 — Info|Stock directly under stats; Insights below */}
+          {/* Info|Stock directly under stats; Insights below */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
             <GlassCard variant="cyan">
               <GlassCardBody>
@@ -530,22 +530,24 @@ export default function WarehouseDetailPage({
                       icon={Calendar}
                       label="Created:"
                       tone="orange"
-                      loading={dataLoading}
+                      loading={dataLoading && !createdAt}
                     >
-                      {!dataLoading &&
-                        (createdAt ? (
-                          <ClientDateTime date={createdAt} semantic="created" />
-                        ) : (
+                      {createdAt ? (
+                        <ClientDateTime date={createdAt} semantic="created" />
+                      ) : (
+                        !dataLoading && (
                           <span className="text-gray-500 dark:text-white/60">
                             —
                           </span>
-                        ))}
+                        )
+                      )}
                     </DetailInfoRow>
                     {updatedAt && (
                       <DetailInfoRow
                         icon={Clock}
                         label="Updated:"
                         tone="violet"
+                        loading={false}
                       >
                         <ClientRelativeTime
                           date={updatedAt}
@@ -724,7 +726,7 @@ export default function WarehouseDetailPage({
             />
           )}
 
-          {/* Action Buttons — REQ-0203 gate CRUD by canManageStock */}
+          {/* Action Buttons — gate CRUD by canManageStock */}
           <div className="flex flex-col sm:flex-row flex-wrap gap-2">
             <Button
               onClick={() => navigateTo(warehousesListHref)}

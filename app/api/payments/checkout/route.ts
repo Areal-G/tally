@@ -1,7 +1,7 @@
 /**
  * Stripe Checkout API Route
  * POST /api/payments/checkout — create a Stripe Checkout session
- * REQ-0152 — optional amount (partial pay); admin can checkout; no unpaid clobber.
+ * Optional amount (partial pay); admin can checkout; no unpaid clobber.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
       const isAdmin = session.role === "admin";
       const isClient = session.role === "client";
       const isCreator = invoice.userId === session.id;
-      // REQ-0214 — buyer via invoice.clientId or linked order.clientId (legacy null invoice.clientId)
+      // Buyer via invoice.clientId or linked order.clientId (legacy null invoice.clientId)
       const isInvoiceClient =
         invoice.clientId === session.id ||
         invoice.order?.clientId === session.id;
@@ -281,7 +281,7 @@ export async function POST(request: NextRequest) {
       cancel_url: cancelUrl || `${baseUrl}/${type}s/${id}?payment=cancelled`,
     });
 
-    // REQ-0152 — store payment link only; never clobber order paymentStatus to unpaid
+    // Store payment link only; never clobber order paymentStatus to unpaid
     if (type === "invoice" && checkoutSession.url) {
       await prisma.invoice.update({
         where: { id },

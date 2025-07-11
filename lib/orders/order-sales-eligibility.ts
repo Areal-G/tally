@@ -1,5 +1,5 @@
 /**
- * REQ-0140 — which order lines count toward "Total Quantity Sold" / revenue / demand velocity.
+ * Which order lines count toward "Total Quantity Sold" / revenue / demand velocity.
  * Pending/unpaid reservations are stock commits, not completed sales.
  */
 

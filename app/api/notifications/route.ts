@@ -4,7 +4,7 @@
  * Supports various notification types: low stock alerts, stock out, inventory reports
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { logger } from "@/lib/logger";
 import { emailNotificationBodySchema } from "@/lib/validations/notification";
 import {
@@ -25,6 +25,8 @@ import type {
 } from "@/lib/email/types";
 import { successResponse, errorResponse } from "@/lib/api/response-helpers";
 import { getErrorMessage } from "@/lib/api/errors";
+import { getSessionFromRequest } from "@/utils/auth";
+import { withRateLimit, defaultRateLimits } from "@/lib/api/rate-limit";
 
 /**
  * POST /api/notifications
@@ -32,6 +34,21 @@ import { getErrorMessage } from "@/lib/api/errors";
  */
 export async function POST(request: NextRequest) {
   try {
+    // Sends real email through Brevo — store admins only, rate-limited.
+    const session = await getSessionFromRequest(request);
+    if (!session) {
+      return errorResponse("Unauthorized", 401);
+    }
+    if (session.role !== "admin") {
+      return errorResponse("Forbidden", 403);
+    }
+    const rateLimitResponse = await withRateLimit(
+      request,
+      defaultRateLimits.strict,
+      session.id,
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     // Check if Brevo is configured
     if (!isBrevoConfigured()) {
       logger.warn("Brevo email service is not configured");
@@ -170,6 +187,11 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
+    const session = await getSessionFromRequest(request);
+    if (!session) {
+      return errorResponse("Unauthorized", 401);
+    }
+
     const isConfigured = isBrevoConfigured();
     const adminEmail = getAdminEmail();
 

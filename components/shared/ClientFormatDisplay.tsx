@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Hydration-safe currency/datetime — stable SSR first paint, browser locale after mount (REQ-0020).
+ * Hydration-safe currency/datetime — stable SSR first paint, browser locale after mount.
  */
 
 import { useMemo } from "react";

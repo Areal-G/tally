@@ -1,5 +1,5 @@
 /**
- * REQ-0150 — resolve statusAt + semantic kind for invoice list Status column.
+ * Resolve statusAt + semantic kind for invoice list Status column.
  * Client-safe — no server imports.
  */
 

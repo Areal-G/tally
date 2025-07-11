@@ -254,7 +254,7 @@ export async function POST(request: NextRequest) {
 
     const allocation = await upsertStockAllocation(data, session.id);
     await scheduleInvalidateStockAllocationCaches();
-    // REQ-0221 — full densify (not thin product:{id,name,sku}) for instant warehouse row paint
+    // Full densify (not thin product:{id,name,sku}) for instant warehouse row paint
     const result = await densifyStockAllocationWriteResponse(allocation);
 
     return NextResponse.json(result, { status: 201 });

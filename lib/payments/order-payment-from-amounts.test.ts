@@ -27,7 +27,7 @@ describe("deriveOrderPaymentStatus", () => {
     expect(deriveOrderPaymentStatus(4000, 3980)).toBe("paid");
   });
 
-  // REQ-0215 — cent-safe: float noise near total still paid
+  // Cent-safe: float noise near total still paid
   it("returns paid for float-near-total amounts", () => {
     expect(deriveOrderPaymentStatus(1880.06, 1880.06)).toBe("paid");
     expect(deriveOrderPaymentStatus(1000 + 880.06, 1880.06)).toBe("paid");
@@ -146,7 +146,7 @@ describe("applyIncrementalInvoicePayment", () => {
     ).toBe("sent");
   });
 
-  // REQ-0215 — remainder settle: sent + full money → paid, amountDue 0
+  // Remainder settle: sent + full money → paid, amountDue 0
   it("marks paid when remainder charge settles sent invoice", () => {
     const next = applyIncrementalInvoicePayment({
       priorAmountPaid: 1000,

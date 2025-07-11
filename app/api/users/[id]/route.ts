@@ -5,6 +5,7 @@
  * DELETE /api/users/:id — delete user (admin-only)
  */
 
+import { isPlatformAdmin } from "@/lib/auth/platform-admin";
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionFromRequest } from "@/utils/auth";
 import { logger } from "@/lib/logger";
@@ -41,7 +42,7 @@ export async function GET(
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    if (session.role !== "admin") {
+    if (!isPlatformAdmin(session)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -82,7 +83,7 @@ export async function PUT(
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    if (session.role !== "admin") {
+    if (!isPlatformAdmin(session)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -147,7 +148,7 @@ export async function DELETE(
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    if (session.role !== "admin") {
+    if (!isPlatformAdmin(session)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 

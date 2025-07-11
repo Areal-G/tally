@@ -1,5 +1,5 @@
 /**
- * REQ-0046 — focus styles without border-width change (prevents toolbar/input shift).
+ * Focus styles without border-width change (prevents toolbar/input shift).
  * Rings use box-shadow only; never grow border width on focus.
  */
 
@@ -23,20 +23,20 @@ export type GlassFocusHue =
   | "blue";
 
 /** Hue-matched keyboard ring — visible in dark mode; no layout shift. */
+/** Calm theme: one indigo keyboard ring for every hue key; no layout shift. */
+const ACCENT_FOCUS_RING =
+  "focus-visible:ring-2 focus-visible:ring-indigo-500/50 dark:focus-visible:ring-indigo-400/70";
+
 export const GLASS_FOCUS_RING: Record<GlassFocusHue, string> = {
-  sky: "focus-visible:ring-2 focus-visible:ring-sky-500/50 dark:focus-visible:ring-sky-400/70",
-  rose: "focus-visible:ring-2 focus-visible:ring-rose-500/50 dark:focus-visible:ring-rose-400/70",
-  emerald:
-    "focus-visible:ring-2 focus-visible:ring-emerald-500/50 dark:focus-visible:ring-emerald-400/70",
-  violet:
-    "focus-visible:ring-2 focus-visible:ring-violet-500/50 dark:focus-visible:ring-violet-400/70",
-  indigo:
-    "focus-visible:ring-2 focus-visible:ring-indigo-500/50 dark:focus-visible:ring-indigo-400/70",
-  amber:
-    "focus-visible:ring-2 focus-visible:ring-amber-500/50 dark:focus-visible:ring-amber-400/70",
-  teal: "focus-visible:ring-2 focus-visible:ring-teal-500/50 dark:focus-visible:ring-teal-400/70",
-  cyan: "focus-visible:ring-2 focus-visible:ring-cyan-500/50 dark:focus-visible:ring-cyan-400/70",
-  blue: "focus-visible:ring-2 focus-visible:ring-blue-500/50 dark:focus-visible:ring-blue-400/70",
+  sky: ACCENT_FOCUS_RING,
+  rose: ACCENT_FOCUS_RING,
+  emerald: ACCENT_FOCUS_RING,
+  violet: ACCENT_FOCUS_RING,
+  indigo: ACCENT_FOCUS_RING,
+  amber: ACCENT_FOCUS_RING,
+  teal: ACCENT_FOCUS_RING,
+  cyan: ACCENT_FOCUS_RING,
+  blue: ACCENT_FOCUS_RING,
 };
 
 /** Compose glass field shell + no-shift + hue ring (dialog/form inputs). */

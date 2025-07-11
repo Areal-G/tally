@@ -1,7 +1,6 @@
 /**
  * Server-side import history detail fetch for SSR prefetch.
  * Mirrors GET /api/import-history/:id auth + response shape.
- * REQ-0024
  */
 
 import { getImportHistoryById } from "@/prisma/import-history";

@@ -4,7 +4,6 @@
  * Gracefully degrades if OAuth is not configured
  */
 
-import { logger } from "@/lib/logger";
 
 /**
  * Check if Google OAuth is configured

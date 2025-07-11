@@ -26,7 +26,7 @@ import { Sparkles } from "lucide-react";
 
 /**
  * Register page — split layout with promo cards + form.
- * REQ-0030 — shared AuthPageShell, stagger animations, max-w-7xl.
+ * Shared AuthPageShell, stagger animations, max-w-7xl.
  */
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -40,6 +40,7 @@ export default function RegisterPage() {
   const handleGoogleSignUp = async () => {
     try {
       const oauthUrl = `/api/auth/oauth/google?callback=/`;
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- API route that redirects to Google; needs a full navigation
       window.location.href = oauthUrl;
     } catch (error) {
       console.error("Error initiating Google OAuth:", error);

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0186 — Type column uses WarehouseTypeBadge; Name/Address use CopyableText;
+ * Type column uses WarehouseTypeBadge; Name/Address use CopyableText;
  * Actions receive detailBase for View Details.
  */
 

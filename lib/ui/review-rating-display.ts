@@ -1,5 +1,5 @@
 /**
- * REQ-0165 / REQ-0167 — shared rating label + star/text hues.
+ * Shared rating label + star/text hues.
  * `textClass` = light surfaces (tables); `dialogTextClass` = always-dark dialog shells.
  */
 

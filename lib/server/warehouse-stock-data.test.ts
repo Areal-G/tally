@@ -18,7 +18,7 @@ describe("getStockByWarehouseForPage", () => {
     vi.clearAllMocks();
   });
 
-  it("returns enriched rows with cross-warehouse catalog totals (REQ-0102)", async () => {
+  it("returns enriched rows with cross-warehouse catalog totals", async () => {
     vi.mocked(prisma.warehouse.findFirst).mockResolvedValue({
       id: "wh-1",
       name: "Main Warehouse",

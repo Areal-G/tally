@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * TransferStockDialog — move stock between warehouses (REQ-0066).
+ * TransferStockDialog — move stock between warehouses.
  * Shell matches CategoryDialog (edge scroll + outer glow).
  */
 
@@ -69,7 +69,7 @@ import {
 import type { Product, StockAllocation } from "@/types";
 import { cn } from "@/lib/utils";
 
-const TRANSFER_DIALOG_CONTENT_CLASS = `${DIALOG_EDGE_SCROLL_SHELL} poppins border-teal-400/30 dark:border-teal-400/30 shadow-[0_30px_80px_rgba(20,184,166,0.35)] dark:shadow-[0_30px_80px_rgba(20,184,166,0.25)]`;
+const TRANSFER_DIALOG_CONTENT_CLASS = `${DIALOG_EDGE_SCROLL_SHELL} poppins border-teal-400/30 dark:border-teal-400/30 `;
 
 export type TransferStockDialogProps = {
   open: boolean;
@@ -93,7 +93,7 @@ export default function TransferStockDialog({
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const { data: warehouses = [] } = useWarehouses();
-  // REQ-0203 gap — join catalog products for owner/supplier densify on picker rows
+  // Join catalog products for owner/supplier densify on picker rows
   const { data: products = [] } = useProducts();
   const transferMutation = useCreateStockTransfer();
 
@@ -204,7 +204,7 @@ export default function TransferStockDialog({
                 <DialogFormLabel icon={Package} required>
                   Product
                 </DialogFormLabel>
-                {/* REQ-0199 — modal Combobox; ghost trigger (no outline→white hover) */}
+                {/* Modal Combobox; ghost trigger (no outline→white hover) */}
                 <Popover open={pickerOpen} onOpenChange={setPickerOpen} modal>
                   <PopoverTrigger asChild>
                     <Button
@@ -336,7 +336,7 @@ export default function TransferStockDialog({
                 <DialogFormLabel icon={Warehouse} required>
                   Destination
                 </DialogFormLabel>
-                {/* REQ-0203 — type badge + name; Select check stays right */}
+                {/* Type badge + name; Select check stays right */}
                   <Select
                   value={toWarehouseId}
                   onValueChange={setToWarehouseId}

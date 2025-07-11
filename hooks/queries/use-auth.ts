@@ -20,9 +20,9 @@ export function useSession() {
       const response = await apiClient.auth.getSession();
       return response.data;
     },
-    // Always revalidate session; lists keep global refetchOnWindowFocus: false (REQ-0133)
+    // Always revalidate session; lists keep global refetchOnWindowFocus: false
     staleTime: 0,
-    // REQ-0134: detect expired JWT on tab return without refetching all data queries
+    // Detect expired JWT on tab return without refetching all data queries
     refetchOnWindowFocus: true,
     retry: (failureCount, error) => {
       if (isAuthError(error)) {

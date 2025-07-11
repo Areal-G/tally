@@ -1,5 +1,5 @@
 /**
- * REQ-0085 / REQ-0090 — merge warehouse allocation totals into product catalog insights.
+ * Merge warehouse allocation totals into product catalog insights.
  * SSR: called in product detail page.tsx after parallel stock prefetch.
  * Client: re-runs when useStockByProduct updates after stock CRUD (no page refresh).
  */

@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import ProductList from "@/components/products/ProductList";
 import { PageContentWrapper } from "@/components/shared";
 import FloatingActionButtons from "@/components/shared/FloatingActionButtons";
@@ -17,7 +16,7 @@ export type AdminProductsContentProps = {
 
 /**
  * Admin products section — same content as /products but inside admin layout (no Navbar).
- * REQ-0021 — shell-first; SSR initialData passed to ProductList.
+ * Shell-first; SSR initialData passed to ProductList.
  */
 export default function AdminProductsContent({
   initialProducts,

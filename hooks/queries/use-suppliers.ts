@@ -14,6 +14,7 @@ import {
   patchListCaches,
   removeFromListCaches,
 } from "@/lib/react-query";
+import { mergeCatalogMutationIntoDetail } from "@/lib/catalog/merge-catalog-mutation-densify";
 import { useToast } from "@/hooks/use-toast";
 import type {
   Supplier,
@@ -73,11 +74,11 @@ export function useCreateSupplier() {
     },
     onSuccess: (newSupplier) => {
       if (newSupplier.id) {
-        // REQ-0218 — merge so thin create never wipes densify if detail was warmed
+        // Merge so thin create never wipes densify if detail was warmed
         patchDetailCacheMerge<Supplier>(
           queryClient,
           queryKeys.suppliers.detail(newSupplier.id),
-          (old) => (old ? { ...old, ...newSupplier } : newSupplier),
+          (old) => mergeCatalogMutationIntoDetail(old, newSupplier),
         );
         patchListCaches(queryClient, queryKeys.suppliers.all, newSupplier, {
           prependIfMissing: true,
@@ -115,12 +116,11 @@ export function useUpdateSupplier() {
     },
     onSuccess: (updatedSupplier) => {
       if (updatedSupplier.id) {
-        // REQ-0218 — thin PUT must not wipe supplierInsights / products / statistics
+        // Thin PUT must not wipe supplierInsights / products / statistics
         patchDetailCacheMerge<Supplier>(
           queryClient,
           queryKeys.suppliers.detail(updatedSupplier.id),
-          (old) =>
-            old ? { ...old, ...updatedSupplier } : updatedSupplier,
+          (old) => mergeCatalogMutationIntoDetail(old, updatedSupplier),
         );
         patchListCaches(queryClient, queryKeys.suppliers.all, updatedSupplier);
       }

@@ -1,5 +1,5 @@
 /**
- * REQ-0211 — PUT /orders returns thin items (ids/qty/price only).
+ * PUT /orders returns thin items (ids/qty/price only).
  * Merging must keep catalog densify (category/supplier/image) or line rows flash.
  */
 

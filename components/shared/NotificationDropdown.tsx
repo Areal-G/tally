@@ -5,7 +5,6 @@
 
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { ClientRelativeTime } from "@/components/shared/ClientDateDisplay";
 import {

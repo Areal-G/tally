@@ -16,6 +16,7 @@ import {
   patchInvoicesOnOrderCancel,
   patchLinkedInvoicesFromOrder,
   patchProductCommittedCaches,
+  patchAllocationReservedCaches,
   resolveOrderCommittedDeltas,
 } from "@/lib/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -99,7 +100,7 @@ export function useCreateOrder() {
       return response.data;
     },
     onSuccess: (data: Order) => {
-      // REQ-0221 — densified 201; merge detail + list (incl. productOwner* for client Store ·)
+      // Densified 201; merge detail + list (incl. productOwner* for client Store ·)
       patchDetailCacheMerge<Order>(
         queryClient,
         queryKeys.orders.detail(data.id),
@@ -115,6 +116,16 @@ export function useCreateOrder() {
       patchProductCommittedCaches(
         queryClient,
         resolveOrderCommittedDeltas(null, data),
+      );
+      // Also patch allocation reservedQuantity for instant warehouse row update
+      patchAllocationReservedCaches(
+        queryClient,
+        (data.items ?? []).map((i) => ({
+          productId: i.productId ?? "",
+          quantity: i.quantity,
+          warehouseId: i.warehouseId ?? null,
+        })),
+        1,
       );
       invalidateAfterOrderGraphChange(queryClient);
 
@@ -158,7 +169,7 @@ export function useUpdateOrder() {
     onSuccess: (data: Order) => {
       // PUT body is thin (no parties densify) — merge, don't replace detail.
       // Also sync invoice linkedOrderStatus/Payment (patchOrderGraph matches invoice by id≠order.id).
-      // REQ-0136 — always resolve statusAt (updatedAt fallback) so list Status date
+      // Always resolve statusAt (updatedAt fallback) so list Status date
       // updates on confirm/process and does not keep a stale shipped/delivered stamp.
       const prevCached =
         queryClient.getQueryData<Order>(queryKeys.orders.detail(data.id)) ??
@@ -265,18 +276,24 @@ export function useUpdateOrder() {
               ? statusPatch.updatedAt
               : new Date(statusPatch.updatedAt).toISOString(),
       });
-      // REQ-0221 — fulfill/release reserved densify on status/payment transition
-      patchProductCommittedCaches(
-        queryClient,
-        resolveOrderCommittedDeltas(prevCached, {
-          status: data.status,
-          paymentStatus: data.paymentStatus,
-          items: (prevCached?.items ?? data.items)?.map((i) => ({
-            productId: i.productId,
-            quantity: i.quantity,
-          })),
-        }),
-      );
+      // Fulfill/release reserved densify on status/payment transition
+      const updateItems = (prevCached?.items ?? data.items ?? []).map((i) => ({
+        productId: i.productId ?? "",
+        quantity: i.quantity,
+        warehouseId: i.warehouseId ?? null,
+      }));
+      const updateDeltas = resolveOrderCommittedDeltas(prevCached, {
+        status: data.status,
+        paymentStatus: data.paymentStatus,
+        items: updateItems,
+      });
+      patchProductCommittedCaches(queryClient, updateDeltas);
+      // Patch allocation reservedQuantity when reservation is released/acquired
+      if (updateDeltas.some((d) => d.reservedDelta < 0)) {
+        patchAllocationReservedCaches(queryClient, updateItems, -1);
+      } else if (updateDeltas.some((d) => d.reservedDelta > 0)) {
+        patchAllocationReservedCaches(queryClient, updateItems, 1);
+      }
       invalidateAfterOrderGraphChange(queryClient);
 
       // Show success toast
@@ -311,7 +328,7 @@ export function useDeleteOrder() {
       return response.data;
     },
     onSuccess: (data: Order) => {
-      // REQ-0210 — statusAt for list Status column; patch linked invoices (not order.id)
+      // statusAt for list Status column; patch linked invoices (not order.id)
       const prevCached =
         queryClient.getQueryData<Order>(queryKeys.orders.detail(data.id)) ??
         queryClient.getQueryData<Order>(
@@ -359,18 +376,22 @@ export function useDeleteOrder() {
         ...cancelPatch,
         invoiceForOrder: data.invoiceForOrder ?? null,
       });
-      // REQ-0221 — release pending reservation densify
+      // Release pending reservation densify
+      const cancelItems = (prevCached?.items ?? data.items ?? []).map((i) => ({
+        productId: i.productId ?? "",
+        quantity: i.quantity,
+        warehouseId: i.warehouseId ?? null,
+      }));
       patchProductCommittedCaches(
         queryClient,
         resolveOrderCommittedDeltas(prevCached, {
           status: data.status,
           paymentStatus: data.paymentStatus,
-          items: (prevCached?.items ?? data.items)?.map((i) => ({
-            productId: i.productId,
-            quantity: i.quantity,
-          })),
+          items: cancelItems,
         }),
       );
+      // Release allocation reservedQuantity immediately on cancel
+      patchAllocationReservedCaches(queryClient, cancelItems, -1);
       cancelOrRemoveDetailQuery(queryClient, queryKeys.orders.detail(data.id));
       invalidateAfterOrderGraphChange(queryClient);
 

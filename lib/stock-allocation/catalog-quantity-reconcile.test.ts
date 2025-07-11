@@ -80,7 +80,7 @@ describe("planCatalogQuantityReconcile", () => {
     expect(plan.blockedReason).toContain("reserved");
   });
 
-  it("REQ-0103 warehouse pick: floor is allocation reserved only (20 not 40)", () => {
+  it("warehouse pick: floor is allocation reserved only (20 not 40)", () => {
     const plan = planCatalogQuantityReconcile({
       currentCatalog: 40,
       newCatalog: 10,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { useMounted } from "@/hooks/use-mounted";
 import { DataSlotPulse } from "@/components/shared";
 
@@ -15,7 +15,7 @@ export type DeferredChartSectionProps = {
 };
 
 /**
- * REQ-0026 — shared Recharts hydration gate for portal/dashboard pages.
+ * Shared Recharts hydration gate for portal/dashboard pages.
  * Shows DataSlotPulse until client mount + data ready; prevents SSR/DOM mismatch.
  */
 export function DeferredChartSection({

@@ -26,7 +26,7 @@ export interface SupplierProductStatusCounts {
   stockOut: number;
 }
 
-/** Revenue by payment status (supplier's share) — REQ-0154 invoice-money partition */
+/** Revenue by payment status (supplier's share) — invoice-money partition */
 export interface SupplierRevenueBreakdown {
   paid: number;
   /** Mid-pay collected (supplier share of amountPaid) */
@@ -48,7 +48,7 @@ export interface SupplierValueBreakdown {
 /** Invoice counts for orders that contain supplier's products (created by product owner) */
 export interface SupplierInvoiceBreakdown {
   paid: number;
-  /** Mid-pay invoices — REQ-0154 */
+  /** Mid-pay invoices */
   partial?: number;
   pending: number;
   overdue: number;
@@ -88,8 +88,22 @@ export interface SupplierPortalDashboard {
     total: number;
     createdAt: string;
     productCount: number;
-    /** REQ-0128 — terminal status date for recent-order cards */
+    /** Terminal status date for recent-order cards */
     statusAt?: string;
+    /** Product densify (first line item preview) */
+    productId?: string | null;
+    productPreview?: string | null;
+    productImageUrl?: string | null;
+    categoryId?: string | null;
+    categoryName?: string | null;
+    supplierId?: string | null;
+    supplierName?: string | null;
+    supplierImage?: string | null;
+    /** Buyer (placedBy*) for supplier portal recent orders */
+    placedById?: string | null;
+    placedByName?: string | null;
+    placedByEmail?: string | null;
+    placedByImage?: string | null;
   }>;
   lowStockProducts: Array<{
     id: string;
@@ -97,6 +111,13 @@ export interface SupplierPortalDashboard {
     sku: string;
     quantity: number;
     status: string;
+    /** Product + catalog densify for low-stock rows */
+    imageUrl?: string | null;
+    categoryId?: string | null;
+    categoryName?: string | null;
+    supplierId?: string | null;
+    supplierName?: string | null;
+    supplierImage?: string | null;
   }>;
   monthlyRevenue: Array<{
     month: string;
@@ -106,7 +127,7 @@ export interface SupplierPortalDashboard {
 }
 
 /**
- * Payment breakdown for client Total Spent card — REQ-0154 invoice-money partition
+ * Payment breakdown for client Total Spent card — invoice-money partition
  */
 export interface ClientPaymentBreakdown {
   paid: number;
@@ -123,7 +144,7 @@ export interface ClientPaymentBreakdown {
  */
 export interface ClientInvoiceBreakdown {
   paid: number;
-  /** Mid-pay invoices — REQ-0154 */
+  /** Mid-pay invoices */
   partial?: number;
   pending: number;
   overdue: number;
@@ -166,8 +187,17 @@ export interface ClientPortalDashboard {
     total: number;
     createdAt: string;
     itemCount: number;
-    /** REQ-0128 — terminal status date for recent-order cards */
+    /** Terminal status date for recent-order cards */
     statusAt?: string;
+    /** Product densify (first line item preview) */
+    productId?: string | null;
+    productPreview?: string | null;
+    productImageUrl?: string | null;
+    categoryId?: string | null;
+    categoryName?: string | null;
+    supplierId?: string | null;
+    supplierName?: string | null;
+    supplierImage?: string | null;
   }>;
   recentInvoices: Array<{
     id: string;
@@ -220,6 +250,9 @@ export interface ClientCatalogOverview {
     productOwnerId: string;
     productOwnerName: string | null;
     productOwnerImage?: string | null;
+    /** Product + supplier avatar densify for client catalog */
+    imageUrl?: string | null;
+    supplierImage?: string | null;
   }>;
 }
 

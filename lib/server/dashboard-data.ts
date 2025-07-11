@@ -88,7 +88,7 @@ function getTwelveMonthsAgo(): Date {
 /** Prisma where clause for resources owned by this user (products, categories, etc.). */
 const userScope = (userId: string) => ({ userId });
 
-/** REQ-0173 — reject Redis rows missing topProducts catalog meta (pre-enrich shape). */
+/** Reject Redis rows missing topProducts catalog meta (pre-enrich shape). */
 function hasTopProductsCatalogMeta(stats: DashboardStats): boolean {
   const rows = stats.orderAnalytics?.topProducts ?? [];
   if (rows.length === 0) return true;
@@ -102,7 +102,7 @@ function hasTopProductsCatalogMeta(stats: DashboardStats): boolean {
   );
 }
 
-/** REQ-0174 — recent orders need supplierImage; reviews need categoryId. */
+/** Recent orders need supplierImage; reviews need categoryId. */
 function hasRecentCatalogMeta(stats: DashboardStats): boolean {
   const orders = stats.recent?.orders ?? [];
   if (
@@ -165,7 +165,7 @@ export async function getDashboardForAdmin(
       ? { orderId: { in: storeOrderIds } }
       : { orderId: { in: [] } };
 
-  // REQ-0158 — Self = store owner + no distinct client buyer
+  // Self = store owner + no distinct client buyer
   const selfOrderIds =
     storeOrderIds.length > 0
       ? (
@@ -225,7 +225,7 @@ export async function getDashboardForAdmin(
       where: { ...whereStoreOrders, status: { not: "cancelled" } },
       _sum: { total: true },
     }),
-    // REQ-0154 — invoice amount fields for Paid/Partial/Due/Pending money partition
+    // Invoice amount fields for Paid/Partial/Due/Pending money partition
     prisma.invoice.findMany({
       where: whereInvoiceForStore,
       select: {
@@ -278,7 +278,7 @@ export async function getDashboardForAdmin(
         userId: true,
         clientId: true,
         ...orderStatusAtSelect,
-        // REQ-0168/0170 — first-line catalog meta + product id/image for Latest 5
+        // First-line catalog meta + product id/image for Latest 5
         items: {
           select: {
             productId: true,
@@ -343,7 +343,7 @@ export async function getDashboardForAdmin(
       _count: { id: true },
     }),
     // Group by productId only — name/sku snapshots can differ across lines
-    // (rename/edit) and would duplicate React keys on Top Products (REQ-0136).
+    // (rename/edit) and would duplicate React keys on Top Products.
     storeOrderIds.length > 0
       ? prisma.orderItem.groupBy({
           by: ["productId"],
@@ -548,7 +548,7 @@ export async function getDashboardForAdmin(
     };
   });
 
-  // REQ-0168/0170/0174 — buyers, catalog, supplier avatars, review category
+  // Buyers, catalog, supplier avatars, review category
   type UserAvatarRow = PartyUserRow & { image?: string | null };
   type SupplierRow = { id: string; name: string; userId: string | null };
   type ReviewProductRow = {
@@ -778,7 +778,7 @@ export async function getDashboardForAdmin(
     }
   }
 
-  // Build top products (REQ-0173 — catalog enrich for denser Product cell)
+  // Build top products (catalog enrich for denser Product cell)
   const topProductIds = [
     ...new Set(topProductsRaw.map((p) => p.productId).filter(Boolean)),
   ];

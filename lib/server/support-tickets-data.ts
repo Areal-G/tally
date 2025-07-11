@@ -1,8 +1,8 @@
 /**
  * Server-side data fetching for Support Tickets pages (admin + user-facing) SSR.
  * Only import from server code (e.g. app/admin/support-tickets/page.tsx, app/support-tickets/page.tsx).
- * REQ-0185 — creator/assignee images + product owner densify (image, productCount).
- * REQ-0200 — owner-scoped products for Related product picker (any role).
+ * Creator/assignee images + product owner densify (image, productCount).
+ * Owner-scoped products for Related product picker (any role).
  */
 
 import { getCache, setCache, cacheKeys } from "@/lib/cache";
@@ -139,7 +139,7 @@ export async function getProductOwnersForSupport(): Promise<
 }
 
 /**
- * REQ-0200 — Non-deleted products owned by `ownerId` for ticket Related product picker.
+ * Non-deleted products owned by `ownerId` for ticket Related product picker.
  * Same ownership scope as POST create validation (`product.userId === assignedToId`).
  * Not role-scoped — client/supplier/admin all see the selected Send-to catalog.
  */
@@ -166,7 +166,7 @@ export async function getOwnerProductsForSupport(
   });
 
   const partyMaps = await loadProductListPartyMaps(products);
-  // REQ-0201 — pass owner/supplier avatars for DialogProductOptionRow densify
+  // Pass owner/supplier avatars for DialogProductOptionRow densify
   return products.map((product) => {
     const party = productListPartyFields(product, partyMaps);
     return {

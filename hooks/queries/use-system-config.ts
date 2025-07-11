@@ -7,7 +7,7 @@ import { apiClient, getErrorMessage } from "@/lib/api";
 import { queryKeys, withInitialData } from "@/lib/react-query";
 import { invalidateAllRelatedQueries } from "@/lib/react-query/invalidate-all";
 import { useToast } from "@/hooks/use-toast";
-import type { SystemConfig, UpdateSystemConfigInput } from "@/types";
+import type { UpdateSystemConfigInput } from "@/types";
 import type { SystemConfigForPage } from "@/lib/server/system-config-data";
 
 export type SystemConfigResponse = SystemConfigForPage;

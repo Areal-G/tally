@@ -1,4 +1,4 @@
-// Prisma schema for Stockly: MongoDB models for users, products, orders, invoices,
+// Prisma schema for Tally: MongoDB models for users, products, orders, invoices,
 // categories, suppliers, warehouses, support tickets, reviews, notifications, etc.
 // Run: npx prisma generate (after schema changes); use prisma/client for DB access.
 
@@ -103,7 +103,7 @@ model OrderItem {
   quantity    Int // Quantity ordered
   price       Float // Unit price at time of order (snapshot)
   subtotal      Float // Line item subtotal (quantity * price)
-  /** REQ-0068 — picked source warehouse when product has allocations */
+  /** Picked source warehouse when product has allocations */
   warehouseId   String?  @db.ObjectId
   warehouseName String? // Warehouse name snapshot at order time
   createdAt     DateTime @default(now()) @db.Date
@@ -143,9 +143,15 @@ model Product {
   expirationDate   DateTime?   @db.Date // Product expiration date (optional, for perishable items)
   deletedAt        DateTime?   @db.Date // Soft-delete: set when product has order history and is "deleted"
   deletedBy        String?     @db.ObjectId // User who soft-deleted the product
+  reorderPoint     Int? // Available qty at/below which the product should be reordered (null → app default 20)
+  reorderQuantity  Int? // Suggested quantity for a purchase order when reordering
+  lotNumber        String? // Batch / lot number of the current stock
+  barcode          String? // Any scannable code on the item (manufacturer EAN/UPC or generated in-store EAN-13); unique per owner, enforced in the API
+  lastScannedAt    DateTime?   @db.Date // Set when the product is found on /scan; drives "Recent scans"
   orderItems       OrderItem[] // Orders containing this product (one-to-many relationship)
 
   @@index([deletedAt])
+  @@index([userId, barcode])
 }
 
 model Session {
@@ -381,4 +387,85 @@ model AuditLog {
   @@index([action])
   @@index([entityType])
   @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Inventory operations: purchasing, stock movements, counts, returns
+// ---------------------------------------------------------------------------
+
+// Purchase order to a supplier. `lines` = [{ productId, name, sku, quantity, receivedQuantity, unitCost }]
+model PurchaseOrder {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  poNumber     String    @unique
+  userId       String    @db.ObjectId // Store owner
+  supplierId   String    @db.ObjectId
+  warehouseId  String?   @db.ObjectId // Default receiving warehouse
+  status       String    @default("draft") // draft | ordered | partial | received | cancelled
+  lines        Json
+  total        Float     @default(0)
+  notes        String?
+  expectedDate DateTime? @db.Date
+  orderedAt    DateTime? @db.Date
+  receivedAt   DateTime? @db.Date
+  createdAt    DateTime  @default(now()) @db.Date
+  updatedAt    DateTime? @db.Date
+
+  @@index([userId])
+  @@index([status])
+}
+
+// Ledger of stock changes not already recorded elsewhere
+// (sales come from orders, warehouse moves from StockTransfer).
+model StockMovement {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String   @db.ObjectId // Store owner
+  productId     String   @db.ObjectId
+  warehouseId   String?  @db.ObjectId
+  type          String // received | adjustment | count | return
+  quantity      Int // Signed change (+ in, − out)
+  balanceAfter  Int? // Catalog quantity after the change
+  reason        String?
+  reference     String? // e.g. PO-2026-0001, CNT-2026-0002, RET-2026-0003
+  referenceId   String?  @db.ObjectId
+  createdBy     String   @db.ObjectId
+  createdAt     DateTime @default(now()) @db.Date
+
+  @@index([userId, createdAt])
+  @@index([productId])
+}
+
+// Physical stock count. `lines` = [{ productId, name, sku, expected, counted }]
+model StockCount {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  countNumber String    @unique
+  userId      String    @db.ObjectId
+  warehouseId String?   @db.ObjectId
+  status      String    @default("draft") // draft | completed
+  lines       Json
+  notes       String?
+  createdAt   DateTime  @default(now()) @db.Date
+  completedAt DateTime? @db.Date
+
+  @@index([userId])
+}
+
+// Customer return against an order. `lines` = [{ productId, name, sku, quantity, unitPrice }]
+model ProductReturn {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  returnNumber String    @unique
+  userId       String    @db.ObjectId // Store owner
+  orderId      String    @db.ObjectId
+  orderNumber  String
+  warehouseId  String?   @db.ObjectId // Restock destination
+  status       String    @default("requested") // requested | restocked | rejected
+  reason       String
+  condition    String    @default("resellable") // resellable | damaged
+  lines        Json
+  refundAmount Float     @default(0)
+  notes        String?
+  createdAt    DateTime  @default(now()) @db.Date
+  resolvedAt   DateTime? @db.Date
+
+  @@index([userId])
+  @@index([orderId])
 }

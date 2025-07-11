@@ -1,5 +1,5 @@
 /**
- * REQ-0106/0110 — order-line stock validation tests (Beats scenario + caps).
+ * Order-line stock validation tests (Beats scenario + caps).
  */
 
 import { describe, expect, it } from "vitest";

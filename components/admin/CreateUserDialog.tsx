@@ -4,7 +4,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -35,7 +35,6 @@ import {
   GLASS_BUTTON_ICON_HOVER,
   GLASS_BUTTON_SHELL_RESET,
   GLASS_GHOST_BUTTON,
-  GLASS_PRIMARY_BUTTON,
   DIALOG_SELECT_CONTENT_CLASS,
   DIALOG_SELECT_ITEM_CLASS,
 } from "@/components/shared";
@@ -127,7 +126,7 @@ export default function CreateUserDialog() {
           Create User
         </Button>
       </DialogTrigger>
-      <DialogContent className="p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto border-blue-400/30 dark:border-blue-400/30 shadow-[0_30px_80px_rgba(59,130,246,0.35)] dark:shadow-[0_30px_80px_rgba(59,130,246,0.25)]">
+      <DialogContent className="p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto border-blue-400/30 dark:border-blue-400/30 ">
         <DialogHeader>
           <DialogTitle className="text-[22px] text-white flex items-center gap-2">
             <div className="p-2 rounded-xl border border-blue-300/30 bg-blue-100/50 dark:border-blue-400/30 dark:bg-blue-500/20">

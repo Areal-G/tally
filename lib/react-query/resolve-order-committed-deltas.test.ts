@@ -1,5 +1,5 @@
 /**
- * REQ-0221 — order create/fulfill/cancel → committedQuantity deltas
+ * Order create/fulfill/cancel → committedQuantity deltas
  */
 import { describe, expect, it } from "vitest";
 import { resolveOrderCommittedDeltas } from "@/lib/react-query/patch-mutation-cache";

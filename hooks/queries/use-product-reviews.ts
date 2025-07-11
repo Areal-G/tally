@@ -2,7 +2,7 @@
  * Product Review query hooks
  * TanStack Query hooks for product review data fetching and mutations
  *
- * REQ-0165 — patch eligibility (order-scoped) before invalidate so Write review
+ * Patch eligibility (order-scoped) before invalidate so Write review
  * never flashes beside stars after create/delete.
  */
 
@@ -166,7 +166,7 @@ export function useCreateProductReview() {
       patchListCaches(queryClient, queryKeys.productReviews.all, data, {
         prependIfMissing: true,
       });
-      // REQ-0165 — hide Write immediately (before eligibility refetch)
+      // Hide Write immediately (before eligibility refetch)
       patchReviewEligibilityAfterCreate(queryClient, data);
       invalidateAllRelatedQueries(queryClient);
       toast({
@@ -234,7 +234,7 @@ export function useDeleteProductReview() {
       return response.data;
     },
     onSuccess: (_data, id) => {
-      // REQ-0165 — restore eligibility before list remove so Write appears without lag flash
+      // Restore eligibility before list remove so Write appears without lag flash
       const cached = findCachedProductReview(queryClient, id);
       if (cached) patchReviewEligibilityAfterDelete(queryClient, cached);
       removeFromListCaches(queryClient, queryKeys.productReviews.all, id);

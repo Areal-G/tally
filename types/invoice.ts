@@ -37,11 +37,11 @@ export interface Invoice {
   paidAt?: Date | null;
   cancelledAt?: Date | null;
   paymentLink?: string | null;
-  /** Stripe PaymentIntent ID for refunds (REQ-0071 detail card) */
+  /** Stripe PaymentIntent ID for refunds (detail card) */
   stripePaymentIntentId?: string | null;
   notes?: string | null;
   billingAddress?: BillingAddress | null;
-  /** REQ-0210 — from linked order (invoice schema stores billing only) */
+  /** From linked order (invoice schema stores billing only) */
   shippingAddress?: BillingAddress | null;
   createdAt: Date;
   updatedAt?: Date | null;
@@ -67,20 +67,20 @@ export interface Invoice {
   client?: { userId?: string; name: string | null; email: string; image?: string | null } | null;
   /** Product owner(s) for items in the order (for detail Parties section) */
   invoiceProductOwners?: { userId: string; name: string | null; email: string; image?: string | null }[];
-  /** REQ-0063 — linked order number for Related Order row + copy */
+  /** Linked order number for Related Order row + copy */
   linkedOrderNumber?: string | null;
-  /** REQ-0150 — linked order createdAt for Invoice table Order # meta */
+  /** Linked order createdAt for Invoice table Order # meta */
   linkedOrderCreatedAt?: string | Date | null;
-  /** REQ-0063 — line items from linked order (thumbnails on invoice detail) */
+  /** Line items from linked order (thumbnails on invoice detail) */
   linkedOrderItems?: OrderItem[];
-  /** REQ-0151 — linked order status/payment for Invoice Order # badges */
+  /** Linked order status/payment for Invoice Order # badges */
   linkedOrderStatus?: string | null;
   linkedOrderPaymentStatus?: string | null;
   linkedOrderStatusAt?: string | null;
   linkedOrderPaidAt?: string | null;
-  /** REQ-0150 — terminal/relevant status timestamp for Status column */
+  /** Terminal/relevant status timestamp for Status column */
   statusAt?: string;
-  /** REQ-0096 — DB audit fields (distinct from invoiceCreatedBy issuer resolution) */
+  /** DB audit fields (distinct from invoiceCreatedBy issuer resolution) */
   creator?: {
     id: string;
     name?: string | null;

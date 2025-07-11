@@ -1,5 +1,5 @@
 /**
- * Server-side email preferences for SSR prefetch (REQ-0025).
+ * Server-side email preferences for SSR prefetch.
  */
 
 import { getUserEmailPreferences } from "@/lib/email/preferences";

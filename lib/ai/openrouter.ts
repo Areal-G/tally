@@ -51,11 +51,11 @@ export async function createOpenRouterChatCompletion(
   messages: ChatMessage[],
   options: ChatCompletionOptions = {},
 ): Promise<ChatCompletionResult> {
-  if (!isOpenRouterConfigured()) {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!isOpenRouterConfigured() || !apiKey) {
     return { ok: false, kind: "not_configured", provider: "openrouter" };
   }
 
-  const apiKey = process.env.OPENROUTER_API_KEY!;
   const model = options.model ?? "openai/gpt-4o-mini";
 
   try {

@@ -4,7 +4,7 @@ import {
   isOrderRecordCountedAsSold,
 } from "@/lib/orders/order-sales-eligibility";
 
-describe("isOrderCountedAsSold (REQ-0140)", () => {
+describe("isOrderCountedAsSold", () => {
   it("counts delivered or paid", () => {
     expect(isOrderCountedAsSold("delivered", "unpaid")).toBe(true);
     expect(isOrderCountedAsSold("pending", "paid")).toBe(true);

@@ -1,8 +1,7 @@
 /**
- * REQ-0079 — numbered circle for ordered card lists (recent orders, etc.).
+ * Numbered circle for ordered card lists (recent orders, etc.).
  * Light: gray-600 bg + white text; dark: inverse (gray-200 bg + gray-700 text).
  */
-import React from "react";
 import { cn } from "@/lib/utils";
 
 export type ListIndexBadgeProps = {

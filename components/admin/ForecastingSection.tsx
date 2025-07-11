@@ -3,13 +3,12 @@
 /**
  * Forecasting Section Component
  * Displays demand forecasting, stock predictions, and anomalies.
- * REQ-0170 — StatisticsCard KPIs; ChartCard section headers; ProductThumb + sky links.
- * REQ-0171 — compact KPIs; denser Product cell.
- * REQ-0172 — 2-line Name·SKU / Category·supplier AvatarInlineLink; table overflow-x only.
- * REQ-0173 — DenseCatalogProductCell shared with Top Products.
+ * StatisticsCard KPIs; ChartCard section headers; ProductThumb + sky links.
+ * Compact KPIs; denser Product cell.
+ * 2-line Name·SKU / Category·supplier AvatarInlineLink; table overflow-x only.
+ * DenseCatalogProductCell shared with Top Products.
  */
 
-import React from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -91,7 +90,7 @@ function getAnomalySeverityColor(severity: SalesAnomaly["severity"]): string {
 }
 
 export type ForecastingSectionProps = {
-  /** SSR-passed forecast summary (REQ-0025) */
+  /** SSR-passed forecast summary */
   initialForecasting?: ForecastingSummary;
 };
 
@@ -127,7 +126,7 @@ export default function ForecastingSection({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* REQ-0170 — StatisticsCard KPIs (single card padding; no nested CardHeader p-4) */}
+      {/* StatisticsCard KPIs (single card padding; no nested CardHeader p-4) */}
       <div
         className={cn(
           PAGE_STATS_GRID_IN_SHELL_CLASS,

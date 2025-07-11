@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * REQ-0063 — shared product line-item rows (thumb + name/SKU/qty/subtotal).
- * REQ-0147 — product name text-sm; meta Qty/SKU/catalog text-xs.
- * REQ-0148 — meta · separators + invoice CopyableText chip when order has invoice.
- * REQ-0163 — optional relatedOrder meta chip (invoice detail → ORD # + clipboard).
+ * Shared product line-item rows (thumb + name/SKU/qty/subtotal).
+ * Product name text-sm; meta Qty/SKU/catalog text-xs.
+ * Meta · separators + invoice CopyableText chip when order has invoice.
+ * Optional relatedOrder meta chip (invoice detail → ORD # + clipboard).
  */
 
 import React from "react";
@@ -29,10 +29,10 @@ export type ProductLineItemsListProps = {
   orderTotal?: number;
   emptyMessage?: string;
   showReviews?: boolean;
-  /** REQ-0148 — include invoiceForOrder for meta invoice chip */
+  /** Include invoiceForOrder for meta invoice chip */
   order?: Pick<Order, "id" | "paymentStatus" | "invoiceForOrder">;
   /**
-   * REQ-0163 — invoice detail: show linked order # chip (sky + clipboard).
+   * Invoice detail: show linked order # chip (sky + clipboard).
    * Prefer over self invoiceForOrder on invoice pages.
    */
   relatedOrder?: { id: string; orderNumber: string } | null;
@@ -85,7 +85,7 @@ function CatalogText({
   );
 }
 
-/** REQ-0148 — join meta chips with · separators (skip empty). */
+/** Join meta chips with · separators (skip empty). */
 function MetaSegmentRow({ segments }: { segments: React.ReactNode[] }) {
   const nodes = segments.filter(Boolean);
   if (nodes.length === 0) return null;
@@ -198,7 +198,7 @@ export function ProductLineItemsList({
               <span key="supplier" className={META_LABEL}>
                 <Truck className="h-3 w-3 shrink-0 text-gray-500 dark:text-gray-300" />
                 Supplier:{" "}
-                <AvatarInlineLink
+                <AvatarInlineLink showAvatar={false}
                   seed={item.supplierId}
                   label={item.supplierName ?? "View supplier"}
                   href={supplierHref}
@@ -233,7 +233,7 @@ export function ProductLineItemsList({
           );
         }
 
-        // REQ-0163 — linked order # on invoice detail (parity with invoice chip on order detail)
+        // Linked order # on invoice detail (parity with invoice chip on order detail)
         if (relatedOrder?.orderNumber) {
           metaSegments.push(
             <span key="related-order" className={META_LABEL}>
@@ -259,7 +259,7 @@ export function ProductLineItemsList({
           );
         }
 
-        // Invoice once per line row when order has a linked invoice (REQ-0148)
+        // Invoice once per line row when order has a linked invoice
         if (invoice) {
           metaSegments.push(
             <span key="invoice" className={META_LABEL}>
@@ -285,7 +285,7 @@ export function ProductLineItemsList({
         return (
           <div
             key={item.id}
-            className="p-4 rounded-xl border border-sky-200/40 dark:border-sky-400/20 bg-gradient-to-r from-sky-100/40 via-sky-50/20 to-transparent dark:from-sky-500/10 dark:via-sky-500/5 dark:to-transparent"
+            className="p-4 rounded-xl border border-sky-200/40 dark:border-sky-400/20 bg-sky-100/40 dark:bg-sky-500/10 "
           >
             <div className="flex gap-3 items-start">
               <ProductThumb
@@ -363,7 +363,7 @@ export function ProductLineItemsList({
               </div>
             </div>
 
-            {/* REQ-0167 — full-width row: rating left · edit/delete right (justify-between) */}
+            {/* Full-width row: rating left · edit/delete right (justify-between) */}
             {showReviews &&
               order?.paymentStatus === "paid" &&
               item.productId &&

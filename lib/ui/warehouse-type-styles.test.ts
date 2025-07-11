@@ -19,7 +19,7 @@ describe("warehouse-type-styles", () => {
     expect(WAREHOUSE_TYPE_OPTIONS).toHaveLength(6);
     for (const opt of WAREHOUSE_TYPE_OPTIONS) {
       const tone = getWarehouseTypeTone(opt.value);
-      expect(tone.className).toContain("bg-gradient-to-r");
+      expect(tone.className).not.toContain("bg-gradient-to-r");
       // Each option resolves to its own glass hue class (not empty / missing)
       expect(tone.className.length).toBeGreaterThan(20);
     }
@@ -41,10 +41,10 @@ describe("warehouse-type-styles", () => {
     expect(getWarehouseTypeTone("Distribution").icon).toBe(Truck);
   });
 
-  it("uses glass glow surfaces (not opaque flat chips)", () => {
+  it("uses calm flat tinted chips (no gradients or glow shadows)", () => {
     const main = getWarehouseTypeTone("main").className;
-    expect(main).toContain("bg-gradient-to-r");
-    expect(main).toContain("shadow-[");
-    expect(main).not.toContain("bg-blue-100");
+    expect(main).not.toContain("bg-gradient-to-r");
+    expect(main).not.toContain("shadow-[");
+    expect(main).toMatch(/bg-[a-z]+-[0-9]00\/[0-9]+/);
   });
 });

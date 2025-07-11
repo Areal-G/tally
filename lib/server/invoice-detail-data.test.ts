@@ -1,6 +1,6 @@
 /**
- * REQ-0204 — supplier invoice detail access via getInvoiceDetailForPage.
- * REQ-0214 — client catalog-history + buyer invoice access.
+ * Supplier invoice detail access via getInvoiceDetailForPage.
+ * Client catalog-history + buyer invoice access.
  */
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
@@ -74,7 +74,7 @@ const sampleInvoice = {
   notes: null,
 } as const;
 
-describe("getInvoiceDetailForPage supplier (REQ-0204)", () => {
+describe("getInvoiceDetailForPage supplier", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(prisma.order.findUnique).mockResolvedValue(null);
@@ -129,7 +129,7 @@ describe("getInvoiceDetailForPage supplier (REQ-0204)", () => {
   });
 });
 
-describe("getInvoiceDetailForPage client (REQ-0214)", () => {
+describe("getInvoiceDetailForPage client", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(prisma.order.findUnique).mockResolvedValue(null);

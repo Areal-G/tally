@@ -259,7 +259,7 @@ describe("enrichStockAllocationRows", () => {
     vi.clearAllMocks();
   });
 
-  it("delegates to DB-backed cross-warehouse totals (REQ-0102)", async () => {
+  it("delegates to DB-backed cross-warehouse totals", async () => {
     vi.mocked(prisma.stockAllocation.findMany).mockResolvedValue([
       { productId: "prod-1", quantity: BigInt(40) },
     ] as never);

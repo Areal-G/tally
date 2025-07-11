@@ -1,5 +1,5 @@
 /**
- * Shallow URL search-param updates without Next.js RSC refetch (REQ-0027).
+ * Shallow URL search-param updates without Next.js RSC refetch.
  * Use when TanStack client cache already holds the data (e.g. client product owner).
  */
 export function replaceShallowSearchParam(

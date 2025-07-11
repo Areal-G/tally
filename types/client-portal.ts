@@ -1,7 +1,7 @@
 /**
  * Admin Client Portal type definitions
  * Dashboard for viewing client (role=client) users, their orders, invoices, activity
- * REQ-0177 — denser recent order/invoice catalog meta
+ * Denser recent order/invoice catalog meta
  */
 
 export interface ClientPortalStats {
@@ -31,12 +31,12 @@ export interface ClientPortalRecentOrder {
   total: number;
   clientId: string;
   clientName: string;
-  /** REQ-0170 — client avatar on recent rows */
+  /** Client avatar on recent rows */
   clientImage?: string | null;
   createdAt: string;
-  /** REQ-0128 — terminal status date for recent-order cards */
+  /** Terminal status date for recent-order cards */
   statusAt?: string;
-  /** REQ-0177 — first-line product/category/supplier (dashboard parity) */
+  /** First-line product/category/supplier (dashboard parity) */
   productId?: string | null;
   productPreview?: string | null;
   productImageUrl?: string | null;
@@ -55,10 +55,10 @@ export interface ClientPortalRecentInvoice {
   total: number;
   clientId: string;
   clientName: string;
-  /** REQ-0170 — client avatar on recent rows */
+  /** Client avatar on recent rows */
   clientImage?: string | null;
   createdAt: string;
-  /** REQ-0177 — product meta from linked order first item */
+  /** Product meta from linked order first item */
   productId?: string | null;
   productPreview?: string | null;
   productImageUrl?: string | null;

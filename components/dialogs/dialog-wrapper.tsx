@@ -93,11 +93,6 @@ export function DialogWrapper({
   onOpenChange,
   ...dialogProps
 }: DialogWrapperProps) {
-  // Generate unique ID for description if not provided
-  const descriptionId = React.useId();
-  const finalDescriptionId =
-    ariaDescriptionId || `dialog-description-${descriptionId}`;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange} {...dialogProps}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
@@ -112,7 +107,7 @@ export function DialogWrapper({
             {title}
           </DialogTitle>
           {/* Always render DialogDescription to satisfy accessibility, even if empty */}
-          <DialogDescription className={descriptionClassName}>
+          <DialogDescription id={ariaDescriptionId} className={descriptionClassName}>
             {description || " "}
           </DialogDescription>
         </DialogHeader>

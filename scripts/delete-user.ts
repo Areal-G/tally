@@ -9,7 +9,7 @@
  *   npm run script:delete-user <email>
  * 
  * Example:
- *   npm run script:delete-user areal@gmail.com
+ *   npm run script:delete-user user@example.com
  * 
  * WARNING: This will permanently delete the user and all their associated data. Use with caution!
  */
@@ -33,7 +33,7 @@ async function deleteUser(email?: string) {
       console.log("  or");
       console.log("  npm run script:delete-user <email>");
       console.log("\nExample:");
-      console.log("  npm run script:delete-user areal@gmail.com");
+      console.log("  npm run script:delete-user user@example.com");
       process.exit(1);
     }
 
@@ -111,8 +111,8 @@ async function deleteUser(email?: string) {
     console.log(
       "\n💡 Note: You can now create a new account with this email via Google OAuth."
     );
-  } catch (error: any) {
-    if (error.code === "P2003") {
+  } catch (error) {
+    if ((error as { code?: string }).code === "P2003") {
       console.error(
         "❌ Error: Cannot delete user because they have associated data."
       );
@@ -120,7 +120,7 @@ async function deleteUser(email?: string) {
         "   Please delete all products, suppliers, and categories for this user first."
       );
     } else {
-      console.error("❌ Error deleting user:", error.message || error);
+      console.error("❌ Error deleting user:", error instanceof Error ? error.message : error);
     }
     process.exit(1);
   } finally {

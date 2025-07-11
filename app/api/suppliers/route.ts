@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       updatedAt: s.updatedAt?.toISOString() ?? null,
       isGlobalDemo: demoUserId != null && s.userId === demoUserId,
     }));
-    // REQ-0141/0142 — productCount (viewer-scoped) + linked email for list columns
+    // productCount (viewer-scoped) + linked email for list columns
     const enriched = await enrichSuppliersWithListFields(withFlags, userId);
 
     return NextResponse.json(

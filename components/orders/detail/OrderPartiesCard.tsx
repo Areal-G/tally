@@ -1,11 +1,10 @@
 "use client";
 
 /**
- * REQ-0147 / REQ-0164 — Parties & Roles on order detail.
+ * Parties & Roles on order detail.
  * Owner-products links for all roles; self name gray/white; others sky.
  */
 
-import React from "react";
 import { Package } from "lucide-react";
 import type { Order } from "@/types";
 import { GlassCard } from "./order-detail-primitives";

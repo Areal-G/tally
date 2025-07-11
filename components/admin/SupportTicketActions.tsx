@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * REQ-0185 — Support ticket table Actions (MoreVertical).
+ * Support ticket table Actions (MoreVertical).
  * View Details · Edit Ticket (dialog) · Delete (dynamic confirm).
  * Edit/Delete when session user is creator or assignee (API gate parity).
- * REQ-0190/0191 — Admin Reassign… via TicketReassignDialog.
+ * Admin Reassign… via TicketReassignDialog.
  */
 
 import { useState } from "react";
@@ -64,7 +64,7 @@ export default function SupportTicketActions({
   const canMutate =
     !!sessionId &&
     (ticket.userId === sessionId || ticket.assignedToId === sessionId);
-  // REQ-0190 — admin Reassign is separate from Edit Send-to lock
+  // Admin Reassign is separate from Edit Send-to lock
   const canReassign = isAdmin && productOwners.length > 0;
 
   const handleDelete = async () => {
@@ -92,7 +92,7 @@ export default function SupportTicketActions({
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/5 backdrop-blur-md shadow-lg"
+          className="border border-white/10 bg-white/5 shadow-lg"
         >
           <DropdownMenuItem asChild>
             <Link href={detailHref} className="flex items-center gap-2">

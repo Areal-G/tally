@@ -1,16 +1,16 @@
 "use client";
 
 /**
- * OrderPickerCommand — searchable order picker for InvoiceDialog (REQ-0060).
+ * OrderPickerCommand — searchable order picker for InvoiceDialog.
  *
  * Replaces the plain Select in create mode: a Popover + Command dropdown with
  * type-to-filter (matches the ProductOwnerSelect pattern). Each row shows
  * order # + total + status (+ placer name on the admin combined invoices page)
  * and all of those fields are searchable.
  *
- * REQ-0199 — dark glass Combobox trigger (no outline→white hover); modal Popover
+ * Dark glass Combobox trigger (no outline→white hover); modal Popover
  * + onCloseAutoFocus preventDefault so outside-click does not close-then-reopen.
- * REQ-0187 — densify option rows (icons · dots, name · sku); trigger without (status).
+ * Densify option rows (icons · dots, name · sku); trigger without (status).
  */
 
 import * as React from "react";
@@ -38,9 +38,9 @@ import { OrderStatusBadge, PaymentStatusBadge } from "@/lib/ui/semantic-badges";
 import { getOrderItemUnitCounts } from "@/lib/orders/order-list-meta";
 import { cn } from "@/lib/utils";
 import type { Order } from "@/types";
+import { formatStableCurrency } from "@/lib/format";
 
-const fmt = (v: number) =>
-  `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmt = formatStableCurrency;
 
 export type OrderPickerCommandProps = {
   /** Non-cancelled orders eligible for invoicing */
@@ -78,7 +78,7 @@ export function OrderPickerCommand({
   );
 
   return (
-    // REQ-0199 — modal isolates pointer events from parent Dialog (no reopen race)
+    // Modal isolates pointer events from parent Dialog (no reopen race)
     <Popover open={open} onOpenChange={setOpen} modal>
       <PopoverTrigger asChild>
         <Button

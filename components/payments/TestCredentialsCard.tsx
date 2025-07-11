@@ -5,7 +5,7 @@
  * Displays Stripe test credentials for demo/development
  */
 
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,

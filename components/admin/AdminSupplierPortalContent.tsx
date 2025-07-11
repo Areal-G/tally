@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ProductStockStatusBadge } from "@/lib/ui/semantic-badges";
@@ -53,6 +53,7 @@ import {
   AdminEmbedDataTable,
   type AdminEmbedColumn,
 } from "@/components/admin/AdminEmbedDataTable";
+import { formatStableCurrency } from "@/lib/format";
 
 export type AdminSupplierPortalContentProps = {
   initialStats?: SupplierPortalStats | null;
@@ -76,7 +77,7 @@ export default function AdminSupplierPortalContent({
         id: "name",
         header: "Name",
         render: (s) => (
-          <AvatarInlineLink
+          <AvatarInlineLink showAvatar={false}
             label={s.name}
             seed={s.userId ?? s.id}
             image={s.image}
@@ -113,7 +114,7 @@ export default function AdminSupplierPortalContent({
         header: "Inventory Value",
         headerClassName: "text-right",
         cellClassName: "text-right text-gray-700 dark:text-white",
-        render: (s) => `$${s.totalValue.toLocaleString()}`,
+        render: (s) => formatStableCurrency(s.totalValue),
       },
     ],
     [],
@@ -166,7 +167,7 @@ export default function AdminSupplierPortalContent({
           />
           <AnalyticsCard
             title="Inventory Value"
-            value={`$${(stats?.counts?.totalValue ?? 0).toLocaleString()}`}
+            value={formatStableCurrency(stats?.counts?.totalValue ?? 0)}
             icon={DollarSign}
             description="Total product value"
             variant="amber"
@@ -176,7 +177,7 @@ export default function AdminSupplierPortalContent({
 
         {/* Recent products & orders — glassmorphic cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4">
-          {/* Recent products — REQ-0177 densify + SectionCardHeader */}
+          {/* Recent products — densify + SectionCardHeader */}
           <GlassCard padding="body" variant="sky">
             <SectionCardHeader
               title="Recent Supplier Products"
@@ -275,7 +276,7 @@ export default function AdminSupplierPortalContent({
                           {p.supplierId ? (
                             <>
                               <span aria-hidden>·</span>
-                              <AvatarInlineLink
+                              <AvatarInlineLink showAvatar={false}
                                 label={p.supplierName}
                                 seed={p.supplierUserId ?? p.supplierId}
                                 image={p.supplierImage}
@@ -292,7 +293,7 @@ export default function AdminSupplierPortalContent({
                       <div className="flex flex-col items-end gap-1 flex-shrink-0">
                         <ProductStockStatusBadge status={p.status} />
                         <span className="text-xs font-normal text-gray-700 dark:text-white">
-                          ${p.price.toLocaleString()}
+                          {formatStableCurrency(p.price)}
                         </span>
                       </div>
                     </li>
@@ -320,7 +321,7 @@ export default function AdminSupplierPortalContent({
             </div>
           </GlassCard>
 
-          {/* Recent orders — REQ-0177 product meta + date-first */}
+          {/* Recent orders — product meta + date-first */}
           <GlassCard padding="body" variant="emerald">
             <SectionCardHeader
               title="Recent Supplier Orders"
@@ -402,7 +403,7 @@ export default function AdminSupplierPortalContent({
                                 (o.categoryId && o.categoryName)) && (
                                 <span aria-hidden>·</span>
                               )}
-                              <AvatarInlineLink
+                              <AvatarInlineLink showAvatar={false}
                                 label={o.supplierName}
                                 seed={o.supplierUserId ?? o.supplierId}
                                 image={o.supplierImage}
@@ -416,7 +417,7 @@ export default function AdminSupplierPortalContent({
                             <span>{o.supplierName}</span>
                           ) : null}
                         </div>
-                        {/* REQ-0178 — Calendar · date · buyer avatar (client-portal parity) */}
+                        {/* Calendar · date · buyer avatar (client-portal parity) */}
                         <div className={CARD_LIST_META_ROW_CLASS}>
                           <span className="inline-flex items-center gap-1 min-w-0">
                             <Calendar
@@ -455,7 +456,7 @@ export default function AdminSupplierPortalContent({
                         paymentStatus={o.paymentStatus}
                         trailing={
                           <span className="text-xs font-normal text-gray-700 dark:text-white">
-                            ${o.total.toLocaleString()}
+                            {formatStableCurrency(o.total)}
                           </span>
                         }
                       />

@@ -1,7 +1,7 @@
 /**
- * REQ-0084 — shared catalog insights from loaded products + order items (no extra DB).
+ * Shared catalog insights from loaded products + order items (no extra DB).
  * Used by category and supplier detail SSR; product uses product-insights.ts.
- * REQ-0140 — sold trend lines only for delivered/paid; stock buckets use qty − committed.
+ * Sold trend lines only for delivered/paid; stock buckets use qty − committed.
  */
 
 import { CATALOG_LOW_STOCK_THRESHOLD } from "@/lib/insights/constants";

@@ -207,7 +207,7 @@ export async function deleteNotification(
   });
 
   if (!existingNotification) {
-    // Expected 404 — already deleted / wrong user (never 500 → Sentry)
+    // Expected 404 — already deleted / wrong user (never a 500)
     throw new ApiError("Notification not found or unauthorized", 404);
   }
 

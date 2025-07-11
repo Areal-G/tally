@@ -1,7 +1,7 @@
 /**
- * REQ-0128 — shared warehouse type icon + badge tone map (DRY with WarehouseTypeBadge).
+ * Shared warehouse type icon + badge tone map (DRY with WarehouseTypeBadge).
  * Glass glow surfaces (parity with ActiveInactiveBadge / order status chips).
- * REQ-0186 — WAREHOUSE_TYPE_OPTIONS + getWarehouseTypeLabel for table/detail/dialog badges.
+ * WAREHOUSE_TYPE_OPTIONS + getWarehouseTypeLabel for table/detail/dialog badges.
  */
 
 import {
@@ -42,7 +42,7 @@ function titleCaseTypeLabel(value: string): string {
 }
 
 /**
- * REQ-0186 — human label for badges (e.g. main → "Main Warehouse").
+ * Human label for badges (e.g. main → "Main Warehouse").
  * Unknown keys fall back to title-case of the raw value.
  */
 export function getWarehouseTypeLabel(type?: string | null): string {

@@ -1,5 +1,5 @@
 /**
- * REQ-0156 — Shared Invoices KPI badges (store-wide / My Activity parity).
+ * Shared Invoices KPI badges (store-wide / My Activity parity).
  * Paid → Partial → Pending → Overdue → Cancelled → Refunded (+ Self/Others).
  * Client-safe / pure. Partial/Pending counts are derived (not a DB status).
  */

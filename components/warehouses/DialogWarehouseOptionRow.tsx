@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0187 — Select/Command-safe warehouse densify row (no Links):
+ * Select/Command-safe warehouse densify row (no Links):
  * Line 1: truncated name
  * Line 2: WarehouseTypeBadge · muted "{n} avail."
  */

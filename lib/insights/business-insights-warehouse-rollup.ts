@@ -1,5 +1,5 @@
 /**
- * REQ-0119 — client-safe warehouse rollup for Business Insights tab.
+ * Client-safe warehouse rollup for Business Insights tab.
  * Pure transforms over getWarehouseStockSummary rows (no DB).
  */
 

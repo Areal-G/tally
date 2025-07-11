@@ -1,5 +1,5 @@
 /**
- * REQ-0197 — When Send-to changes, clear productId if linked product is not owned
+ * When Send-to changes, clear productId if linked product is not owned
  * by the new assignee (Related card must stay coherent).
  */
 

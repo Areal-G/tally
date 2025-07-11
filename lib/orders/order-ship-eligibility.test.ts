@@ -4,7 +4,7 @@ import {
   shippingLabelBlockedReason,
 } from "./order-ship-eligibility";
 
-describe("canGenerateShippingLabel (REQ-0211)", () => {
+describe("canGenerateShippingLabel", () => {
   it("blocks pending unpaid", () => {
     expect(
       canGenerateShippingLabel({

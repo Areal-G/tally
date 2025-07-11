@@ -27,7 +27,7 @@ export type StockQuantityFieldProps = {
   allocatedTotal?: number;
   /** Catalog minus total allocated (can still be placed in warehouses) */
   unallocatedRemaining?: number;
-  /** REQ-0108 — edit mode reserved floor per warehouse row */
+  /** Edit mode reserved floor per warehouse row */
   minReserved?: number;
 };
 

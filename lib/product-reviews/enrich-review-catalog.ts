@@ -1,5 +1,5 @@
 /**
- * REQ-0180 — batch catalog enrich for product review list/detail
+ * Batch catalog enrich for product review list/detail
  * (product image, category, supplier avatar; optional order/invoice on detail).
  */
 
@@ -24,7 +24,7 @@ export type ReviewPurchaseEnrich = {
   orderNumber: string | null;
   invoiceId: string | null;
   invoiceNumber: string | null;
-  /** REQ-0183 — densify purchase card on detail */
+  /** Densify purchase card on detail */
   orderStatus: string | null;
   orderPaymentStatus: string | null;
   orderTotal: number | null;
@@ -224,7 +224,7 @@ export async function mapProductReviewsWithCatalog(
   });
 }
 
-/** True when cached list rows include REQ-0180 densify fields. */
+/** True when cached list rows include densify fields. */
 export function hasReviewListV2Shape(
   cached: ProductReview[] | null,
 ): cached is ProductReview[] {

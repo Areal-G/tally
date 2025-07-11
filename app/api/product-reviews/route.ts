@@ -12,7 +12,6 @@ import {
   getAllProductReviews,
   getProductReviewsForProductOwner,
   hasExistingReview,
-  getEligibleReviewSlots,
 } from "@/prisma/product-review";
 import { createProductReviewSchema } from "@/lib/validations";
 import { withRateLimit, defaultRateLimits } from "@/lib/api/rate-limit";
@@ -178,7 +177,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // REQ-0180 — return enriched detail shape (catalog + reviewer)
+    // Return enriched detail shape (catalog + reviewer)
     const detail = await getProductReviewDetailForPage(
       { id: session.id, role: session.role },
       created.id,

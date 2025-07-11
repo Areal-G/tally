@@ -1,11 +1,10 @@
 "use client";
 
 /**
- * REQ-0148 — header Back matches ProductDetailPage: variant="ghost" + DETAIL_HEADER_BACK_ICON_CLASS.
+ * Header Back matches ProductDetailPage: variant="ghost" + DETAIL_HEADER_BACK_ICON_CLASS.
  * Default Button variant paints bg-primary (red) over the light glass token.
  */
 
-import React from "react";
 import Link from "next/link";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";

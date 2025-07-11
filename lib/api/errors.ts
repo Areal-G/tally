@@ -178,7 +178,7 @@ export function getErrorHttpStatus(error: unknown): number | undefined {
 }
 
 /**
- * Expected client errors (4xx) — should not be reported to Sentry
+ * Expected client errors (4xx) — should not be reported
  */
 export function isExpectedClientError(error: unknown): boolean {
   const status = getErrorHttpStatus(error);

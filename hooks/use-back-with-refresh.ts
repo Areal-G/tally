@@ -2,7 +2,7 @@
  * useBackWithRefresh
  * Central back-navigation hook used on ALL detail pages.
  * Navigates first, then invalidates list/dashboard caches so the destination is fresh
- * without refetching the still-mounted detail (soft-nav flash — REQ-0220).
+ * Without refetching the still-mounted detail (soft-nav flash —).
  *
  * Supports every entity that has a detail page in the app.
  * Usage:
@@ -46,7 +46,7 @@ function runBackInvalidations(
     void queryClient.invalidateQueries({ queryKey: queryKeys.history.lists() });
     return;
   }
-  // REQ-0220 — lists/dashboards only; never *.all / forecasting / stock while detail painted
+  // Lists/dashboards only; never *.all / forecasting / stock while detail painted
   invalidateAfterBackNavigation(queryClient);
 }
 
@@ -62,7 +62,7 @@ export function useBackWithRefresh(
     // Clear Stripe return flag when present (history may still contain checkout.stripe.com)
     consumeStripeCheckoutReturn();
     // Prefer explicit list path when set (admin order detail → /admin/orders)
-    // Navigate BEFORE invalidate so departing detail is not painted as unsettled (REQ-0220)
+    // Navigate BEFORE invalidate so departing detail is not painted as unsettled
     if (fallbackPath) {
       router.push(fallbackPath);
     } else {

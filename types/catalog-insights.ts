@@ -1,5 +1,5 @@
 /**
- * REQ-0084 — shared catalog entity insights (category, supplier, product detail SSR).
+ * Shared catalog entity insights (category, supplier, product detail SSR).
  */
 
 export type CatalogSalesTrendPoint = {

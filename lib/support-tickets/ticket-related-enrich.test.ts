@@ -30,7 +30,7 @@ describe("mergeTicketRelated", () => {
     expect(merged.subject).toBe("S");
   });
 
-  // REQ-0201 — densify snap fields merge through
+  // Densify snap fields merge through
   it("merges related product densify fields", () => {
     const merged = mergeTicketRelated(base, {
       relatedProductName: "Beats",

@@ -1,6 +1,6 @@
 /**
- * REQ-0084 — single-product insights from order items + optional warehouse allocations.
- * REQ-0140 — sold stats only for delivered/paid; stock buckets use qty − committed.
+ * Single-product insights from order items + optional warehouse allocations.
+ * Sold stats only for delivered/paid; stock buckets use qty − committed.
  */
 
 import { CATALOG_LOW_STOCK_THRESHOLD } from "@/lib/insights/constants";
@@ -28,7 +28,7 @@ export function computeProductInsights(
   quantity: number,
   orderItems: ProductInsightOrderItem[],
   stockAllocations?: StockAllocation[] | null,
-  /** REQ-0140 — catalog available = qty − committed (disjoint reserved sum). */
+  /** Catalog available = qty − committed (disjoint reserved sum). */
   committedQuantity = 0,
 ): CatalogEntityInsights {
   const qty = Number(quantity);

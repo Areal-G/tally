@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0069/0070 — Sync SSR props into TanStack cache on App Router navigation.
+ * Sync SSR props into TanStack cache on App Router navigation.
  * Bridges withInitialData + refetchOnMount when stale: fresh RSC wins; stale
  * router.back() snapshots never clobber post-CRUD TanStack cache.
  */
@@ -38,13 +38,21 @@ function syncSsrSnapshot<T>(
   }
   if (action === "applyDensifyOnly") {
     // Gap-fill only — never let a stale-but-differently-shaped SSR object win on
-    // fields the resolver did not prove fresher (REQ-0136 Fix B).
+    // Fields the resolver did not prove fresher (Fix B).
     queryClient.setQueryData(queryKey, mergeDensifyOnly(serverData, cached as T));
+    // Still refetch while invalidated so Redis/API confirm; densify already painted.
+    if (state?.isInvalidated || state?.fetchStatus === "fetching") {
+      void queryClient.refetchQueries({ queryKey });
+    }
     return;
   }
   // apply — server proven fresher (or cache empty); merge keeps cached-only fields
   // that a thinner SSR/PUT response may omit instead of a blind full replace.
   queryClient.setQueryData(queryKey, mergeSsrIntoCache(serverData, cached));
+  // Stock shrink apply while invalidated still needs API settle.
+  if (state?.isInvalidated || state?.fetchStatus === "fetching") {
+    void queryClient.refetchQueries({ queryKey });
+  }
 }
 
 /** Push one SSR snapshot into the query cache before paint (avoids stale flash). */
@@ -58,6 +66,8 @@ export function useSyncSsrQueryData<T>(
   useLayoutEffect(() => {
     if (serverData === undefined) return;
     syncSsrSnapshot(queryClient, queryKey, serverData);
+    // Keyed on the serialised fingerprint, not the object identities (which change every render).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryClient, fingerprint]);
 }
 
@@ -80,5 +90,7 @@ export function useSyncSsrQueryDataMany(
       if (serverData === undefined) continue;
       syncSsrSnapshot(queryClient, queryKey, serverData);
     }
+    // Keyed on the serialised fingerprint, not the array identity (inline arrays change every render).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryClient, fingerprint]);
 }

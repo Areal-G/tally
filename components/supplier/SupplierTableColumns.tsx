@@ -7,7 +7,6 @@ import { Supplier } from "@/types";
 import { Column, ColumnDef } from "@tanstack/react-table";
 import SupplierActions from "./SupplierActions";
 import { ActiveInactiveBadge } from "@/lib/ui/semantic-badges";
-import { AvatarInlineLink } from "@/components/shared/AvatarInlineLink";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -107,20 +106,18 @@ const truncateText = (
 };
 
 /**
- * REQ-0142 — product-like stack: avatar | name control | email sibling.
+ * Product-like stack: name control | email sibling (no avatar for suppliers).
  * Name alone navigates (button closes dialog); CopyableText never nests inside button.
  */
 function SupplierNameEmailCell({
   href,
   name,
-  userId,
   email,
   onBeforeNavigate,
   linkClass,
 }: {
   href: string;
   name: string;
-  userId: string;
   email?: string | null;
   onBeforeNavigate?: () => void;
   linkClass: string;
@@ -153,7 +150,6 @@ function SupplierNameEmailCell({
 
   return (
     <div className="flex items-center gap-2 min-w-0 max-w-[220px]">
-      <AvatarInlineLink seed={userId} size={28} className="shrink-0" />
       <div className="flex min-w-0 flex-col">
         {nameControl}
         {emailTrimmed ? (
@@ -169,7 +165,7 @@ function SupplierNameEmailCell({
   );
 }
 
-// REQ-0141 — page list drops notes; dialog hides description/products
+// Page list drops notes; dialog hides description/products
 const DIALOG_HIDDEN_COLUMNS = new Set(["description", "productCount"]);
 
 export const createSupplierColumns = (
@@ -190,7 +186,6 @@ export const createSupplierColumns = (
           <SupplierNameEmailCell
             href={`/suppliers/${supplier.id}`}
             name={supplier.name}
-            userId={supplier.userId ?? supplier.id}
             email={supplier.email}
             onBeforeNavigate={onBeforeNavigate}
             linkClass={linkClass}
@@ -219,7 +214,7 @@ export const createSupplierColumns = (
     },
     {
       accessorKey: "productCount",
-      // REQ-0142 — HelpTooltip sibling of sort trigger (no nested interactive)
+      // HelpTooltip sibling of sort trigger (no nested interactive)
       header: ({ column }) => (
         <div className="flex items-center gap-1">
           <SortableHeader

@@ -5,7 +5,6 @@
 
 "use client";
 
-import React from "react";
 import Navbar from "@/components/layouts/Navbar";
 import SupplierList from "@/components/supplier/SupplierList";
 import { PageContentWrapper } from "@/components/shared";
@@ -20,7 +19,7 @@ export type SuppliersPageProps = {
 
 /**
  * Suppliers page client component.
- * REQ-0021 — shell-first; SSR initialData passed to SupplierList.
+ * Shell-first; SSR initialData passed to SupplierList.
  */
 export default function SuppliersPage({
   initialSuppliers,

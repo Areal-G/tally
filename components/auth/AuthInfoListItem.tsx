@@ -14,8 +14,8 @@ type AuthInfoListItemProps = {
 };
 
 /**
- * REQ-0032 — single flat list row with micro-glass + icon pill.
- * REQ-0033 — glass glow icon wrap + tighter title/description spacing.
+ * Single flat list row with micro-glass + icon pill.
+ * Glass glow icon wrap + tighter title/description spacing.
  */
 export function AuthInfoListItem({
   item,

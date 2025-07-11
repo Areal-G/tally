@@ -1,5 +1,5 @@
 /**
- * REQ-0158 — Canonical order/invoice party semantics.
+ * Canonical order/invoice party semantics.
  *
  * - `userId` = store / catalog owner (seller side)
  * - `clientId` = buyer; `null` = owner self-order
@@ -75,7 +75,7 @@ export type BuyerDisplay = {
 };
 
 /**
- * REQ-0159 — Resolve buyer display from a user map keyed by user id.
+ * Resolve buyer display from a user map keyed by user id.
  * Self → owner; Client → distinct `clientId` user.
  */
 export function resolveBuyerDisplayFromUsers(

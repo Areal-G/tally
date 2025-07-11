@@ -4,6 +4,7 @@
  * Migrated from Pages API to App Router
  */
 
+import { withRateLimit, defaultRateLimits } from "@/lib/api/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { MongoClient } from "mongodb";
@@ -54,6 +55,10 @@ async function insertUserWithRetry(
  * Register a new user
  */
 export async function POST(request: NextRequest) {
+  // Brute-force guard: 5 attempts per minute per IP
+  const rateLimitResponse = await withRateLimit(request, defaultRateLimits.auth);
+  if (rateLimitResponse) return rateLimitResponse;
+
   let mongoClient: MongoClient | null = null;
   try {
     const body = await request.json();
@@ -86,7 +91,11 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    mongoClient = new MongoClient(process.env.DATABASE_URL!);
+    const databaseUrl = process.env.DATABASE_URL;
+    if (!databaseUrl) {
+      throw new Error("DATABASE_URL is not configured");
+    }
+    mongoClient = new MongoClient(databaseUrl);
     await mongoClient.connect();
 
     const db = mongoClient.db();

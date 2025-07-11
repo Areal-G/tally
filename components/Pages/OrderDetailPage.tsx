@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useStripeCheckoutReturn } from "@/hooks/use-stripe-checkout-return";
 import {
@@ -45,7 +45,7 @@ import { OrderStatusBadge, PaymentStatusBadge } from "@/lib/ui/semantic-badges";
 import type { Order } from "@/types";
 import type { OrderReviewContext } from "@/lib/server/order-review-context-data";
 import { cn } from "@/lib/utils";
-import { toDateOrNull } from "@/lib/format";
+import { formatStableCurrency, toDateOrNull } from "@/lib/format";
 import { APP_SHELL_DETAIL_CLASS } from "@/lib/ui/shell-layout-styles";
 import { TYPO_CARD_TITLE } from "@/lib/ui/typography-scale";
 import OrderDialog from "@/components/orders/OrderDialog";
@@ -74,7 +74,7 @@ import {
 
 export type OrderDetailPageProps = {
   initialOrder?: Order;
-  /** REQ-0026 — batch SSR review context for order line items */
+  /** Batch SSR review context for order line items */
   initialReviewContext?: OrderReviewContext;
 };
 
@@ -86,7 +86,7 @@ export default function OrderDetailPage({
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const { user, isCheckingAuth } = useAuth();
-  // REQ-0209 — back list follows current route shell (not role): /orders vs /admin/orders
+  // Back list follows current route shell (not role): /orders vs /admin/orders
   const ordersListPath = useMemo(
     () => (pathname.startsWith("/admin") ? "/admin/orders" : "/orders"),
     [pathname],
@@ -109,7 +109,7 @@ export default function OrderDetailPage({
   const isClientRole = user?.role === "client";
   const isAdminRole = user?.role === "admin";
   const disableOrderActions = isSupplierRole || isClientRole;
-  // REQ-0214 — catalog-history clients may open others' ORD; Pay only for assigned buyer
+  // Catalog-history clients may open others' ORD; Pay only for assigned buyer
   const isOrderBuyer =
     Boolean(user?.id) &&
     (order?.clientId === user?.id ||
@@ -121,7 +121,7 @@ export default function OrderDetailPage({
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [refundDialogOpen, setRefundDialogOpen] = useState(false);
-  // REQ-0061: InvoiceDialog create mode pre-selected with this order
+  // InvoiceDialog create mode pre-selected with this order
   const [createInvoiceOpen, setCreateInvoiceOpen] = useState(false);
   // Dialog stays open while pending (AlertDialog preventDefault) — spinner uses isPending
   const isCancelling = deleteOrderMutation.isPending && cancelDialogOpen;
@@ -144,14 +144,9 @@ export default function OrderDetailPage({
         setCancelDialogOpen(false);
       },
     });
-  }, [
-    order,
-    deleteOrderMutation,
-    cancelDialogOpen,
-    ordersListPath,
-  ]);
+  }, [order, deleteOrderMutation]);
 
-  // REQ-0209 — Process Refund uses same cancel API (Stripe refund + stock restore)
+  // Process Refund uses same cancel API (Stripe refund + stock restore)
   const handleConfirmRefundOrder = useCallback(() => {
     if (!order) return;
     deleteOrderMutation.mutate(order.id, {
@@ -220,7 +215,7 @@ export default function OrderDetailPage({
     );
   }
 
-  // REQ-0136 — never fall back to `new Date()` ("now"): SSR/client render at different
+  // Never fall back to `new Date()` ("now"): SSR/client render at different
   // instants and that non-determinism is a classic hydration-mismatch source.
   const createdAt = toDateOrNull(order?.createdAt);
   const updatedAt = order?.updatedAt ? new Date(order.updatedAt) : null;
@@ -249,7 +244,7 @@ export default function OrderDetailPage({
             dataLoading={dataLoading}
           />
 
-          {/* REQ-0146 — equal-height status stack + tracking when shipped */}
+          {/* Equal-height status stack + tracking when shipped */}
           {hasShipping && order ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-stretch">
               <OrderStatusBadges
@@ -270,7 +265,7 @@ export default function OrderDetailPage({
             />
           )}
 
-          {/* REQ-0147 — Items | Summary equal-height row */}
+          {/* Items | Summary equal-height row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4 items-stretch">
             <OrderItemsCard
               order={order}
@@ -294,7 +289,7 @@ export default function OrderDetailPage({
             <OrderSummaryCard order={order} dataLoading={dataLoading} />
           </div>
 
-          {/* REQ-0147 — Info | Parties + addresses stack (content-height, no empty stretch) */}
+          {/* Info | Parties + addresses stack (content-height, no empty stretch) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4 items-start">
             <GlassCard variant="orange">
               <SectionCardHeader
@@ -339,7 +334,7 @@ export default function OrderDetailPage({
                     >
                       <PaymentStatusBadge status={order.paymentStatus} />
                     </DetailInfoRow>
-                    {/* REQ-0147 — invoice snapshot in Order Information */}
+                    {/* Invoice snapshot in Order Information */}
                     {order.invoiceForOrder && (
                       <DetailInfoRow
                         icon={FileText}
@@ -379,7 +374,8 @@ export default function OrderDetailPage({
                         label="Payment:"
                         tone="amber"
                       >
-                        Partial payment — total ${order.total.toFixed(2)}
+                        Partial payment — total{" "}
+                        {formatStableCurrency(order.total)}
                         {order.invoiceForOrder && (
                           <>
                             {" · "}
@@ -417,22 +413,22 @@ export default function OrderDetailPage({
                     icon={Calendar}
                     label="Created:"
                     tone="orange"
-                    loading={dataLoading}
+                    loading={dataLoading && !createdAt}
                   >
-                    {!dataLoading && createdAt && (
+                    {createdAt ? (
                       <ClientDateTime date={createdAt} semantic="created" />
-                    )}
+                    ) : null}
                   </DetailInfoRow>
                   {(dataLoading || updatedAt) && (
                     <DetailInfoRow
                       icon={Calendar}
                       label="Updated:"
                       tone="amber"
-                      loading={dataLoading}
+                      loading={dataLoading && !updatedAt}
                     >
-                      {!dataLoading && updatedAt && (
+                      {updatedAt ? (
                         <ClientDateTime date={updatedAt} semantic="updated" />
-                      )}
+                      ) : null}
                     </DetailInfoRow>
                   )}
                 </DetailInfoRowGroup>
@@ -584,7 +580,7 @@ export default function OrderDetailPage({
                       "text-gray-700 dark:text-white",
                     )}
                   />
-                  <p className="text-sm text-gray-700 dark:text-white p-2 rounded-xl bg-gradient-to-r from-blue-100/40 via-blue-50/20 to-transparent dark:from-blue-500/10 dark:via-blue-500/5 dark:to-transparent border border-blue-200/30 dark:border-blue-400/10">
+                  <p className="text-sm text-gray-700 dark:text-white p-2 rounded-xl bg-blue-100/40 dark:bg-blue-500/10 border border-blue-200/30 dark:border-blue-400/10">
                     {dataLoading ? null : formatAddress(order!.billingAddress)}
                   </p>
                 </GlassCard>
@@ -592,7 +588,7 @@ export default function OrderDetailPage({
             </div>
           </div>
 
-          {/* REQ-0209 — Cancel unpaid|partial; Process Refund when fully paid */}
+          {/* Cancel unpaid|partial; Process Refund when fully paid */}
           <OrderDetailActionBar
             order={order}
             dataLoading={dataLoading}
@@ -654,7 +650,7 @@ export default function OrderDetailPage({
             <div style={{ display: "none" }} aria-hidden />
           </OrderDialog>
 
-          {/* REQ-0061: InvoiceDialog create mode pre-selected with this order */}
+          {/* InvoiceDialog create mode pre-selected with this order */}
           {createInvoiceOpen && order && (
             <InvoiceDialog
               open={createInvoiceOpen}

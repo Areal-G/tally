@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0145 — compact date + icon with semantic hue (paid / cancelled / refunded / …).
+ * Compact date + icon with semantic hue (paid / cancelled / refunded / …).
  * Used by order Status, Payment, and Invoice # table cells.
  */
 
@@ -29,7 +29,7 @@ const EVENT_ICONS: Record<SemanticDateKind, LucideIcon> = {
   created: Calendar,
   updated: CalendarClock,
   expiration: CalendarClock,
-  /** REQ-0151 — due/overdue use Clock (not Calendar) */
+  /** Due/overdue use Clock (not Calendar) */
   due: Clock,
   paid: CheckCircle2,
   cancelled: Ban,

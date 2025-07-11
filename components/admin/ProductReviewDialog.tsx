@@ -84,7 +84,7 @@ export default function ProductReviewDialog({
 
   const isPending = createMutation.isPending;
 
-  /** REQ-0179 — semantic star hues from getRatingDisplay (edit-dialog parity) */
+  /** Semantic star hues from getRatingDisplay (edit-dialog parity) */
   const renderStars = (count: number) => {
     const display = getRatingDisplay(count);
     return (
@@ -104,7 +104,7 @@ export default function ProductReviewDialog({
     );
   };
 
-  /** REQ-0180 — readable (N stars) on dark dialog shell */
+  /** Readable (N stars) on dark dialog shell */
   const ratingLabelClass = (n: number) =>
     cn("text-sm font-medium", getRatingDisplay(n).dialogTextClass);
 
@@ -112,7 +112,7 @@ export default function ProductReviewDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
-        className="p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto border-amber-400/30 dark:border-amber-400/30 shadow-[0_30px_80px_rgba(245,158,11,0.35)] dark:shadow-[0_30px_80px_rgba(245,158,11,0.25)]"
+        className="p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto border-amber-400/30 dark:border-amber-400/30 "
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeaderBrand
@@ -133,7 +133,7 @@ export default function ProductReviewDialog({
             <DeferredSelectGate
               enabled={open}
               placeholder={
-                // REQ-0198 — match SelectTrigger h-auto min-h-11 + densify row
+                // Match SelectTrigger h-auto min-h-11 + densify row
                 <div
                   className={cn(
                     "flex h-auto min-h-11 w-full items-center rounded-md px-2 py-1.5 text-sm text-white/60",

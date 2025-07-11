@@ -1,5 +1,5 @@
 /**
- * REQ-0043 — shared borderless filter chip row styles (catalog + multi-select lists).
+ * Shared borderless filter chip row styles (catalog + multi-select lists).
  * X dismiss hover: rose; Reset hover: sky.
  */
 import { cn } from "@/lib/utils";
@@ -22,4 +22,4 @@ export const FILTER_CHIP_RESET_BTN_CLASS = cn(
 );
 
 export const FILTER_CHIP_COLLAPSED_CLASS =
-  "inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-xs text-gray-700 dark:text-white/80 backdrop-blur-md";
+  "inline-flex items-center rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-xs text-gray-700 dark:text-white/80 ";

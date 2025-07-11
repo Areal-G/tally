@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0185 — supplier-style table person cell:
+ * Supplier-style table person cell:
  * avatar | sky name (optional Link) | muted email + CopyableText clipboard.
  * Never nest CopyableText inside the name button/link.
  */

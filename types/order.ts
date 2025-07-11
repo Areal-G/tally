@@ -53,22 +53,22 @@ export interface OrderItem {
   quantity: number;
   price: number;
   subtotal: number;
-  /** ISO string from API/SSR transforms (REQ-0064) */
+  /** ISO string from API/SSR transforms */
   createdAt: string;
   /** Category ID for link to category detail (from product) */
   categoryId?: string | null;
   /** Supplier ID for link to supplier detail (from product) */
   supplierId?: string | null;
-  /** Display name from product.category (REQ-0071) */
+  /** Display name from product.category */
   categoryName?: string | null;
-  /** Display name from product.supplier (REQ-0071) */
+  /** Display name from product.supplier */
   supplierName?: string | null;
-  /** REQ-0068 — source warehouse when product has allocations */
+  /** Source warehouse when product has allocations */
   warehouseId?: string | null;
   warehouseName?: string | null;
-  /** Current product image for line-item thumbnails (REQ-0059; null when product deleted) */
+  /** Current product image for line-item thumbnails (; null when product deleted) */
   imageUrl?: string | null;
-  /** REQ-0114 — line share of order.total when fees/discount apply */
+  /** Line share of order.total when fees/discount apply */
   proportionalAmount?: number;
 }
 
@@ -100,7 +100,7 @@ export interface Order {
   shippedAt?: string | Date | null;
   deliveredAt?: string | Date | null;
   cancelledAt?: string | Date | null;
-  /** Stripe PaymentIntent ID when paid via Stripe (REQ-0071 detail card) */
+  /** Stripe PaymentIntent ID when paid via Stripe (detail card) */
   stripePaymentIntentId?: string | null;
   createdAt: string | Date;
   updatedAt?: string | Date | null;
@@ -117,10 +117,10 @@ export interface Order {
   productOwnerEmail?: string | null;
   /** Product owner(s) for items in this order (for Parties section) */
   orderProductOwners?: { userId: string; name: string | null; email: string; image?: string | null }[];
-  /** REQ-0074 — party avatar SSR */
+  /** Party avatar SSR */
   placedByUserId?: string | null;
   placedByImage?: string | null;
-  /** Linked invoice when order has an invoice (REQ-0061 actions; REQ-0145 list Invoice #) */
+  /** Linked invoice when order has an invoice (actions; list Invoice #) */
   invoiceForOrder?: {
     id: string;
     invoiceNumber: string;
@@ -128,7 +128,6 @@ export interface Order {
     createdAt?: string;
     dueDate?: string;
     amountDue?: number;
-    /** REQ-0152 */
     amountPaid?: number;
     total?: number;
     status?: string;
@@ -136,11 +135,11 @@ export interface Order {
     cancelledAt?: string | null;
     updatedAt?: string | null;
   } | null;
-  /** REQ-0129 — terminal status timestamp for list rows */
+  /** Terminal status timestamp for list rows */
   statusAt?: string;
-  /** REQ-0073 — payment timestamp from linked invoice (not order.updatedAt) */
+  /** Payment timestamp from linked invoice (not order.updatedAt) */
   paidAt?: string | null;
-  /** REQ-0096 — audit user snapshots for Created by / Updated by rows */
+  /** Audit user snapshots for Created by / Updated by rows */
   creator?: {
     id: string;
     name?: string | null;
@@ -164,14 +163,12 @@ export interface CreateOrderInput {
   items: Array<{
     productId: string;
     quantity: number;
-    /** REQ-0068 — required server-side when product has warehouse allocations */
+    /** Required server-side when product has warehouse allocations */
     warehouseId?: string;
   }>;
   shippingAddress?: ShippingAddress;
   billingAddress?: BillingAddress;
-  tax?: number;
-  shipping?: number;
-  discount?: number;
+  /** Fees computed server-side; not accepted on create */
   notes?: string;
 }
 
@@ -185,7 +182,7 @@ export interface UpdateOrderInput {
   shippingAddress?: ShippingAddress;
   billingAddress?: BillingAddress;
   trackingNumber?: string;
-  /** REQ-0146 — carrier for manual / Shippo tracking */
+  /** Carrier for manual / Shippo tracking */
   trackingCarrier?: string;
   trackingUrl?: string;
   estimatedDelivery?: Date;

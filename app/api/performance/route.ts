@@ -5,15 +5,12 @@
  * - Error rates
  * - Request counts
  * - Performance trends
- * 
- * NOTE: This API is fully functional and ready to use.
- * However, performance tracking on individual routes is deferred until
- * all other features are implemented. Once routes are wrapped with
- * withPerformanceTracking(), metrics will automatically appear here.
- * 
- * See: lib/api/performance-wrapper.ts for implementation details
+ *
+ * Metrics are recorded by route handlers wrapped with withPerformanceTracking()
+ * (lib/api/performance-wrapper.ts).
  */
 
+import { getSessionFromRequest } from "@/utils/auth";
 import { NextRequest } from "next/server";
 import {
   getAllEndpointMetrics,
@@ -33,6 +30,14 @@ import { logger } from "@/lib/logger";
  */
 export async function GET(request: NextRequest) {
   try {
+    const session = await getSessionFromRequest(request);
+    if (!session) {
+      return errorResponse("Unauthorized", 401);
+    }
+    if (session.role !== "admin") {
+      return errorResponse("Forbidden", 403);
+    }
+
     const { searchParams } = new URL(request.url);
     const endpoint = searchParams.get("endpoint");
     const method = searchParams.get("method");

@@ -1,5 +1,5 @@
 /**
- * REQ-0066 hardening — role-aware product access for stock allocation/transfer APIs.
+ * Hardening — role-aware product access for stock allocation/transfer APIs.
  * Mirrors getProductDetailForPage access rules (admin/supplier/owner/client).
  */
 

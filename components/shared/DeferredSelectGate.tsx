@@ -5,7 +5,7 @@
  * Use on nav-heavy pages and any Select that portals to document.body, so portals
  * tear down cleanly before the next route unmounts (avoids removeChild NotFoundError).
  *
- * REQ-0198 — In dialogs (`enabled={open}`), Select mounts immediately on the same
+ * In dialogs (`enabled={open}`), Select mounts immediately on the same
  * route (no placeholder flash). One-frame defer only after pathname changes.
  * Placeholder should match SelectTrigger height/content when used.
  */

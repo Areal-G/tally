@@ -6,7 +6,7 @@
 
 import { getQStash, isQStashConfigured } from "@/lib/queue/qstash";
 import { logger } from "@/lib/logger";
-import { isBrevoConfigured, getAdminEmail, sendEmailViaBrevo } from "./brevo";
+import { isBrevoConfigured, sendEmailViaBrevo } from "./brevo";
 import {
   generateLowStockAlertEmail,
   generateStockOutNotificationEmail,

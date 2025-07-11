@@ -1,5 +1,5 @@
 /**
- * REQ-0084 — warehouse detail insights derived from stock allocations (no extra DB).
+ * Warehouse detail insights derived from stock allocations (no extra DB).
  */
 
 export type WarehouseCategoryMixPoint = {
@@ -17,7 +17,7 @@ export type WarehouseInsights = {
   categoryMix: WarehouseCategoryMixPoint[];
 };
 
-/** REQ-0115 — stat-card shape on WarehouseDetailPage (maps from WarehouseInsights). */
+/** Stat-card shape on WarehouseDetailPage (maps from WarehouseInsights). */
 export type WarehouseStockSummary = {
   totalProducts: number;
   totalQuantity: number;

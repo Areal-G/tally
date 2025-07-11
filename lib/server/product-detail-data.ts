@@ -1,7 +1,7 @@
 /**
  * Server-side product detail fetch for SSR prefetch.
  * Mirrors GET /api/products/:id auth + response shape (includes Redis cache).
- * REQ-0024, REQ-0105 — committedQuantity display field (disjoint paths summed).
+ * committedQuantity display field (disjoint paths summed).
  */
 
 import { getSupplierByUserId } from "@/prisma/supplier";
@@ -54,7 +54,7 @@ function transformProductDetail(
     description: string | null;
     status: boolean;
     email?: string | null;
-    /** REQ-0202 — linked User.image */
+    /** Linked User.image */
     image?: string | null;
   } | null,
   creatorUser: { id: string; email: string; name: string | null; image?: string | null } | null,
@@ -71,7 +71,7 @@ function transformProductDetail(
   } | null,
 ) {
   const orderItems = product.orderItems || [];
-  // REQ-0140 — sold stats = delivered or paid only (not pending reservations)
+  // Sold stats = delivered or paid only (not pending reservations)
   const soldItems = orderItems.filter((item) =>
     isOrderRecordCountedAsSold(item.order),
   );
@@ -105,7 +105,7 @@ function transformProductDetail(
       : null,
   }));
 
-  // Stock buckets refined after enrich with committedQuantity (REQ-0140)
+  // Stock buckets refined after enrich with committedQuantity
   const productInsights = computeProductInsights(
     Number(product.quantity),
     insightOrderItems,
@@ -167,6 +167,10 @@ function transformProductDetail(
     imageUrl: product.imageUrl || null,
     imageFileId: product.imageFileId || null,
     expirationDate: product.expirationDate?.toISOString() || null,
+    reorderPoint: product.reorderPoint ?? null,
+    reorderQuantity: product.reorderQuantity ?? null,
+    lotNumber: product.lotNumber ?? null,
+    barcode: product.barcode ?? null,
     statistics: {
       totalQuantitySold,
       totalRevenue,
@@ -209,7 +213,7 @@ function transformProductDetail(
         proportionalAmount,
         orderTotal: order.total,
         orderDate: item.order.createdAt.toISOString(),
-        // REQ-0143 — category + owner for recent-order meta parity
+        // Category + owner for recent-order meta parity
         category: category
           ? { id: category.id, name: category.name }
           : null,
@@ -239,7 +243,7 @@ function transformProductDetail(
 }
 
 export type ProductDetailForPage = ReturnType<typeof transformProductDetail> & {
-  /** REQ-0105 — display-only; ProductFormDialog uses raw reservedQuantity + allocation rows */
+  /** Display-only; ProductFormDialog uses raw reservedQuantity + allocation rows */
   committedQuantity: number;
 };
 
@@ -353,7 +357,7 @@ export async function getProductDetailForPage(
     ]),
   );
 
-  // REQ-0202 — supplier user email + image for detail PersonInlineRow
+  // Supplier user email + image for detail PersonInlineRow
   const supplierUser = supplier?.userId
     ? await prisma.user.findUnique({
         where: { id: supplier.userId },
@@ -380,7 +384,7 @@ export async function getProductDetailForPage(
   const enrichedProduct =
     await enrichProductDetailWithCommittedQuantity(transformedProduct);
 
-  // REQ-0143 — batch invoice links for recent-order indicators
+  // Batch invoice links for recent-order indicators
   const invoiceMap = await getInvoiceLinkMap(
     enrichedProduct.recentOrders.map((o) => o.orderId).filter(Boolean),
   );
@@ -394,7 +398,7 @@ export async function getProductDetailForPage(
     };
   });
 
-  // REQ-0140 — reclassify insights stock using full committed (product + alloc reserved)
+  // Reclassify insights stock using full committed (product + alloc reserved)
   const productInsights = computeProductInsights(
     enrichedProduct.quantity,
     (product.orderItems ?? []).map((item) => ({

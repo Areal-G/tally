@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0201 — Interactive Related product densify for ticket detail.
+ * Interactive Related product densify for ticket detail.
  * Same layout as DialogProductOptionRow + sky Link name + CopyableText SKU.
  */
 
@@ -10,6 +10,7 @@ import { Boxes, DollarSign, Tag } from "lucide-react";
 import { AvatarInlineLink } from "@/components/shared/AvatarInlineLink";
 import { CopyableText } from "@/components/shared/CopyableText";
 import { ProductThumb } from "@/components/products/ProductOptionRow";
+import { formatStableCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export type TicketRelatedProductDenseProps = {
@@ -96,7 +97,7 @@ export function TicketRelatedProductDense({
                 )}
               >
                 <DollarSign className="h-3 w-3 shrink-0" aria-hidden />
-                {Number(price).toFixed(2)}
+                {formatStableCurrency(Number(price))}
               </span>
             </>
           ) : null}
@@ -153,7 +154,7 @@ export function TicketRelatedProductDense({
               </span>
             ) : null}
             {supplierId && supplierLabel ? (
-              <AvatarInlineLink
+              <AvatarInlineLink showAvatar={false}
                 seed={supplierId}
                 image={supplierImage}
                 label={supplierLabel}

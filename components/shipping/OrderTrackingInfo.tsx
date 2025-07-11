@@ -1,11 +1,10 @@
 "use client";
 
 /**
- * Order Tracking Info — glass carrier glow badge (REQ-0146 / REQ-0147).
- * REQ-0147 — never use shadcn Badge here (default bg-primary paints red over glass).
+ * Order Tracking Info — glass carrier glow badge.
+ * Never use shadcn Badge here (default bg-primary paints red over glass).
  */
 
-import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Package,
@@ -86,7 +85,7 @@ export function normalizeCarrier(carrier: string): string {
   return "other";
 }
 
-/** REQ-0146 — glass glow badge meta for carrier chips outside OrderTrackingInfo. */
+/** Glass glow badge meta for carrier chips outside OrderTrackingInfo. */
 export function getCarrierBadgeMeta(carrier?: string | null): {
   name: string;
   hue: GlassBadgeHue;
@@ -97,7 +96,7 @@ export function getCarrierBadgeMeta(carrier?: string | null): {
 }
 
 /**
- * REQ-0147 — plain span glass chip (no shadcn Badge / bg-primary).
+ * Plain span glass chip (no shadcn Badge / bg-primary).
  * Compact height matches SemanticBadgeBase compact tokens.
  */
 export function CarrierGlassBadge({
@@ -152,10 +151,10 @@ export default function OrderTrackingInfo({
   return (
     <article
       className={cn(
-        "h-full flex flex-col rounded-[28px] border border-emerald-400/20 dark:border-emerald-400/30 p-2 sm:p-4 backdrop-blur-md transition-all duration-300",
+        "h-full flex flex-col rounded-lg border border-emerald-400/20 dark:border-emerald-400/30 p-2 sm:p-4 transition-all duration-300",
         "bg-white/60 dark:bg-white/5",
-        "bg-gradient-to-br from-emerald-500/15 via-emerald-500/5 to-transparent dark:from-emerald-500/25 dark:via-emerald-500/10 dark:to-emerald-500/5",
-        "shadow-[0_15px_40px_rgba(16,185,129,0.15)] dark:shadow-[0_30px_80px_rgba(16,185,129,0.25)]",
+        " bg-emerald-500/15 dark:bg-emerald-500/25 ",
+        " ",
         "hover:border-emerald-300/40 dark:hover:border-emerald-300/50",
         className,
       )}
@@ -212,7 +211,7 @@ export default function OrderTrackingInfo({
           {trackingUrl && (
             <Button
               asChild
-              className="flex-1 gap-2 rounded-xl border border-sky-400/30 bg-gradient-to-r from-sky-500/70 via-sky-500/50 to-sky-500/30 dark:from-sky-500/70 dark:via-sky-500/50 dark:to-sky-500/30 text-white shadow-[0_15px_35px_rgba(2,132,199,0.45)] dark:shadow-[0_15px_35px_rgba(2,132,199,0.25)] backdrop-blur-md hover:border-sky-300/50 hover:from-sky-500/80 hover:via-sky-500/60 hover:to-sky-500/40 dark:hover:border-sky-300/50 transition-all duration-300 h-10"
+              className="flex-1 gap-2 rounded-xl border border-sky-400/30 bg-sky-500/70 dark:bg-sky-500/70 text-white hover:border-sky-300/50 hover:bg-sky-500/80 dark:hover:border-sky-300/50 transition-all duration-300 h-10"
             >
               <a
                 href={trackingUrl}
@@ -229,7 +228,7 @@ export default function OrderTrackingInfo({
           {order.labelUrl && (
             <Button
               asChild
-              className="flex-1 gap-2 rounded-xl border border-violet-400/30 bg-gradient-to-r from-violet-500/70 via-violet-500/50 to-violet-500/30 dark:from-violet-500/70 dark:via-violet-500/50 dark:to-violet-500/30 text-white shadow-[0_15px_35px_rgba(139,92,246,0.45)] dark:shadow-[0_15px_35px_rgba(139,92,246,0.25)] backdrop-blur-md hover:border-violet-300/50 hover:from-violet-500/80 hover:via-violet-500/60 hover:to-violet-500/40 dark:hover:border-violet-300/50 transition-all duration-300 h-10"
+              className="flex-1 gap-2 rounded-xl border border-violet-400/30 bg-violet-500/70 dark:bg-violet-500/70 text-white hover:border-violet-300/50 hover:bg-violet-500/80 dark:hover:border-violet-300/50 transition-all duration-300 h-10"
             >
               <a
                 href={order.labelUrl}

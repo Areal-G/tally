@@ -1,7 +1,7 @@
 /**
- * REQ-0141 — compact KPI card beside category/supplier stock pie
+ * Compact KPI card beside category/supplier stock pie
  * (avoids lg:col-span-2 when stockChartCompanion is omitted).
- * REQ-0221 — pass dataLoading=false when snapshot densify is already on the entity.
+ * Pass dataLoading=false when snapshot densify is already on the entity.
  */
 
 import {
@@ -15,6 +15,7 @@ import {
 import { DetailInfoRow } from "@/components/orders/detail";
 import { GlassCard, GlassCardBody } from "@/lib/ui/glass-card";
 import { TYPO_CARD_TITLE, TYPO_SUBTITLE } from "@/lib/ui/typography-scale";
+import { formatStableCurrency } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export type CatalogSnapshotStats = {
@@ -90,7 +91,7 @@ export function CatalogSnapshotCompanion({
           >
             {!dataLoading && (
               <span className="text-sky-600 dark:text-sky-400">
-                ${stats.totalValue.toFixed(2)}
+                {formatStableCurrency(stats.totalValue)}
               </span>
             )}
           </DetailInfoRow>

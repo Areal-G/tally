@@ -17,13 +17,9 @@ import {
   FiCheckCircle,
   FiDatabase,
   FiMail,
-  FiPackage,
   FiRefreshCw,
-  FiServer,
   FiXCircle,
   FiImage,
-  FiCloud,
-  FiTrendingUp,
   FiClock,
   FiCpu,
   FiHardDrive,
@@ -34,7 +30,6 @@ import {
   PageSectionHeader,
   SectionCardHeader,
   GlassCard,
-  GLASS_CARD_VARIANT_CONFIG as variantConfig,
 } from "@/components/shared";
 import type { GlassCardVariant } from "@/lib/ui/glass-card";
 import { GlassCardBody } from "@/lib/ui/glass-card";
@@ -58,7 +53,7 @@ import {
 type EndpointStatus = EndpointProbeResult;
 
 interface ApiStatusPageProps {
-  /** SSR role — scopes probes + admin-only metrics (REQ-0093). */
+  /** SSR role — scopes probes + admin-only metrics. */
   userRole: ApiStatusRole | string;
 }
 
@@ -202,7 +197,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
         | undefined;
 
       const status: SystemStatus = {
-        project: "Stockly Inventory Management",
+        project: "Tally Inventory Management",
         environment: healthData.environment,
         currentTime: new Date(healthData.timestamp).toLocaleString(),
         uptime: healthData.uptime,
@@ -247,6 +242,8 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
     return () => {
       cancelled = true;
     };
+    // Reload only when the role changes; loadSystemStatus is recreated every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userRole]);
 
   const getStatusIcon = (status: string) => {
@@ -289,14 +286,14 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
     <Navbar>
       <PageContentWrapper>
         <div className="flex flex-col gap-6">
-          {/* Header — PageSectionHeader parity (REQ-0075 AC3) */}
+          {/* Header — PageSectionHeader parity */}
           <PageSectionHeader
             as="h1"
             className={DETAIL_PAGE_HEADER_SPACING_CLASS}
             icon={Activity}
             tone="emerald"
             title="API & Project Status"
-            description="Real-time monitoring of Stockly's API endpoints and system health"
+            description="Real-time monitoring of Tally's API endpoints and system health"
             trailing={
               <Button
                 onClick={handleRefresh}
@@ -442,7 +439,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                   ? roleEndpoints.map((_, i) => (
                       <div
                         key={`skeleton-ep-${i}`}
-                        className="flex items-center justify-between p-4 rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 backdrop-blur-md"
+                        className="flex items-center justify-between p-4 rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 "
                       >
                         <Skeleton className="h-6 w-48" />
                         <Skeleton className="h-6 w-20" />
@@ -452,7 +449,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                     ? systemStatus.endpoints.map((endpoint) => (
                         <div
                           key={endpoint.path}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 backdrop-blur-md gap-2"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 gap-2"
                         >
                           <div className="flex items-center gap-2">
                             {getStatusIcon(endpoint.status)}
@@ -518,7 +515,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
               ) : systemStatus ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {/* Database */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2 rounded-xl border border-emerald-400/20 bg-gradient-to-r from-emerald-500/10 to-transparent backdrop-blur-md gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2 rounded-xl border border-emerald-400/20 bg-emerald-500/10 gap-2">
                     <div className="flex items-center gap-2">
                       <FiDatabase className="h-5 w-5 text-gray-700 dark:text-white" />
                       <div>
@@ -548,7 +545,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                   </div>
 
                   {/* Redis */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2 rounded-xl border border-amber-400/20 bg-gradient-to-r from-amber-500/10 to-transparent backdrop-blur-md gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2 rounded-xl border border-amber-400/20 bg-amber-500/10 gap-2">
                     <div className="flex items-center gap-2">
                       <FiActivity className="h-5 w-5 text-gray-700 dark:text-white" />
                       <div>
@@ -580,7 +577,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                   </div>
 
                   {/* ImageKit */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2 rounded-xl border border-sky-400/20 bg-gradient-to-r from-sky-500/10 to-transparent backdrop-blur-md gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2 rounded-xl border border-sky-400/20 bg-sky-500/10 gap-2">
                     <div className="flex items-center gap-2">
                       <FiImage className="h-5 w-5 text-gray-700 dark:text-white" />
                       <div>
@@ -613,7 +610,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                   </div>
 
                   {/* Brevo */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2 rounded-xl border border-rose-400/20 bg-gradient-to-r from-rose-500/10 to-transparent backdrop-blur-md gap-2">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2 rounded-xl border border-rose-400/20 bg-rose-500/10 gap-2">
                     <div className="flex items-center gap-2">
                       <FiMail className="h-5 w-5 text-gray-700 dark:text-white" />
                       <div>
@@ -662,7 +659,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                 <div className="space-y-4">
                   {/* Summary Stats */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    <div className="p-4 rounded-xl border border-blue-400/20 bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent backdrop-blur-md">
+                    <div className="p-4 rounded-xl border border-blue-400/20 bg-blue-500/10 ">
                       <div className="text-sm text-gray-600 dark:text-white/80 mb-1">
                         Total Endpoints
                       </div>
@@ -670,7 +667,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                         {systemStatus.performance.totalEndpoints}
                       </div>
                     </div>
-                    <div className="p-4 rounded-xl border border-emerald-400/20 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent backdrop-blur-md">
+                    <div className="p-4 rounded-xl border border-emerald-400/20 bg-emerald-500/10 ">
                       <div className="text-sm text-gray-600 dark:text-white/80 mb-1">
                         Total Requests
                       </div>
@@ -678,7 +675,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                         {systemStatus.performance.totalRequests.toLocaleString()}
                       </div>
                     </div>
-                    <div className="p-4 rounded-xl border border-amber-400/20 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent backdrop-blur-md">
+                    <div className="p-4 rounded-xl border border-amber-400/20 bg-amber-500/10 ">
                       <div className="text-sm text-gray-600 dark:text-white/80 mb-1 flex items-center gap-1">
                         <FiClock className="h-3 w-3" />
                         Avg Response
@@ -687,7 +684,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                         {systemStatus.performance.averageResponseTime}ms
                       </div>
                     </div>
-                    <div className="p-4 rounded-xl border border-rose-400/20 bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-transparent backdrop-blur-md">
+                    <div className="p-4 rounded-xl border border-rose-400/20 bg-rose-500/10 ">
                       <div className="text-sm text-gray-600 dark:text-white/80 mb-1">
                         Error Rate
                       </div>
@@ -708,7 +705,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                           (endpoint, index) => (
                             <div
                               key={`slow-${endpoint.method}-${endpoint.endpoint}-${index}`}
-                              className="flex items-center justify-between p-2 rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 backdrop-blur-md"
+                              className="flex items-center justify-between p-2 rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 "
                             >
                               <div>
                                 <div className="font-medium text-sm text-gray-700 dark:text-white">
@@ -742,7 +739,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                           (endpoint, index) => (
                             <div
                               key={`error-${endpoint.method}-${endpoint.endpoint}-${index}`}
-                              className="flex items-center justify-between p-2 rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 backdrop-blur-md"
+                              className="flex items-center justify-between p-2 rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 "
                             >
                               <div>
                                 <div className="font-medium text-sm text-gray-700 dark:text-white">
@@ -798,7 +795,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                       Cache Statistics
                     </h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      <div className="p-2 rounded-xl border border-emerald-400/20 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent backdrop-blur-md">
+                      <div className="p-2 rounded-xl border border-emerald-400/20 bg-emerald-500/10 ">
                         <div className="text-xs text-gray-600 dark:text-white/80 mb-1">
                           Cache Hits
                         </div>
@@ -806,7 +803,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                           {systemStatus.systemMetrics.cache.hits.toLocaleString()}
                         </div>
                       </div>
-                      <div className="p-2 rounded-xl border border-orange-400/20 bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent backdrop-blur-md">
+                      <div className="p-2 rounded-xl border border-orange-400/20 bg-orange-500/10 ">
                         <div className="text-xs text-gray-600 dark:text-white/80 mb-1">
                           Cache Misses
                         </div>
@@ -814,7 +811,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                           {systemStatus.systemMetrics.cache.misses.toLocaleString()}
                         </div>
                       </div>
-                      <div className="p-2 rounded-xl border border-blue-400/20 bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent backdrop-blur-md">
+                      <div className="p-2 rounded-xl border border-blue-400/20 bg-blue-500/10 ">
                         <div className="text-xs text-gray-600 dark:text-white/80 mb-1">
                           Hit Rate
                         </div>
@@ -822,7 +819,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                           {systemStatus.systemMetrics.cache.hitRate}%
                         </div>
                       </div>
-                      <div className="p-2 rounded-xl border border-violet-400/20 bg-gradient-to-br from-violet-500/10 via-violet-500/5 to-transparent backdrop-blur-md">
+                      <div className="p-2 rounded-xl border border-violet-400/20 bg-violet-500/10 ">
                         <div className="text-xs text-gray-600 dark:text-white/80 mb-1">
                           Total Requests
                         </div>
@@ -840,7 +837,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                       Database Performance
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                      <div className="p-2 rounded-xl border border-sky-400/20 bg-gradient-to-br from-sky-500/10 via-sky-500/5 to-transparent backdrop-blur-md">
+                      <div className="p-2 rounded-xl border border-sky-400/20 bg-sky-500/10 ">
                         <div className="text-xs text-gray-600 dark:text-white/80 mb-1">
                           Total Queries
                         </div>
@@ -848,7 +845,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                           {systemStatus.systemMetrics.database.totalQueries.toLocaleString()}
                         </div>
                       </div>
-                      <div className="p-2 rounded-xl border border-emerald-400/20 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent backdrop-blur-md">
+                      <div className="p-2 rounded-xl border border-emerald-400/20 bg-emerald-500/10 ">
                         <div className="text-xs text-gray-600 dark:text-white/80 mb-1 flex items-center gap-1">
                           <FiClock className="h-3 w-3" />
                           Avg Query Time
@@ -858,7 +855,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                           ms
                         </div>
                       </div>
-                      <div className="p-2 rounded-xl border border-amber-400/20 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent backdrop-blur-md">
+                      <div className="p-2 rounded-xl border border-amber-400/20 bg-amber-500/10 ">
                         <div className="text-xs text-gray-600 dark:text-white/80 mb-1">
                           Slow Queries (&gt;1s)
                         </div>
@@ -876,7 +873,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                       System Resources
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <div className="p-4 rounded-xl border border-rose-400/20 bg-gradient-to-br from-rose-500/10 via-rose-500/5 to-transparent backdrop-blur-md">
+                      <div className="p-4 rounded-xl border border-rose-400/20 bg-rose-500/10 ">
                         <h5 className="font-medium mb-3 text-sm text-gray-700 dark:text-white">
                           Memory Usage
                         </h5>
@@ -931,7 +928,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                           </div>
                         </div>
                       </div>
-                      <div className="p-4 rounded-xl border border-violet-400/20 bg-gradient-to-br from-violet-500/10 via-violet-500/5 to-transparent backdrop-blur-md">
+                      <div className="p-4 rounded-xl border border-violet-400/20 bg-violet-500/10 ">
                         <h5 className="font-medium mb-3 text-sm text-gray-700 dark:text-white">
                           Process Info
                         </h5>
@@ -1022,7 +1019,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                 </div>
               ) : systemStatus ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <div className="p-2 rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 backdrop-blur-md">
+                  <div className="p-2 rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 ">
                     <h4 className="font-medium mb-2 text-xs sm:text-sm text-gray-700 dark:text-white">
                       Deployment
                     </h4>
@@ -1030,7 +1027,7 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
                       {systemStatus.deployment}
                     </p>
                   </div>
-                  <div className="p-2 rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 backdrop-blur-md">
+                  <div className="p-2 rounded-xl border border-gray-300/20 dark:border-white/10 bg-white/30 dark:bg-white/5 ">
                     <h4 className="font-medium mb-2 text-xs sm:text-sm text-gray-700 dark:text-white">
                       Last checked
                     </h4>

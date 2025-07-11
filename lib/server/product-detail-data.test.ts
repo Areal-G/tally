@@ -1,6 +1,6 @@
 /**
- * REQ-0077 — product detail SSR shape: recentOrders.placedBy enrichment.
- * REQ-0105 — committedQuantity enrich + stale cache guard.
+ * Product detail SSR shape: recentOrders.placedBy enrichment.
+ * committedQuantity enrich + stale cache guard.
  */
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
@@ -117,7 +117,7 @@ function mockProductDbRow() {
   ] as never);
 }
 
-describe("getProductDetailForPage recentOrders (REQ-0077)", () => {
+describe("getProductDetailForPage recentOrders", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getCacheMock.mockResolvedValue(null);
@@ -141,7 +141,7 @@ describe("getProductDetailForPage recentOrders (REQ-0077)", () => {
   });
 });
 
-describe("getProductDetailForPage committedQuantity (REQ-0105)", () => {
+describe("getProductDetailForPage committedQuantity", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getCacheMock.mockResolvedValue(null);

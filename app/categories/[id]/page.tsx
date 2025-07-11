@@ -7,7 +7,7 @@ import type { Category } from "@/types";
 
 type Props = { params: Promise<{ id: string }> };
 
-/** REQ-0025 — blocking SSR detail prefetch (no Suspense shell flash). REQ-0083 — admin cache-read forecast. */
+/** Blocking SSR detail prefetch (no Suspense shell flash). admin cache-read forecast. */
 export const dynamic = "force-dynamic";
 
 export default async function CategoryDetailRoute({ params }: Props) {

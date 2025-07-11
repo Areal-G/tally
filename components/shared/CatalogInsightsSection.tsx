@@ -1,6 +1,6 @@
 /**
- * REQ-0084 — reusable catalog entity insights + charts (category, supplier, product detail).
- * REQ-0221 — when densify (`insights`) is mounted, parents pass dataLoading=false so
+ * Reusable catalog entity insights + charts (category, supplier, product detail).
+ * When densify (`insights`) is mounted, parents pass dataLoading=false so
  * metrics never pulse; forecast table still uses forecastLoading.
  */
 
@@ -25,8 +25,10 @@ import { ResponsiveChartContainer } from "@/components/ui/responsive-chart-conta
 import {
   CHART_LABEL_TOP_MARGIN,
   createChartBarLabelRenderer,
+  createChartPieCountLabel,
   formatChartCurrencyLabel,
 } from "@/lib/ui/chart-point-label";
+import { formatStableCurrency } from "@/lib/format";
 import { CATALOG_STOCK_PIE_COLORS } from "@/lib/ui/catalog-insights-chart-data";
 import { DetailInfoRow } from "@/components/orders/detail";
 import { GlassCard, GlassCardBody } from "@/components/shared";
@@ -64,7 +66,7 @@ export type CatalogInsightsSectionProps = {
   salesChartDescription?: string;
   stockChartTitle?: string;
   stockChartDescription?: string;
-  /** REQ-0090 — badges below stock chart header (product warehouse allocated vs unallocated). */
+  /** Badges below stock chart header (product warehouse allocated vs unallocated). */
   stockChartTrailing?: ReactNode;
   salesChartData: Array<{ label: string; revenue: number; units: number }>;
   stockChartData: Array<{ name: string; value: number }>;
@@ -79,7 +81,7 @@ export type CatalogInsightsSectionProps = {
   /** When false, hides urgent table even if productHref is set (product detail uses KPI rows only). */
   showUrgentForecastTable?: boolean;
   /**
-   * REQ-0139 — fills the empty cell beside the stock pie (2-col grid).
+   * Fills the empty cell beside the stock pie (2-col grid).
    * When omitted and warehouseStock exists, renders a Catalog Allocation snapshot.
    */
   stockChartCompanion?: ReactNode;
@@ -246,7 +248,7 @@ export function CatalogInsightsSection({
           >
             {!dataLoading && (
               <span className="text-emerald-600 dark:text-emerald-400">
-                ${insights.avgOrderValue.toFixed(2)}
+                {formatStableCurrency(insights.avgOrderValue)}
               </span>
             )}
           </DetailInfoRow>
@@ -283,7 +285,7 @@ export function CatalogInsightsSection({
                 tone="amber"
                 loading={forecastLoading}
               >
-                {/* REQ-0139 — semantic urgency badge (Urgent / Normal / …) */}
+                {/* Semantic urgency badge (Urgent / Normal / …) */}
                 {!forecastLoading && (
                   <ForecastUrgencyBadge
                     urgency={productForecast.reorderRecommendation}
@@ -389,8 +391,9 @@ export function CatalogInsightsSection({
                 nameKey="name"
                 cx="50%"
                 cy="50%"
-                outerRadius={80}
-                label={({ name, value }) => `${name}: ${value}`}
+                outerRadius="85%"
+                labelLine={false}
+                label={createChartPieCountLabel()}
               >
                 {stockChartData.map((_, index) => (
                   <Cell
@@ -405,7 +408,7 @@ export function CatalogInsightsSection({
         </DeferredChartSection>
       </ChartCard>
 
-      {/* REQ-0139 — fill empty cell beside warehouse pie */}
+      {/* Fill empty cell beside warehouse pie */}
       {defaultCompanion}
 
       {showUrgentTable && productHref && (

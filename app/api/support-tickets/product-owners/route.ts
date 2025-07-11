@@ -1,7 +1,7 @@
 /**
  * GET /api/support-tickets/product-owners
  * Returns users who have at least one product (for "Send to" dropdown when creating a ticket).
- * REQ-0185 — include image + productCount for densify Select.
+ * Include image + productCount for densify Select.
  */
 
 import { NextRequest, NextResponse } from "next/server";

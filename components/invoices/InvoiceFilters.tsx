@@ -52,7 +52,6 @@ interface InvoiceFiltersProps {
 export default function InvoiceFilters({
   searchTerm,
   setSearchTerm,
-  pagination,
   setPagination,
   allInvoices,
   selectedStatuses,
@@ -113,7 +112,7 @@ export default function InvoiceFilters({
         { header: "Due Date", key: "Due Date" },
       ];
 
-      exportToCSV(csvData, columns, "stockly-invoices");
+      exportToCSV(csvData, columns, "tally-invoices");
 
       toast({
         title: "CSV Export Successful!",
@@ -159,7 +158,7 @@ export default function InvoiceFilters({
 
       await exportToExcel({
         sheetName: "Invoices",
-        fileName: "stockly-invoices",
+        fileName: "tally-invoices",
         columns: [
           { header: "Invoice Number", key: "Invoice Number", width: 20 },
           { header: "Invoice Date", key: "Invoice Date", width: 12 },
@@ -246,7 +245,7 @@ export default function InvoiceFilters({
               variant="ghost"
               size="sm"
               onClick={() => setSearchTerm("")}
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 backdrop-blur-md"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 "
             >
               <IoClose className="h-4 w-4 text-gray-700 dark:text-white/80" />
             </Button>

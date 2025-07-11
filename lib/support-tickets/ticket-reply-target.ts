@@ -1,5 +1,5 @@
 /**
- * REQ-0197 — Role-aware “Reply to” target for ticket chat header/placeholder.
+ * Role-aware “Reply to” target for ticket chat header/placeholder.
  * Creator → assignee (or “Support”); assignee/admin staff → creator.
  */
 

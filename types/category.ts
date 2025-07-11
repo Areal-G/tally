@@ -28,6 +28,13 @@ export type CategoryForecastUrgentRow = {
   productId: string;
   productName: string;
   sku: string;
+  /** Densify parity with admin forecast tables */
+  imageUrl?: string | null;
+  categoryId?: string | null;
+  categoryName?: string | null;
+  supplierId?: string | null;
+  supplierName?: string | null;
+  supplierImage?: string | null;
   availableStock: number;
   daysUntilStockout: number | null;
   reorderRecommendation: "urgent" | "soon" | "normal" | "overstocked";
@@ -54,9 +61,9 @@ export interface Category {
   updatedAt?: Date | string | null;
   createdBy: string; // User ID who created the category
   updatedBy?: string | null; // User ID who last updated the category
-  /** REQ-0141 — active products under this category (list + SSR). */
+  /** Active products under this category (list + SSR). */
   productCount?: number;
-  /** REQ-0141 — role-visible catalog size for Products % column. */
+  /** Role-visible catalog size for Products % column. */
   catalogProductTotal?: number;
   /** Extended by API for detail page */
   creator?: CategoryPartySnapshot | null;
@@ -70,7 +77,7 @@ export interface Category {
     totalValue: number;
   } | null;
   recentOrders?: CategoryRecentOrder[] | null;
-  /** REQ-0081 — derived KPIs from products + order history (SSR). */
+  /** Derived KPIs from products + order history (SSR). */
   categoryInsights?: CategoryInsights | null;
 }
 

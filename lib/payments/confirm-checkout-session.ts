@@ -1,8 +1,8 @@
 /**
- * REQ-0209 gap — Apply Stripe Checkout Session on browser return (`?payment=success&session_id=`).
+ * Apply Stripe Checkout Session on browser return (`?payment=success&session_id=`).
  * Idempotent vs webhook: if PaymentIntent already stored, only re-run payment→status sync
  * (confirms Pending→Confirmed on first money when webhook used older logic or remote webhook).
- * REQ-0215 — after apply (and alreadyApplied), always heal invoice + sync order so
+ * After apply (and alreadyApplied), always heal invoice + sync order so
  * partial→remainder settle promotes invoice paid / order paymentStatus paid.
  */
 
@@ -21,7 +21,7 @@ export type ConfirmCheckoutSessionResult = {
   invoiceId?: string;
   paymentStatus?: string | null;
   orderStatus?: string | null;
-  /** REQ-0215 — healed invoice status when available */
+  /** Healed invoice status when available */
   invoiceStatus?: string | null;
   error?: string;
 };
@@ -114,7 +114,7 @@ export async function confirmCheckoutSessionById(
       invoiceId = existing?.id;
     }
 
-    // REQ-0215 — heal+sync always (sent→paid when settled; order partial→paid)
+    // Heal+sync always (sent→paid when settled; order partial→paid)
     let invoiceStatus: string | null = null;
     if (invoiceId) {
       const healed = await healInvoiceStatusAfterMoney(invoiceId);
@@ -171,7 +171,7 @@ export async function confirmCheckoutSessionById(
       });
     }
 
-    // REQ-0215 — heal after apply or alreadyApplied (promotes stuck sent→paid)
+    // Heal after apply or alreadyApplied (promotes stuck sent→paid)
     const healed = await healInvoiceStatusAfterMoney(invoiceId);
     await invalidateOnOrderChange();
     const orderId = healed?.orderId ?? prior.orderId;

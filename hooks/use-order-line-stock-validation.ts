@@ -1,5 +1,5 @@
 /**
- * REQ-0111 — reactive order-line stock validation via useStockByProduct.
+ * Reactive order-line stock validation via useStockByProduct.
  * Re-validates when prefetch/cache fills; parent owns cap messages.
  */
 

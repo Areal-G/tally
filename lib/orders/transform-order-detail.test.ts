@@ -67,7 +67,7 @@ describe("transformOrderDetail", () => {
     expect(result.createdAt).toBe("2026-01-01T00:00:00.000Z");
   });
 
-  it("includes creator and updater from enrichment (REQ-0096)", () => {
+  it("includes creator and updater from enrichment", () => {
     const result = transformOrderDetail(baseOrder, {
       placedByName: "Alice",
       placedByEmail: "alice@test.com",

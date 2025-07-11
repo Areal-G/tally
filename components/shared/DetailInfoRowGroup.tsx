@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0114 — responsive row group for DetailInfoRow siblings on detail pages.
+ * Responsive row group for DetailInfoRow siblings on detail pages.
  */
 
 import { cn } from "@/lib/utils";

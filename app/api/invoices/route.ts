@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       dueDateEnd: searchParams.get("dueDateEnd") || undefined,
     };
 
-    // Supplier: invoices for orders containing this supplier's products (REQ-0075 AC2)
+    // Supplier: invoices for orders containing this supplier's products
     if (isSupplier) {
       if (!supplier) {
         return NextResponse.json([]);
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(supplierInvoices);
     }
 
-    // REQ-0159 — admin/user Self-only (parity with getInvoicesByUser / /orders)
+    // Admin/user Self-only (parity with getInvoicesByUser / /orders)
     const cacheKey = cacheKeys.invoices.list({
       ...(filters as Record<string, unknown>),
       ...(isClient
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // REQ-0150 — linked order preview + statusAt for dense Invoice table
+    // Linked order preview + statusAt for dense Invoice table
     const orderPreviewMap = await fetchInvoiceListOrderPreviewMap(
       invoices.map((inv) => inv.orderId),
     );
@@ -270,7 +270,7 @@ export async function POST(request: NextRequest) {
     }).catch(() => {});
     await scheduleInvalidateInvoiceCaches();
 
-    // REQ-0211 — densify create response like GET list (no thin-row flash on prepend)
+    // Densify create response like GET list (no thin-row flash on prepend)
     const orderPreviewMap = await fetchInvoiceListOrderPreviewMap([
       invoice.orderId,
     ]);
@@ -329,7 +329,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(transformedInvoice, { status: 201 });
   } catch (error) {
-    // Duplicate invoice is an expected business-logic rejection — return 409 and do not log to Sentry
+    // Duplicate invoice is an expected business-logic rejection — return 409 without reporting it
     if (error instanceof Error && error.message.startsWith("Invoice already exists")) {
       return NextResponse.json({ error: error.message }, { status: 409 });
     }

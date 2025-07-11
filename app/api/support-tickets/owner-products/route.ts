@@ -1,6 +1,6 @@
 /**
  * GET /api/support-tickets/owner-products?ownerId=
- * REQ-0200 — Products owned by selected Send-to (for Related product picker).
+ * Products owned by selected Send-to (for Related product picker).
  * Any authenticated role; not viewer-scoped like GET /api/products.
  */
 

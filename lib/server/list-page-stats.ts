@@ -1,5 +1,5 @@
 /**
- * Shared SSR prefetch for list-page stat cards (REQ-0025).
+ * Shared SSR prefetch for list-page stat cards.
  * Admin/user → dashboard; supplier → supplier portal; client → client portal.
  */
 import { getDashboardForAdmin } from "@/lib/server/dashboard-data";

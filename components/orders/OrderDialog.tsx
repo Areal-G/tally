@@ -60,7 +60,7 @@ import {
   DialogSubmitButton,
   GLASS_GHOST_BUTTON,
 } from "@/components/shared";
-import { cn } from "@/lib/utils";
+import { cn, EMPTY_LIST } from "@/lib/utils";
 import {
   createOrderSchema,
   updateOrderSchema,
@@ -75,6 +75,8 @@ import type {
   BillingAddress,
   CreateOrderInput,
 } from "@/types";
+import { computeOrderFeesFromSubtotal } from "@/lib/orders/order-fees";
+import { formatStableCurrency } from "@/lib/format";
 import { logger } from "@/lib/logger";
 import {
   CircleDollarSign,
@@ -94,7 +96,7 @@ import { useAuth } from "@/contexts";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
-/** ISO date string for native date inputs (REQ-0126). */
+/** ISO date string for native date inputs. */
 function toDateInputValue(value?: Date | string | null): string {
   if (!value) return "";
   const d = new Date(value);
@@ -133,38 +135,9 @@ const paymentStatusOptions: Array<{ value: PaymentStatus; label: string }> = [
   { value: "refunded", label: "Refunded" },
 ];
 
-/** Tax: 7% of subtotal (hardcoded). */
-const TAX_RATE = 0.07;
-/** Shipping: fixed $4.99 (hardcoded). */
-const SHIPPING_FIXED = 4.99;
-
-/**
- * Discount percent by subtotal tiers (hardcoded):
- * &lt; $100 → 10%, $100–$300 → 20%, $300–$500 → 30%, $500+ → 50%
- */
-function getDiscountPercent(subtotal: number): number {
-  if (subtotal < 100) return 10;
-  if (subtotal < 300) return 20;
-  if (subtotal < 500) return 30;
-  return 50;
-}
-
-/**
- * Compute tax, shipping, and discount amounts from subtotal.
- * Used for display and for create-order payload (all roles).
- */
-function getOrderFeesFromSubtotal(subtotal: number): {
-  taxAmount: number;
-  shippingAmount: number;
-  discountPercent: number;
-  discountAmount: number;
-} {
-  const taxAmount = subtotal * TAX_RATE;
-  const discountPercent = getDiscountPercent(subtotal);
-  const discountAmount = subtotal * (discountPercent / 100);
-  // Free shipping on the 10% (< $100) discount tier — keeps total <= subtotal on small orders.
-  const shippingAmount = discountPercent === 10 ? 0 : SHIPPING_FIXED;
-  return { taxAmount, shippingAmount, discountPercent, discountAmount };
+/** Display fees from shared server policy. */
+function getOrderFeesFromSubtotal(subtotal: number) {
+  return computeOrderFeesFromSubtotal(subtotal);
 }
 
 /**
@@ -209,11 +182,6 @@ export default function OrderDialog({
       ? externalEditingOrder
       : internalEditingOrder;
 
-  const setEditingOrder =
-    externalEditingOrder !== undefined && onEditOrder
-      ? onEditOrder
-      : setInternalEditingOrder;
-
   // Fetch products for selection (used in create form)
   // Client + defaultOwnerId: use browse products from selected owner
   const isClientCreatingOrder = user?.role === "client" && !!defaultOwnerId;
@@ -248,7 +216,6 @@ export default function OrderDialog({
   // Determine loading states from mutations
   const isCreating = createOrderMutation.isPending;
   const isUpdating = updateOrderMutation.isPending;
-  const isSubmitting = isCreating || isUpdating;
 
   // ==================== CREATE ORDER FORM ====================
   // Initialize create form
@@ -271,9 +238,6 @@ export default function OrderDialog({
         zipCode: "",
         country: "",
       },
-      tax: 0,
-      shipping: 0,
-      discount: 0,
       notes: "",
     },
   });
@@ -292,7 +256,7 @@ export default function OrderDialog({
     name: "items",
   });
 
-  /** REQ-0112 — keyed by field.id (stable across remove/reindex). */
+  /** Keyed by field.id (stable across remove/reindex). */
   const [lineStockErrors, setLineStockErrors] = useState<Record<string, boolean>>(
     {},
   );
@@ -318,7 +282,7 @@ export default function OrderDialog({
     useWatch({
       control: createControl,
       name: "items",
-    }) || [];
+    }) || EMPTY_LIST;
   const useSameAddress = createWatch("useSameAddress");
 
   // Calculate subtotal from items - updates in real-time as items change
@@ -341,7 +305,7 @@ export default function OrderDialog({
     }, 0);
   }, [watchedItems, availableProducts]);
 
-  // Tax, shipping, discount: computed from subtotal (hardcoded rules) — no dropdowns
+  // Tax, shipping, discount: shared policy (display only; server recomputes)
   const orderFees = useMemo(
     () => getOrderFeesFromSubtotal(subtotal),
     [subtotal],
@@ -391,9 +355,6 @@ export default function OrderDialog({
           zipCode: "",
           country: "",
         },
-        tax: 0,
-        shipping: 0,
-        discount: 0,
         notes: "",
       });
     }
@@ -421,19 +382,7 @@ export default function OrderDialog({
         throw new Error("At least one order item is required");
       }
 
-      // Compute subtotal and fees (tax 7%, shipping $4.99 except free on 10% tier, discount by tier) for payload
-      const submitSubtotal = validItems.reduce((sum, item) => {
-        const product = availableProducts.find((p) => p.id === item.productId);
-        if (!product) return sum;
-        const qty =
-          item.quantity !== undefined && item.quantity !== null
-            ? Number(item.quantity)
-            : 0;
-        return sum + Number(product.price) * qty;
-      }, 0);
-      const fees = getOrderFeesFromSubtotal(submitSubtotal);
-
-      // REQ-0111 — ensure fresh allocation cache before submit validation
+      // Ensure fresh allocation cache before submit validation
       for (const item of validItems) {
         const product = availableProducts.find((p) => p.id === item.productId);
         if (!product) {
@@ -448,7 +397,7 @@ export default function OrderDialog({
           item,
         );
         if (!stockCheck.ok) {
-          // Expected client validation — toast + warn (never logger.error → Sentry)
+          // Expected client validation — toast + warn (not logger.error, which reports)
           const msg =
             stockCheck.message ??
             `Insufficient stock for ${product.name}. Available: ${stockCheck.maxQty}`;
@@ -498,9 +447,6 @@ export default function OrderDialog({
         billingAddress: hasValidAddress(data.billingAddress)
           ? (data.billingAddress as BillingAddress)
           : undefined,
-        tax: fees.taxAmount,
-        shipping: fees.shippingAmount,
-        discount: fees.discountAmount,
         notes: data.notes || undefined,
       };
 
@@ -527,13 +473,10 @@ export default function OrderDialog({
           zipCode: "",
           country: "",
         },
-        tax: 0,
-        shipping: 0,
-        discount: 0,
         notes: "",
       });
     } catch (error) {
-      // Mutation failures: toast from hook; unexpected errors → Sentry via logger.error
+      // Mutation failures: toast from hook; unexpected errors are reported via logger.error
       logger.error("Order creation error:", error);
       // Don't close dialog on error - let user fix the issue
     }
@@ -602,7 +545,7 @@ export default function OrderDialog({
 
   const { reset: editReset, watch: editWatch } = editFormMethods;
 
-  // REQ-0198 — sync edit form on open / order change (no useEffect bounce)
+  // Sync edit form on open / order change (no useEffect bounce)
   useSyncDialogOpenState(
     open,
     () => {
@@ -707,24 +650,6 @@ export default function OrderDialog({
     }
   };
 
-  // Handle Edit Order - called from table actions
-  const handleEditOrder = useCallback(
-    (order: Order) => {
-      if (externalEditingOrder !== undefined && onEditOrder) {
-        // If controlled, call the external handler
-        onEditOrder(order);
-      } else {
-        // If internal, set state directly
-        setInternalEditingOrder(order);
-      }
-      // Open dialog if controlled
-      if (isControlled) {
-        setOpen(true);
-      }
-    },
-    [externalEditingOrder, onEditOrder, isControlled, setOpen],
-  );
-
   const currentStatus = editWatch("status");
 
   // ==================== RENDER ====================
@@ -732,13 +657,13 @@ export default function OrderDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {children || (
-          <Button className="h-10 font-medium inline-flex items-center justify-center rounded-xl border border-violet-400/30 dark:border-violet-400/30 bg-gradient-to-r from-violet-500/40 via-violet-500/30 to-violet-500/20 dark:from-violet-500/40 dark:via-violet-500/30 dark:to-violet-500/20 text-white shadow-[0_15px_35px_rgba(139,92,246,0.35)] backdrop-blur-md transition duration-200 hover:border-violet-300/50 hover:from-violet-500/50 hover:via-violet-500/40 hover:to-violet-500/30 dark:hover:border-violet-300/50 dark:hover:from-violet-500/50 dark:hover:via-violet-500/40 dark:hover:to-violet-500/30">
+          <Button className="h-10 font-medium inline-flex items-center justify-center rounded-xl border border-violet-400/30 dark:border-violet-400/30 bg-violet-500/40 dark:bg-violet-500/40 text-white transition duration-200 hover:border-violet-300/50 hover:bg-violet-500/50 dark:hover:border-violet-300/50 dark:hover:bg-violet-500/50 ">
             + Create Order
           </Button>
         )}
       </DialogTrigger>
       <DialogContent
-        className="p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto border-violet-400/30 dark:border-violet-400/30 shadow-[0_30px_80px_rgba(139,92,246,0.45)] dark:shadow-[0_30px_80px_rgba(139,92,246,0.25)]"
+        className="p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto border-violet-400/30 dark:border-violet-400/30 "
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeaderBrand
@@ -903,7 +828,7 @@ export default function OrderDialog({
                   inputClassName={DIALOG_FORM_FIELD_VIOLET}
                 />
 
-                {/* Estimated Delivery — REQ-0126 DialogDateField */}
+                {/* Estimated Delivery — DialogDateField */}
                 <DialogDateField
                   id="estimated-delivery"
                   label="Estimated Delivery"
@@ -988,7 +913,7 @@ export default function OrderDialog({
               </div>
 
               <DialogFooter className="mt-9 mb-4 flex flex-col sm:flex-row items-center gap-2">
-                {/* REQ-0150 — type=button so Cancel does not submit/unmount the form */}
+                {/* Type=button so Cancel does not submit/unmount the form */}
                 <Button
                   type="button"
                   onClick={handleCancelEdit}
@@ -1090,7 +1015,7 @@ export default function OrderDialog({
                       type="button"
                       onClick={handleAddItem}
                       variant="secondary"
-                      className="h-10 rounded-[28px] border border-violet-400/30 dark:border-violet-400/30 bg-gradient-to-r from-violet-500/30 via-violet-500/15 to-violet-500/5 dark:from-violet-500/30 dark:via-violet-500/15 dark:to-violet-500/5 text-gray-700 dark:text-white shadow-[0_10px_30px_rgba(139,92,246,0.2)] backdrop-blur-md transition duration-200 hover:border-violet-300/60 hover:from-violet-500/35 hover:via-violet-500/25 hover:to-violet-500/15 dark:hover:border-violet-300/60 dark:hover:from-violet-500/35 dark:hover:via-violet-500/25 dark:hover:to-violet-500/15"
+                      className="h-10 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors duration-150 hover:bg-slate-50 dark:hover:bg-slate-700 "
                     >
                       <Plus className="h-4 w-4 mr-1" />
                       Add Item
@@ -1170,21 +1095,21 @@ export default function OrderDialog({
                           <Receipt className="h-3.5 w-3.5 shrink-0" />
                           Subtotal:
                         </span>
-                        <span>${subtotal.toFixed(2)}</span>
+                        <span>{formatStableCurrency(subtotal)}</span>
                       </div>
                       <div className="flex justify-between text-sm text-white/70">
                         <span className="inline-flex items-center gap-1.5">
                           <Percent className="h-3.5 w-3.5 shrink-0" />
                           Tax (7%):
                         </span>
-                        <span>${orderFees.taxAmount.toFixed(2)}</span>
+                        <span>{formatStableCurrency(orderFees.taxAmount)}</span>
                       </div>
                       <div className="flex justify-between text-sm text-white/70">
                         <span className="inline-flex items-center gap-1.5">
                           <Truck className="h-3.5 w-3.5 shrink-0" />
                           Shipping:
                         </span>
-                        <span>${orderFees.shippingAmount.toFixed(2)}</span>
+                        <span>{formatStableCurrency(orderFees.shippingAmount)}</span>
                       </div>
                       <div className="flex justify-between text-sm text-white/70">
                         <span className="inline-flex items-center gap-1.5">
@@ -1192,7 +1117,7 @@ export default function OrderDialog({
                           Discount ({orderFees.discountPercent}%):
                         </span>
                         <span className="text-red-400">
-                          -${orderFees.discountAmount.toFixed(2)}
+                          -{formatStableCurrency(orderFees.discountAmount)}
                         </span>
                       </div>
                       <div className="flex justify-between text-base font-medium text-white pt-2 border-t border-violet-400/20">
@@ -1200,7 +1125,7 @@ export default function OrderDialog({
                           <CircleDollarSign className="h-4 w-4 shrink-0" />
                           Total:
                         </span>
-                        <span>${total.toFixed(2)}</span>
+                        <span>{formatStableCurrency(total)}</span>
                       </div>
                     </div>
                   ) : (

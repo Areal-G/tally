@@ -1,5 +1,5 @@
 /**
- * REQ-0068 — unit tests for per-warehouse order allocation sync helpers.
+ * Unit tests for per-warehouse order allocation sync helpers.
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";

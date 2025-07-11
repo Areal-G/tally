@@ -99,7 +99,7 @@ const truncateText = (
   return `${text.substring(0, maxLength)}...`;
 };
 
-// REQ-0141 — page list drops notes; dialog still hides description+notes
+// Page list drops notes; dialog still hides description+notes
 const DIALOG_HIDDEN_COLUMNS = new Set(["description", "productCount"]);
 
 export const createCategoryColumns = (
@@ -147,7 +147,7 @@ export const createCategoryColumns = (
     },
     {
       accessorKey: "productCount",
-      // REQ-0142 — HelpTooltip sibling of sort trigger (no nested interactive)
+      // HelpTooltip sibling of sort trigger (no nested interactive)
       header: ({ column }) => (
         <div className="flex items-center gap-1">
           <SortableHeader

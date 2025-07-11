@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import HistoryList from "./HistoryList";
 import ActivityLogSection from "./ActivityLogSection";
 import { PageContentWrapper } from "@/components/shared";

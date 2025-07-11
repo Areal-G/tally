@@ -1,6 +1,6 @@
 /**
  * Shared card list row styles — matches Top Products by Orders table dividers.
- * REQ-0174 — clip-safe meta rows for AvatarInlineLink rings.
+ * Clip-safe meta rows for AvatarInlineLink rings.
  */
 
 /** List wrapper with row separators */

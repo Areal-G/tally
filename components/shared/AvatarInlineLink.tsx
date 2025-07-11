@@ -7,7 +7,7 @@ import { AVATAR_RING_CLASS } from "@/lib/ui/avatar-ring-styles";
 import { cn } from "@/lib/utils";
 
 export type AvatarInlineLinkProps = {
-  /** Display name beside avatar; omit for avatar-only (REQ-0142 supplier table) */
+  /** Display name beside avatar; omit for avatar-only (supplier table) */
   label?: string;
   /** Robohash / avatar seed (user id or supplier id) */
   seed: string;
@@ -18,9 +18,11 @@ export type AvatarInlineLinkProps = {
   size?: number;
   className?: string;
   linkClassName?: string;
+  /** Avatars are off app-wide (only the top-bar account button shows one); pass true to opt in. */
+  showAvatar?: boolean;
 };
 
-/** REQ-0077 — round avatar + optional link for owner/supplier/buyer rows */
+/** Round avatar + optional link for owner/supplier/buyer rows */
 export function AvatarInlineLink({
   label,
   seed,
@@ -29,6 +31,7 @@ export function AvatarInlineLink({
   size = 24,
   className,
   linkClassName,
+  showAvatar = false,
 }: AvatarInlineLinkProps) {
   const avatar = resolveAvatarSourcesFromSeed(seed, image ?? null);
   const showLabel = label != null && label !== "";
@@ -48,9 +51,14 @@ export function AvatarInlineLink({
     </span>
   );
 
+  if (!showAvatar) {
+    if (!nameEl) return null;
+    return <span className={cn("inline-flex min-w-0 items-center", className)}>{nameEl}</span>;
+  }
+
   return (
     <span className={cn("inline-flex items-center gap-2 min-w-0", className)}>
-      {/* REQ-0174 — ring on outer; overflow-hidden only on image (ring must not clip) */}
+      {/* Ring on outer; overflow-hidden only on image (ring must not clip) */}
       <span
         className={cn("relative shrink-0 rounded-full", AVATAR_RING_CLASS)}
         style={{ width: size, height: size }}

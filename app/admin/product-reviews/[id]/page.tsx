@@ -5,7 +5,7 @@ import AdminProductReviewDetailContent from "@/components/admin/AdminProductRevi
 
 type Props = { params: Promise<{ id: string }> };
 
-/** REQ-0025 — blocking SSR detail prefetch (no Suspense shell flash). */
+/** Blocking SSR detail prefetch (no Suspense shell flash). */
 export const dynamic = "force-dynamic";
 
 export default async function AdminProductReviewDetailPage({ params }: Props) {

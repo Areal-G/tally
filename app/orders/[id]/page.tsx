@@ -10,7 +10,7 @@ type Props = {
   searchParams: Promise<{ payment?: string; session_id?: string }>;
 };
 
-/** REQ-0025 — blocking SSR detail prefetch (no Suspense shell flash). */
+/** Blocking SSR detail prefetch (no Suspense shell flash). */
 export const dynamic = "force-dynamic";
 
 export default async function OrderDetailRoute({ params, searchParams }: Props) {
@@ -19,7 +19,7 @@ export default async function OrderDetailRoute({ params, searchParams }: Props) 
   const { id } = await params;
   const sp = await searchParams;
 
-  // REQ-0209 — confirm Stripe session before SSR so status is Confirmed on first paint
+  // Confirm Stripe session before SSR so status is Confirmed on first paint
   const stripeReturn = await reconcileStripeReturnBeforeDetail(sp);
   if (stripeReturn.shouldRedirect) {
     redirect(`/orders/${id}`);

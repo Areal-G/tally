@@ -1,5 +1,5 @@
 /**
- * REQ-0114 — line share of order total when tax/shipping/discount adjust order.total.
+ * Line share of order total when tax/shipping/discount adjust order.total.
  */
 
 /** Proportional share of order.total for one line subtotal. */

@@ -171,5 +171,5 @@ export function SafeImage({
 ## This repo
 
 - Implementation: [`components/ui/safe-image.tsx`](../components/ui/safe-image.tsx), [`components/ui/safe-avatar-image.tsx`](../components/ui/safe-avatar-image.tsx)
-- Usage (REQ-0038/0040): product table/detail, ImageField preview, category/supplier product thumbs, QR code, auth shell SVG (`SafeImage`); **all avatars** use `SafeAvatarImage` with `getRoboHashAvatarUrl` / `resolveAvatarSourcesFromSeed` / `resolveUserAvatarSources` from [`lib/ui/user-avatar-sources.ts`](../lib/ui/user-avatar-sources.ts) (Navbar, Sidebar, reviews, ticket replies)
+- Usage: product table/detail, ImageField preview, category/supplier product thumbs, QR code, auth shell SVG (`SafeImage`). The account avatar in the top bar uses `SafeAvatarImage` with `resolveUserAvatarSources` from [`lib/ui/user-avatar-sources.ts`](../lib/ui/user-avatar-sources.ts).
 - `remotePatterns` in [`next.config.ts`](../next.config.ts): `robohash.org`, `ik.imagekit.io`, `**.googleusercontent.com`

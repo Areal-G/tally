@@ -1,5 +1,5 @@
 /**
- * REQ-0192 — Ticket message counts: opening description = 1 creator message,
+ * Ticket message counts: opening description = 1 creator message,
  * plus reply thread (same semantics as table `1 + replyCount`).
  */
 

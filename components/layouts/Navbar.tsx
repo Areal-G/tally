@@ -1,26 +1,27 @@
 "use client";
 
 /**
- * Main app navbar: logo, nav links (role-based: admin vs client vs supplier), theme toggle, notifications, profile menu.
- * Role is inferred from user.role or pathname so correct links show before auth finishes (e.g. on refresh).
+ * App shell: collapsible grouped sidebar (drawer on mobile) + slim top bar
+ * (page title, ⌘K search, notifications, theme, account) + scrollable content.
+ * Role is inferred from user.role or pathname so the right nav shows before auth resolves.
+ * Name kept as "Navbar" because ~25 pages wrap themselves in <Navbar>.
  */
-import React, { useState, ReactNode } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { TallyMark } from "@/components/brand/TallyMark";
+import { usePathname, useRouter } from "next/navigation";
 import {
+  Bell,
+  ChevronLeft,
+  ChevronRight,
   LogOut,
   Menu,
-  X,
   Moon,
+  Search,
   Sun,
-  Settings,
-  ChevronDown,
-  Bell,
-  MessageSquare,
-  FileCode,
-  Activity,
+  X,
 } from "lucide-react";
-import { AiFillProduct } from "react-icons/ai";
+import { useTheme } from "next-themes";
 
 import { useAuth } from "@/contexts/auth-context";
 import { setPostLogoutGoodbye } from "@/lib/auth/post-logout-goodbye";
@@ -35,142 +36,358 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Separator } from "@/components/ui/separator";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command";
 import { SafeAvatarImage } from "@/components/ui/safe-avatar-image";
 import { resolveUserAvatarSources } from "@/lib/ui/user-avatar-sources";
-import { useTheme } from "next-themes";
 import ScrollControl from "../shared/ScrollControl";
-import Footer from "./Footer";
 import { NotificationBell } from "../shared";
-
 import {
   DROPDOWN_NAV_CONTENT_CLASS,
   DROPDOWN_NAV_ITEM_CLASS,
 } from "@/components/ui/menu-item-styles";
-import { APP_SHELL_WIDTH_CLASS } from "@/lib/ui/shell-layout-styles";
 import { isNavPathActive } from "@/lib/navigation/is-nav-path-active";
+import { getHomePathForRole } from "@/lib/navigation/role-nav-config";
 import {
-  getHomePathForRole,
-  getNavItemsForRole,
-  PROFILE_MENU_PATHS,
-  type RoleNavItem,
-} from "@/lib/navigation/role-nav-config";
-import { navbarNavLinkClass } from "@/lib/navigation/nav-link-styles";
+  getSidebarSectionsForRole,
+  SIDEBAR_FOOTER_ITEMS,
+  type SidebarNavItem,
+  type SidebarNavSection,
+} from "@/lib/navigation/sidebar-nav-config";
+import { cn } from "@/lib/utils";
 
-/** Profile menu entries — paths shared with RouteWarmPrefetch (REQ-0094). */
-const PROFILE_MENU_LINKS = [
-  {
-    path: PROFILE_MENU_PATHS[0],
-    label: "Support Tickets",
-    Icon: MessageSquare,
-  },
-  {
-    path: PROFILE_MENU_PATHS[1],
-    label: "Email Preferences",
-    Icon: Settings,
-  },
-  { path: PROFILE_MENU_PATHS[2], label: "API Documentation", Icon: FileCode },
-  { path: PROFILE_MENU_PATHS[3], label: "API Status", Icon: Activity },
-] as const;
+const SIDEBAR_COLLAPSED_KEY = "tally-sidebar-collapsed";
 
-/**
- * Theme toggle component (inline ModeToggle)
- */
-function ModeToggle() {
-  const { setTheme } = useTheme();
+const ROLE_LABEL: Record<string, string> = {
+  admin: "Store admin",
+  user: "Store admin",
+  client: "Client",
+  supplier: "Supplier",
+};
 
+/* ------------------------------------------------------------------ */
+/* Sidebar pieces                                                      */
+/* ------------------------------------------------------------------ */
+
+function SidebarLink({
+  item,
+  active,
+  collapsed,
+  onNavigate,
+}: {
+  item: SidebarNavItem;
+  active: boolean;
+  collapsed: boolean;
+  onNavigate?: () => void;
+}) {
+  const Icon = item.icon;
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Toggle theme"
-          className="h-8 w-8 sm:h-10 sm:w-10 focus-visible:outline-none focus:outline-none focus-visible:ring-0 focus:ring-0"
-        >
-          <Sun className="h-4 w-4 sm:h-[1.2rem] sm:w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-4 w-4 sm:h-[1.2rem] sm:w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className={`w-48 ${DROPDOWN_NAV_CONTENT_CLASS}`}
-      >
-        <DropdownMenuItem
-          onClick={() => setTheme("light")}
-          className={DROPDOWN_NAV_ITEM_CLASS}
-        >
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => setTheme("dark")}
-          className={DROPDOWN_NAV_ITEM_CLASS}
-        >
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => setTheme("system")}
-          className={DROPDOWN_NAV_ITEM_CLASS}
-        >
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Link
+      href={item.path}
+      prefetch
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      title={collapsed ? item.label : undefined}
+      className={cn(
+        "flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition",
+        collapsed && "justify-center px-0",
+        active
+          ? "money-nav-active"
+          : "text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]",
+      )}
+    >
+      <Icon className="h-4 w-4 shrink-0" />
+      {!collapsed && <span className="truncate">{item.label}</span>}
+    </Link>
   );
 }
+
+function SidebarBody({
+  sections,
+  pathname,
+  collapsed,
+  homePath,
+  onNavigate,
+  onToggleCollapsed,
+}: {
+  sections: SidebarNavSection[];
+  pathname: string | null;
+  collapsed: boolean;
+  homePath: string;
+  onNavigate?: () => void;
+  onToggleCollapsed?: () => void;
+}) {
+  return (
+    <div className="flex h-full flex-col">
+      {/* Brand */}
+      <div
+        className={cn(
+          "relative flex shrink-0 items-center gap-3 px-4 py-6",
+          collapsed ? "justify-center" : "justify-between",
+        )}
+      >
+        <Link
+          href={homePath}
+          prefetch
+          onClick={onNavigate}
+          aria-label="Tally home"
+          title={collapsed ? "Tally" : undefined}
+          className={cn("flex min-w-0 items-center gap-3", collapsed && "justify-center")}
+        >
+          <span className="money-brand-fill money-brand-shadow flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+            <TallyMark className="h-6 w-6" />
+          </span>
+          {!collapsed && (
+            <span className="min-w-0">
+              <span className="block text-base font-semibold tracking-[-0.03em] text-[var(--text-primary)]">
+                Tally
+              </span>
+              <span className="block text-[10px] font-medium uppercase tracking-[0.12em] text-[var(--text-secondary)]">
+                Inventory
+              </span>
+            </span>
+          )}
+        </Link>
+        {onToggleCollapsed && (
+          <button
+            type="button"
+            onClick={onToggleCollapsed}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className={cn(
+              "rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]",
+              collapsed &&
+                "absolute -right-3 top-8 border border-[var(--border-subtle)] bg-[var(--card-bg)] shadow-sm",
+            )}
+          >
+            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </button>
+        )}
+      </div>
+
+      {/* Sections */}
+      <nav
+        aria-label="Main navigation"
+        className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-2"
+      >
+        {sections.map((section) => (
+          <div key={section.title} className="space-y-1">
+            {!collapsed && (
+              <p className="px-3 pb-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)] opacity-70">
+                {section.title}
+              </p>
+            )}
+            <div className="space-y-1">
+              {section.items.map((item) => (
+                <SidebarLink
+                  key={item.path}
+                  item={item}
+                  active={isNavPathActive(pathname, item.path)}
+                  collapsed={collapsed}
+                  onNavigate={onNavigate}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <div className="space-y-1">
+          {!collapsed && (
+            <p className="px-3 pb-1 text-[9px] font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)] opacity-70">
+              Resources
+            </p>
+          )}
+          <div className="space-y-1">
+            {SIDEBAR_FOOTER_ITEMS.map((item) => (
+              <SidebarLink
+                key={item.path}
+                item={item}
+                active={isNavPathActive(pathname, item.path)}
+                collapsed={collapsed}
+                onNavigate={onNavigate}
+              />
+            ))}
+          </div>
+        </div>
+      </nav>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Top bar pieces                                                      */
+/* ------------------------------------------------------------------ */
+
+/** Light/dark switch beside the notification bell. Icons swap via the `dark` class (no hydration flash). */
+function ThemeToggleButton() {
+  const { theme, systemTheme, setTheme } = useTheme();
+  const isDark = ((theme === "system" ? systemTheme : theme) ?? "light") === "dark";
+  return (
+    <button
+      type="button"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      aria-label="Toggle light or dark theme"
+      title="Toggle theme"
+      className="money-tool-button"
+    >
+      <Sun className="hidden h-[18px] w-[18px] dark:block" />
+      <Moon className="h-[18px] w-[18px] dark:hidden" />
+    </button>
+  );
+}
+
+function CommandMenu({
+  open,
+  onOpenChange,
+  sections,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  sections: SidebarNavSection[];
+}) {
+  const router = useRouter();
+  const { setTheme } = useTheme();
+
+  const run = useCallback(
+    (fn: () => void) => {
+      onOpenChange(false);
+      fn();
+    },
+    [onOpenChange],
+  );
+
+  return (
+    <CommandDialog open={open} onOpenChange={onOpenChange}>
+      <CommandInput placeholder="Jump to a page or action…" />
+      <CommandList>
+        <CommandEmpty>No results.</CommandEmpty>
+        {sections.map((section) => (
+          <CommandGroup key={section.title} heading={section.title}>
+            {section.items.map((item) => {
+              const Icon = item.icon;
+              return (
+                <CommandItem
+                  key={item.path}
+                  value={`${section.title} ${item.label}`}
+                  onSelect={() => run(() => router.push(item.path))}
+                >
+                  <Icon className="mr-2 h-4 w-4 text-slate-500" />
+                  {item.label}
+                </CommandItem>
+              );
+            })}
+          </CommandGroup>
+        ))}
+        <CommandSeparator />
+        <CommandGroup heading="Preferences">
+          <CommandItem value="theme light" onSelect={() => run(() => setTheme("light"))}>
+            <Sun className="mr-2 h-4 w-4 text-slate-500" /> Light theme
+          </CommandItem>
+          <CommandItem value="theme dark" onSelect={() => run(() => setTheme("dark"))}>
+            <Moon className="mr-2 h-4 w-4 text-slate-500" /> Dark theme
+          </CommandItem>
+          {SIDEBAR_FOOTER_ITEMS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <CommandItem
+                key={item.path}
+                value={item.label}
+                onSelect={() => run(() => router.push(item.path))}
+              >
+                <Icon className="mr-2 h-4 w-4 text-slate-500" />
+                {item.label}
+              </CommandItem>
+            );
+          })}
+        </CommandGroup>
+      </CommandList>
+    </CommandDialog>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Shell                                                               */
+/* ------------------------------------------------------------------ */
 
 interface NavbarProps {
   children?: ReactNode;
 }
 
-/**
- * Main Navigation Bar Component with Layout Wrapper
- * Handles navigation, user menu, theme toggle, mobile responsive menu
- * Also provides the layout structure with background and scrolling
- */
 export default function Navbar({ children }: NavbarProps) {
   const { user, isCheckingAuth } = useAuth();
   const pathname = usePathname();
   const { toast } = useToast();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [commandOpen, setCommandOpen] = useState(false);
 
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  // Restore collapsed state after mount (avoids SSR/client mismatch).
+  useEffect(() => {
+    try {
+      setCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1");
+    } catch {
+      /* storage unavailable */
+    }
+  }, []);
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(SIDEBAR_COLLAPSED_KEY, next ? "1" : "0");
+      } catch {
+        /* storage unavailable */
+      }
+      return next;
+    });
+  };
+
+  // ⌘K / Ctrl+K opens the command menu.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setCommandOpen((o) => !o);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Close the mobile drawer on route change.
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     setIsMobileMenuOpen(false);
-
     try {
-      // Get user name before logout (will be cleared after)
       const userName = user?.name || user?.email?.split("@")[0] || "User";
-
       clearAuthToastMarkers();
       setPostLogoutGoodbye({ userName });
-
-      // Clear localStorage keys synchronously (no React re-renders).
       localStorage.removeItem("isAuth");
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("token");
       localStorage.removeItem("getSession");
       localStorage.removeItem("prevUserId");
       localStorage.removeItem("stock-inventory-query-cache");
-
-      // Await the server-side logout so the httpOnly session_id cookie is
-      // cleared via Set-Cookie BEFORE the browser navigates to /login.
-      // (Cookies.remove can't clear httpOnly cookies; only a server
-      // response can.)  This is fast — no DB calls, just clears a cookie.
-      // We do NOT call logout() from auth context because that would
-      // setIsLoggedIn(false) → React re-renders the current page with
-      // empty data → "Failed to load" flash.
+      // Server clears the httpOnly session cookie before we navigate.
       await fetch("/api/auth/logout", {
         method: "POST",
         credentials: "include",
       }).catch(() => {});
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- full reload clears all client state after logout
       window.location.href = "/login";
       return;
-    } catch (error) {
+    } catch {
       toast({
         title: "Logout Failed",
         description: "Failed to logout. Please try again.",
@@ -181,9 +398,6 @@ export default function Navbar({ children }: NavbarProps) {
     }
   };
 
-  type NavItem = RoleNavItem;
-
-  // Role from auth when available; else infer from pathname so client/supplier see correct nav on refresh (no admin flash).
   const role =
     user?.role ??
     (pathname?.startsWith("/client")
@@ -191,372 +405,190 @@ export default function Navbar({ children }: NavbarProps) {
       : pathname?.startsWith("/supplier")
         ? "supplier"
         : "user");
-  const navItems = getNavItemsForRole(role);
-
-  /** Home link for logo/brand: admin → /, client → /client, supplier → /supplier */
+  const sections = getSidebarSectionsForRole(role);
   const homePath = getHomePathForRole(role);
-
-  // REQ-0039 — SafeAvatarImage: Google primary + robohash fallback on load error
   const avatar = resolveUserAvatarSources(user);
 
-  // If children prop is provided, wrap with full layout, otherwise just return navbar
-  const navbarContent = (
-    <header className="sticky top-0 z-50 w-full h-[72px] min-h-[72px] border-b border-gray-200/50 dark:border-white/10 bg-gradient-to-br from-white/90 via-white/85 to-white/80 dark:from-white/10 dark:via-white/10 dark:to-white/5 backdrop-blur-2xl shadow-[0_10px_30px_rgba(2,132,199,0.15)] dark:shadow-[0_10px_30px_rgba(15,23,42,0.25)] will-change-transform transform-gpu">
-      {/* Skip to main content - visible on focus for keyboard/screen reader users (WCAG 2.1) */}
+  const topBar = (
+    <header className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--border-subtle)] py-4">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-sky-600 focus:px-4 focus:py-2 focus:text-sm focus:font-normal focus:text-white focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-[var(--text-primary)] focus:px-4 focus:py-2 focus:text-sm focus:text-[var(--bg-main)]"
       >
-        Skip to main content
+        Skip to content
       </a>
-      {/* min-w-0 on flex children instead of overflow-x-hidden — hidden overflow-y would clip notification portal ancestors */}
-      <div
-        className={`${APP_SHELL_WIDTH_CLASS} flex h-full items-center justify-between gap-2 px-2 sm:px-4 lg:px-6`}
-      >
-        {/* Left Section - Logo and Brand (REQ-0094: Link prefetch for instant home nav) */}
-        <div className="flex items-center gap-2">
-          <Link
-            href={homePath}
-            prefetch
-            onClick={closeMobileMenu}
-            aria-label="Go to home"
-            className="group flex items-center gap-2"
-          >
-            <div className="flex aspect-square size-10 items-center justify-center rounded-xl border border-rose-400/40 dark:border-rose-400/30 bg-gradient-to-br from-rose-500/30 via-rose-500/15 to-rose-500/8 dark:from-rose-500/20 dark:via-rose-500/15 dark:to-rose-500/10 shadow-[0_5px_20px_rgba(225,29,72,0.3)] dark:shadow-[0_5px_20px_rgba(225,29,72,0.25)] backdrop-blur-md transition-all duration-200 hover:border-rose-400/60 dark:hover:border-rose-400/40 hover:from-rose-500/40 hover:via-rose-500/20 hover:to-rose-500/10 dark:hover:from-rose-500/30 dark:hover:via-rose-500/20 dark:hover:to-rose-500/15 hover:shadow-[0_10px_35px_rgba(225,29,72,0.5)] dark:hover:shadow-[0_10px_35px_rgba(225,29,72,0.4)]">
-              <AiFillProduct className="text-sm sm:text-lg text-rose-600 dark:text-rose-400 transition-transform group-hover:scale-110 drop-shadow-[0_2px_8px_rgba(225,29,72,0.4)]" />
-            </div>
-            <h1 className="text-sm sm:text-lg font-medium tracking-tight bg-gradient-to-r from-rose-600 to-gray-900 dark:from-rose-400 dark:to-gray-100 bg-clip-text text-transparent transition-all duration-300 ease-in-out group-hover:from-rose-700 group-hover:to-gray-950 dark:group-hover:from-rose-300 dark:group-hover:to-gray-50">
-              Stockly
-            </h1>
-          </Link>
-        </div>
 
-        {/* Desktop Navigation (XL screens) */}
-        <nav className="hidden xl:flex items-center gap-1">
-          {navItems.map((item) => {
-            // API dropdown
-            if (item.hasDropdown && "dropdownItems" in item) {
-              return (
-                <DropdownMenu key={item.label}>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-sm font-normal text-gray-700 dark:text-muted-foreground will-change-[background,box-shadow,color] transition-[background-image,box-shadow,color] duration-300 ease-in-out hover:text-sky-600 dark:hover:text-foreground hover:bg-gradient-to-br hover:from-sky-500/10 hover:via-sky-500/5 hover:to-sky-500/5 dark:hover:from-white/10 dark:hover:via-white/5 dark:hover:to-white/5 hover:backdrop-blur-md hover:shadow-[0_5px_15px_rgba(2,132,199,0.25)] dark:hover:shadow-[0_5px_15px_rgba(255,255,255,0.15)] rounded-md px-2 py-2 border-0 focus:border-0 focus-visible:border-0 focus-visible:ring-0 focus:ring-0 data-[state=open]:border-0"
-                    >
-                      <span>{item.label}</span>
-                      <ChevronDown className="ml-1 h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    sideOffset={2}
-                    className="w-48 border border-white/10 dark:border-white/10 bg-gradient-to-br from-white/80 via-white/70 to-white/60 dark:from-white/10 dark:via-white/10 dark:to-white/5 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.2)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.4)] text-gray-700 dark:text-white"
-                  >
-                    {item.dropdownItems.map((sub) => (
-                      <DropdownMenuItem
-                        key={sub.path}
-                        asChild
-                        className="text-gray-700 dark:text-muted-foreground hover:text-gray-700 dark:hover:text-foreground hover:bg-gradient-to-br hover:from-sky-500/10 hover:via-sky-500/5 hover:to-sky-500/5 dark:hover:from-white/10 dark:hover:via-white/5 dark:hover:to-white/5 cursor-pointer p-0"
-                      >
-                        <Link
-                          href={sub.path}
-                          prefetch
-                          onClick={closeMobileMenu}
-                          className="block w-full cursor-pointer px-2 py-1.5 text-sm"
-                        >
-                          {sub.label}
-                        </Link>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              );
-            }
-            // Regular navigation items (including Dashboard)
-            const isNavActive = isNavPathActive(pathname, item.path);
-            return (
-              <Link
-                key={item.path}
-                href={item.path}
-                prefetch
-                onClick={closeMobileMenu}
-                aria-current={isNavActive ? "page" : undefined}
-                className={navbarNavLinkClass(isNavActive, "desktop")}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Right Section - Actions */}
-        <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
-          {/* Notification Bell - Always render to prevent flickering during auth check */}
-          {/* Show skeleton during auth check, then show bell when user is available */}
-          {isCheckingAuth ? (
-            // Skeleton placeholder during auth check to maintain layout - matches NotificationBell styling
-            <div className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full border border-rose-400/30 dark:border-rose-400/30 bg-gradient-to-r from-rose-500/25 via-rose-500/15 to-rose-500/10 dark:from-rose-500/25 dark:via-rose-500/15 dark:to-rose-500/10 shadow-[0_10px_30px_rgba(225,29,72,0.2)] backdrop-blur-md animate-pulse flex items-center justify-center">
-              <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-rose-400/50 dark:text-rose-300/50" />
-            </div>
-          ) : user ? (
-            <NotificationBell />
-          ) : null}
-
-          {/* Mode Toggle */}
-          <ModeToggle />
-
-          {/* Avatar Dropdown (Desktop - LG and above) */}
-          <div className="hidden lg:block">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  aria-label="Open account menu"
-                  className="relative h-10 w-10 min-h-10 min-w-10 rounded-full border-2 border-sky-400/50 dark:border-white/20 bg-gradient-to-br from-sky-500/25 via-sky-500/10 to-sky-500/5 dark:from-white/10 dark:via-white/10 dark:to-white/5 backdrop-blur-md hover:border-sky-400/70 dark:hover:border-white/30 hover:from-sky-500/35 hover:via-sky-500/15 hover:to-sky-500/8 dark:hover:from-white/15 dark:hover:via-white/15 dark:hover:to-white/8 transition-all duration-200 shadow-[0_5px_20px_rgba(2,132,199,0.3)] hover:shadow-[0_10px_30px_rgba(2,132,199,0.5)] ring-2 ring-sky-400/30 dark:ring-white/20 hover:ring-sky-400/50 dark:hover:ring-white/30 p-0 overflow-hidden focus-visible:outline-none focus:outline-none focus-visible:ring-0 focus:ring-0"
-                >
-                  {isCheckingAuth ? (
-                    <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
-                  ) : avatar ? (
-                    <SafeAvatarImage
-                      src={avatar.src}
-                      fallbackSrc={avatar.fallbackSrc}
-                      alt={user?.name || "User"}
-                      width={40}
-                      height={40}
-                      className="rounded-full object-cover"
-                      priority
-                    />
-                  ) : (
-                    <span className="text-sm font-medium text-gray-700 dark:text-foreground">
-                      {user?.email?.[0]?.toUpperCase() || "U"}
-                    </span>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className={`w-56 ${DROPDOWN_NAV_CONTENT_CLASS}`}
-              >
-                <DropdownMenuLabel className="font-normal px-2 py-2">
-                  <div className="flex flex-col ">
-                    {user?.name && (
-                      <p className="text-sm leading-none text-gray-700 dark:text-white">
-                        {user.name}
-                      </p>
-                    )}
-                    <p className="text-xs text-gray-600 dark:text-gray-300">
-                      {user?.email}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
-                {PROFILE_MENU_LINKS.map(({ path, label, Icon }) => (
-                  <DropdownMenuItem
-                    key={path}
-                    asChild
-                    className={DROPDOWN_NAV_ITEM_CLASS}
-                  >
-                    <Link href={path} prefetch onClick={closeMobileMenu}>
-                      <Icon className="mr-2 h-4 w-4" />
-                      <span>{label}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}
-                  className={DROPDOWN_NAV_ITEM_CLASS}
-                >
-                  <LogOut className="mr-2 h-4 w-4 text-red-500 dark:text-red-400" />
-                  <span className="text-red-500 dark:text-red-400">
-                    {isLoggingOut ? "Logging Out..." : "Logout"}
-                  </span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Mobile: Burger Menu Only (LG and below) */}
-          <div className="flex items-center lg:hidden">
-            {/* Burger Menu Button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={isMobileMenuOpen}
-              aria-controls="mobile-menu-panel"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="h-8 w-8 sm:h-10 sm:w-10 text-gray-700 dark:text-foreground hover:bg-gradient-to-br hover:from-sky-500/10 hover:via-sky-500/5 hover:to-sky-500/5 dark:hover:from-white/10 dark:hover:via-white/5 dark:hover:to-white/5 hover:backdrop-blur-md transition-all duration-300 ease-in-out"
-            >
-              {isMobileMenuOpen ? (
-                <X className="h-4 w-4 sm:h-5 sm:w-5" />
-              ) : (
-                <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
-              )}
-            </Button>
-          </div>
-        </div>
+      <div className="flex min-w-0 items-center gap-2 text-sm font-semibold tracking-tight">
+        <button
+          type="button"
+          aria-label="Open menu"
+          aria-expanded={isMobileMenuOpen}
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="money-tool-button lg:hidden"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <span className="lg:hidden">
+          <span className="inline-flex items-center gap-1.5"><span className="money-brand-fill inline-flex h-6 w-6 items-center justify-center rounded-md"><TallyMark className="h-4 w-4" /></span>Tally</span>
+        </span>
+        <button
+          type="button"
+          onClick={() => setCommandOpen(true)}
+          aria-label="Search pages and actions"
+          className="hidden h-10 w-[min(380px,40vw)] items-center gap-2.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--card-bg)] px-3.5 text-left text-sm font-normal text-[var(--text-secondary)] shadow-sm transition-colors hover:border-[color-mix(in_srgb,var(--accent-purple)_35%,var(--border-subtle))] lg:flex"
+        >
+          <Search className="h-4 w-4 shrink-0" />
+          <span className="flex-1 truncate">Search pages, products, actions…</span>
+          <kbd className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[10px] font-medium">
+            Ctrl K
+          </kbd>
+        </button>
       </div>
 
-      {/* Mobile Menu Dropdown (LG and below) */}
-      {isMobileMenuOpen && (
-        <div
-          id="mobile-menu-panel"
-          role="navigation"
-          aria-label="Mobile navigation"
-          className="xl:hidden border-t border-white/10 dark:border-white/10 bg-gradient-to-br from-white/95 via-white/90 to-white/85 dark:from-white/10 dark:via-white/10 dark:to-white/5 backdrop-blur-xl max-h-[calc(100vh-3.5rem)] overflow-y-auto"
+      <div className="flex items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => setCommandOpen(true)}
+          aria-label="Search pages and actions"
+          className="money-tool-button lg:hidden"
         >
-          <div
-            className={`${APP_SHELL_WIDTH_CLASS} px-2 sm:px-4 lg:px-6 sm:py-6 space-y-2`}
-          >
-            {/* User Email with Avatar */}
-            <div className="flex items-center gap-2 px-2 py-2">
-              {isCheckingAuth ? (
-                <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
-              ) : (
-                avatar && (
-                  <div className="relative flex h-10 w-10 items-center justify-center rounded-full border-2 border-sky-400/50 dark:border-white/20 bg-gradient-to-br from-sky-500/25 via-sky-500/10 to-sky-500/5 dark:from-white/10 dark:via-white/10 dark:to-white/5 backdrop-blur-md overflow-hidden ring-2 ring-sky-400/30 dark:ring-white/20 shadow-[0_5px_20px_rgba(2,132,199,0.3)]">
-                    <SafeAvatarImage
-                      src={avatar.src}
-                      fallbackSrc={avatar.fallbackSrc}
-                      alt={user?.name || "User"}
-                      width={40}
-                      height={40}
-                      className="rounded-full object-cover"
-                    />
-                  </div>
-                )
-              )}
-              <div className="flex flex-col">
-                {!isCheckingAuth && user?.name && (
-                  <p className="text-sm text-gray-700 dark:text-muted-foreground">
-                    {user.name}
-                  </p>
-                )}
-                <p className="text-xs text-gray-600 dark:text-muted-foreground">
-                  {isCheckingAuth ? "Loading..." : user?.email}
-                </p>
-              </div>
-            </div>
-
-            <Separator className="bg-gray-300/50 dark:bg-white/10" />
-
-            {/* Navigation Items */}
-            <nav className="">
-              {navItems.map((item) => {
-                // API dropdown (mobile: label + sub-links)
-                if (item.hasDropdown && "dropdownItems" in item) {
-                  return (
-                    <div key={item.label} className="">
-                      <p className="px-2 py-2 text-xs font-medium text-gray-500 dark:text-muted-foreground uppercase tracking-wider">
-                        {item.label}
-                      </p>
-                      <div className="pl-4 ">
-                        {item.dropdownItems.map((sub) => (
-                          <Link
-                            key={sub.path}
-                            href={sub.path}
-                            prefetch
-                            onClick={closeMobileMenu}
-                            className={navbarNavLinkClass(
-                              isNavPathActive(pathname, sub.path),
-                              "mobile",
-                            )}
-                          >
-                            {sub.label}
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                }
-                // Regular navigation items (including Dashboard)
-                const isNavActive = isNavPathActive(pathname, item.path);
-                return (
-                  <Link
-                    key={item.path}
-                    href={item.path}
-                    prefetch
-                    onClick={closeMobileMenu}
-                    aria-current={isNavActive ? "page" : undefined}
-                    className={navbarNavLinkClass(isNavActive, "mobile")}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            <Separator className="bg-gray-300/50 dark:bg-white/10" />
-
-            {/* Profile menu links (REQ-0094: Link prefetch) */}
-            {PROFILE_MENU_LINKS.map(({ path, label, Icon }) => (
-              <Link
-                key={path}
-                href={path}
-                prefetch
-                onClick={closeMobileMenu}
-                className={navbarNavLinkClass(false, "mobile")}
-              >
-                <Icon className="mr-2 h-4 w-4" />
-                {label}
-              </Link>
-            ))}
-
-            <Separator className="bg-gray-300/50 dark:bg-white/10" />
-
-            {/* Logout */}
+          <Search className="h-[18px] w-[18px]" />
+        </button>
+        <ThemeToggleButton />
+        {isCheckingAuth ? (
+          <span className="money-tool-button">
+            <Bell className="h-[18px] w-[18px] opacity-40" />
+          </span>
+        ) : user ? (
+          <NotificationBell />
+        ) : null}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="w-full justify-start text-gray-700 dark:text-muted-foreground hover:text-gray-700 dark:hover:text-foreground hover:bg-gradient-to-br hover:from-rose-500/10 hover:via-rose-500/5 hover:to-rose-500/5 dark:hover:from-white/10 dark:hover:via-white/5 dark:hover:to-white/5 hover:backdrop-blur-md transition-all duration-300 ease-in-out px-2 h-auto min-h-[44px]"
+              aria-label="Open account menu"
+              className="ml-1 h-9 w-9 overflow-hidden rounded-full border border-[var(--border-subtle)] p-0 hover:opacity-90"
+            >
+              {isCheckingAuth ? (
+                <span className="h-9 w-9 animate-pulse rounded-full bg-[var(--bg-elevated)]" />
+              ) : avatar ? (
+                <SafeAvatarImage
+                  src={avatar.src}
+                  fallbackSrc={avatar.fallbackSrc}
+                  alt={user?.name || "User"}
+                  width={36}
+                  height={36}
+                  className="rounded-full object-cover"
+                  priority
+                />
+              ) : (
+                <span className="text-sm font-medium">
+                  {user?.email?.[0]?.toUpperCase() || "U"}
+                </span>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className={`w-60 ${DROPDOWN_NAV_CONTENT_CLASS}`}>
+            <DropdownMenuLabel className="px-2 py-2 font-normal">
+              <p className="text-sm font-medium text-slate-900 dark:text-white">
+                {user?.name}
+              </p>
+              <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                {user?.email}
+              </p>
+              <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.1em] text-slate-400 dark:text-slate-500">
+                {ROLE_LABEL[role] ?? "Member"}
+              </p>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {SIDEBAR_FOOTER_ITEMS.map(({ path, label, icon: Icon }) => (
+              <DropdownMenuItem key={path} asChild className={DROPDOWN_NAV_ITEM_CLASS}>
+                <Link href={path} prefetch>
+                  <Icon className="mr-2 h-4 w-4" />
+                  {label}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
               onClick={handleLogout}
               disabled={isLoggingOut}
+              className={cn(DROPDOWN_NAV_ITEM_CLASS, "text-red-600 dark:text-red-400")}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              {isLoggingOut ? "Logging Out..." : "Logout"}
-            </Button>
-          </div>
-        </div>
-      )}
+              {isLoggingOut ? "Logging out…" : "Log out"}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </header>
   );
 
-  // If children provided, wrap with full layout structure
-  if (children) {
-    return (
-      <div className="flex h-screen overflow-hidden relative min-h-screen bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.15),transparent_55%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.12),transparent_65%)] dark:bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.15),transparent_55%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.12),transparent_65%)]">
-        <ScrollControl />
-        {/* Background overlay layer */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.3),transparent_60%)] dark:bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.05),transparent_60%)]"></div>
+  if (!children) return topBar;
 
-        <div className="poppins relative z-10 flex h-screen w-full overflow-hidden flex-col">
-          {navbarContent}
-          <main
-            id="main-content"
-            className="flex-1 overflow-y-auto overflow-x-hidden flex flex-col"
-            tabIndex={-1}
-          >
-            <div className="flex-1 flex flex-col">
-              <div
-                className={
-                  pathname?.startsWith("/admin") ||
-                  pathname?.startsWith("/business-insights")
-                    ? `${APP_SHELL_WIDTH_CLASS} flex-1 sm:pr-4`
-                    : `${APP_SHELL_WIDTH_CLASS} p-2 sm:px-4 sm:py-6 flex-1`
-                }
-              >
-                {children}
-              </div>
-            </div>
-            {!pathname?.startsWith("/admin") && <Footer />}
-          </main>
+  return (
+    <div className="relative flex h-screen min-h-screen overflow-hidden">
+      <ScrollControl />
+
+      {/* Desktop sidebar */}
+      <aside
+        className={cn(
+          "relative z-40 hidden shrink-0 border-r border-[var(--border-subtle)] bg-[var(--sidebar-bg)] backdrop-blur-xl transition-[width] duration-200 lg:block",
+          collapsed ? "w-20" : "w-64",
+        )}
+      >
+        <SidebarBody
+          sections={sections}
+          pathname={pathname}
+          collapsed={collapsed}
+          homePath={homePath}
+          onToggleCollapsed={toggleCollapsed}
+        />
+      </aside>
+
+      {/* Mobile drawer */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
+          <button
+            type="button"
+            aria-label="Close menu"
+            className="absolute inset-0 bg-[#0b0d1a]/50"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+          <aside className="absolute inset-y-0 left-0 w-72 max-w-[85vw] border-r border-[var(--border-subtle)] bg-[var(--card-bg)] shadow-2xl">
+            <button
+              type="button"
+              aria-label="Close menu"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="money-tool-button absolute right-2 top-5 z-10"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <SidebarBody
+              sections={sections}
+              pathname={pathname}
+              collapsed={false}
+              homePath={homePath}
+              onNavigate={() => setIsMobileMenuOpen(false)}
+            />
+          </aside>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  // Otherwise just return the navbar (for backward compatibility)
-  return navbarContent;
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="relative flex min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden focus:outline-none"
+      >
+        <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-8 lg:px-10 xl:px-12">
+          {topBar}
+        </div>
+        <div className="money-content mx-auto w-full max-w-[1400px] flex-1 px-4 pb-16 pt-5 sm:px-8 lg:px-10 lg:pt-7 xl:px-12">
+          {children}
+        </div>
+      </main>
+
+      <CommandMenu open={commandOpen} onOpenChange={setCommandOpen} sections={sections} />
+    </div>
+  );
 }

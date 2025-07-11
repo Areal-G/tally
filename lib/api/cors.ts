@@ -9,7 +9,7 @@ import type { NextRequest } from "next/server";
 /**
  * Production URL
  */
-const PRODUCTION_URL = "https://stockly-inventory.vercel.app";
+const PRODUCTION_URL = process.env.NEXT_PUBLIC_APP_URL;
 
 /**
  * Check if an origin is allowed for CORS
@@ -21,7 +21,7 @@ export function isAllowedOrigin(origin: string | null): boolean {
   if (!origin) return false;
 
   // Allow production URL
-  if (origin === PRODUCTION_URL) {
+  if (PRODUCTION_URL && origin === PRODUCTION_URL) {
     return true;
   }
 
@@ -46,7 +46,7 @@ export function getAllowedOrigin(origin: string | null): string {
   if (origin && isAllowedOrigin(origin)) {
     return origin;
   }
-  return PRODUCTION_URL;
+  return PRODUCTION_URL ?? "";
 }
 
 /**

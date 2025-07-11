@@ -6,7 +6,7 @@
 
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -21,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { usePathname } from "next/navigation";
 import {
@@ -80,8 +79,9 @@ import { ProductThumb } from "@/components/products/ProductOptionRow";
 import { getOrderItemUnitCounts } from "@/lib/orders/order-list-meta";
 import { cn } from "@/lib/utils";
 import { OrderPickerCommand } from "./OrderPickerCommand";
+import { formatStableCurrency } from "@/lib/format";
 
-/** ISO date string for native date inputs (REQ-0126). */
+/** ISO date string for native date inputs. */
 function toDateInputValue(value?: Date | string | null): string {
   if (!value) return "";
   const d = new Date(value);
@@ -94,12 +94,11 @@ interface InvoiceDialogProps {
   onOpenChange?: (open: boolean) => void;
   editingInvoice?: Invoice | null;
   onEditInvoice?: (invoice: Invoice | null) => void;
-  /** Pre-select an order in create mode (REQ-0061 — "Create Invoice" from order row/detail) */
+  /** Pre-select an order in create mode ("Create Invoice" from order row/detail) */
   initialOrderId?: string;
 }
 
-const fmt = (v: number) =>
-  `$${v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const fmt = formatStableCurrency;
 
 /**
  * Invoice Dialog Component
@@ -117,7 +116,6 @@ export default function InvoiceDialog({
   const [internalOpen, setInternalOpen] = useState(false);
   const [internalEditingInvoice, setInternalEditingInvoice] =
     useState<Invoice | null>(null);
-  const dialogCloseRef = useRef<HTMLButtonElement | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -147,15 +145,10 @@ export default function InvoiceDialog({
       ? externalEditingInvoice
       : internalEditingInvoice;
 
-  const setEditingInvoice =
-    externalEditingInvoice !== undefined && onEditInvoice
-      ? onEditInvoice
-      : setInternalEditingInvoice;
-
   const pathname = usePathname();
   const isAdminInvoicesPage = pathname?.startsWith("/admin/invoices");
   const isAdmin = user?.role === "admin";
-  // Client-orders leg also loads when pre-selecting an order (REQ-0061 —
+  // Client-orders leg also loads when pre-selecting an order (
   // "Create Invoice" from a client order row on /admin/orders)
   const needsClientOrdersLeg =
     isAdmin && (isAdminInvoicesPage || Boolean(initialOrderId));
@@ -187,7 +180,6 @@ export default function InvoiceDialog({
   const updateInvoiceMutation = useUpdateInvoice();
   const isCreating = createInvoiceMutation.isPending;
   const isUpdating = updateInvoiceMutation.isPending;
-  const isSubmitting = isCreating || isUpdating;
 
   // ==================== EDIT INVOICE FORM ====================
   // Initialize edit form with invoice data
@@ -242,7 +234,7 @@ export default function InvoiceDialog({
     setValue: editSetValue,
   } = editFormMethods;
 
-  // REQ-0198 — sync edit form on open / invoice change (no useEffect bounce)
+  // Sync edit form on open / invoice change (no useEffect bounce)
   useSyncDialogOpenState(
     open,
     () => {
@@ -422,7 +414,7 @@ export default function InvoiceDialog({
     }
   }, [open, editingInvoice, isControlled]);
 
-  // REQ-0061: pre-select order when opened via "Create Invoice" from an order row/detail
+  // Pre-select order when opened via "Create Invoice" from an order row/detail
   useEffect(() => {
     if (open && !editingInvoice && initialOrderId) {
       setSelectedOrderId(initialOrderId);
@@ -522,7 +514,7 @@ export default function InvoiceDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent
-        className="p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto border-indigo-400/30 dark:border-indigo-400/30 shadow-[0_30px_80px_rgba(99,102,241,0.45)] dark:shadow-[0_30px_80px_rgba(99,102,241,0.25)]"
+        className="p-2 sm:p-4 sm:px-8 poppins max-h-[90vh] overflow-y-auto border-indigo-400/30 dark:border-indigo-400/30 "
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <DialogHeaderBrand
@@ -545,7 +537,7 @@ export default function InvoiceDialog({
           <FormProvider {...editFormMethods}>
             <form
               onSubmit={editFormMethods.handleSubmit(handleUpdateInvoice, () => {
-                // REQ-0151 — DialogDateField errors were silent; surface validation fail
+                // DialogDateField errors were silent; surface validation fail
                 toast({
                   title: "Check invoice fields",
                   description:
@@ -555,7 +547,7 @@ export default function InvoiceDialog({
               })}
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
-                {/* Invoice Status — REQ-0126 DialogFormLabel + badge select items */}
+                {/* Invoice Status — DialogFormLabel + badge select items */}
                 <div className="flex flex-col gap-2">
                   <DialogFormLabel htmlFor="invoice-status">
                     Invoice Status
@@ -603,7 +595,7 @@ export default function InvoiceDialog({
                           )}
                         >
                           <SelectValue placeholder="Select Status">
-                            {/* REQ-0150 — solid white-on-hue when selected */}
+                            {/* Solid white-on-hue when selected */}
                             <InvoiceStatusBadge
                               status={
                                 (editWatch("status") ||
@@ -697,7 +689,7 @@ export default function InvoiceDialog({
                   </div>
                 </div>
 
-                {/* Due Date — REQ-0126 DialogDateField */}
+                {/* Due Date — DialogDateField */}
                 <DialogDateField
                   id="edit-due-date"
                   label="Due Date"
@@ -800,7 +792,7 @@ export default function InvoiceDialog({
               </div>
 
               <DialogFooter className="mt-9 mb-4 flex flex-col sm:flex-row items-center gap-2">
-                {/* REQ-0150 — type=button so Cancel does not submit/unmount the form */}
+                {/* Type=button so Cancel does not submit/unmount the form */}
                 <Button
                   type="button"
                   onClick={handleCancelEdit}
@@ -838,7 +830,7 @@ export default function InvoiceDialog({
                 >
                   Select Order
                 </DialogFormLabel>
-                {/* REQ-0060: searchable order picker (type-to-filter) replaces plain Select */}
+                {/* Searchable order picker (type-to-filter) replaces plain Select */}
                 <OrderPickerCommand
                   orders={availableOrders}
                   selectedOrderId={selectedOrderId}
@@ -849,7 +841,7 @@ export default function InvoiceDialog({
                 />
                 {selectedOrder && (
                   <div className="rounded-md border border-indigo-400/20 bg-white/5 p-3 space-y-2">
-                    {/* REQ-0187 — glass-safe densify; solid badges on dark dialog glass */}
+                    {/* Glass-safe densify; solid badges on dark dialog glass */}
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-white/80">
                       <CopyableText
                         value={selectedOrder.orderNumber}
@@ -948,7 +940,7 @@ export default function InvoiceDialog({
                                     </span>
                                   ) : null}
                                   {item.supplierName ? (
-                                    <AvatarInlineLink
+                                    <AvatarInlineLink showAvatar={false}
                                       label={item.supplierName}
                                       seed={item.supplierId ?? item.supplierName}
                                       size={14}

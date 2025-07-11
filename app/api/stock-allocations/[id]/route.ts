@@ -1,5 +1,5 @@
 /**
- * Stock allocation by id — update quantity or delete row (REQ-0101).
+ * Stock allocation by id — update quantity or delete row.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -121,7 +121,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const updated = await updateStockAllocation(id, validation.data);
     await scheduleInvalidateStockAllocationCaches();
 
-    // REQ-0221 — densified PUT (parity with GET / allocate POST)
+    // Densified PUT (parity with GET / allocate POST)
     const result = await densifyStockAllocationWriteResponse(updated);
     return NextResponse.json(result);
   } catch (error) {

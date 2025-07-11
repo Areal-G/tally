@@ -5,7 +5,6 @@
 
 "use client";
 
-import React from "react";
 import Navbar from "@/components/layouts/Navbar";
 import WarehouseList from "@/components/warehouses/WarehouseList";
 import { PageContentWrapper } from "@/components/shared";
@@ -21,7 +20,7 @@ export type WarehousesPageProps = {
 
 /**
  * Warehouses page client component.
- * REQ-0021 — shell-first; SSR initialData passed to WarehouseList.
+ * Shell-first; SSR initialData passed to WarehouseList.
  */
 export default function WarehousesPage({
   initialWarehouses,

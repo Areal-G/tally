@@ -4,7 +4,6 @@
  */
 
 import { prisma } from "@/prisma/client";
-import { logger } from "@/lib/logger";
 import type { Prisma } from "@prisma/client";
 
 /**

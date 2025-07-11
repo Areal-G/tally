@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Navbar from "@/components/layouts/Navbar";
 import { PageContentWrapper, PageSectionHeader } from "@/components/shared";
 import { PaginationType } from "@/components/shared/PaginationSelector";
@@ -8,7 +8,7 @@ import { useSupportTickets } from "@/hooks/queries";
 import { isDataSlotLoading, isDataSlotUnsettled, queryKeys, useSyncSsrQueryData } from "@/lib/react-query";
 import { APP_SHELL_WIDTH_CLASS } from "@/lib/ui/shell-layout-styles";
 import { MessageSquare, MessageCircle, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, EMPTY_LIST } from "@/lib/utils";
 import type { ProductOwnerOption, SupportTicket } from "@/types";
 import SupportTicketDialog from "./SupportTicketDialog";
 import { Button } from "@/components/ui/button";
@@ -27,14 +27,16 @@ export default function SupportTicketsPageContent({
   initialTickets,
   productOwners,
 }: SupportTicketsPageContentProps) {
-  const ticketsQuery = useSupportTickets("all", initialTickets);
+  // Personal /support-tickets = creator scope (matches SSR).
+  // Do not use view "all" — for admin that key/API means assigned-to-me (store inbox).
+  const ticketsQuery = useSupportTickets("created_by_me", initialTickets);
 
   useSyncSsrQueryData(
-    queryKeys.supportTickets.list({ view: "all" }),
+    queryKeys.supportTickets.list({ view: "created_by_me" }),
     initialTickets,
   );
 
-  const list = ticketsQuery.data ?? initialTickets ?? [];
+  const list = ticketsQuery.data ?? initialTickets ?? EMPTY_LIST;
 
   const ticketStats = useMemo(() => {
     if (list.length === 0) {
@@ -74,7 +76,7 @@ export default function SupportTicketsPageContent({
     [productOwners],
   );
 
-  // REQ-0125: stat cards unsettled on stale refetch; table loading keeps patched rows visible
+  // Stat cards unsettled on stale refetch; table loading keeps patched rows visible
   const cardsLoading = isDataSlotUnsettled(ticketsQuery, initialTickets);
   const tableDataLoading = isDataSlotLoading(ticketsQuery, initialTickets);
 
@@ -95,10 +97,10 @@ export default function SupportTicketsPageContent({
                 trigger={
                   <Button
                     className={cn(
-                      "h-10 rounded-[28px] border border-sky-400/30 dark:border-sky-400/30",
-                      "bg-gradient-to-r from-sky-500/50 via-sky-500/40 to-sky-500/30 dark:from-sky-500/50 dark:via-sky-500/40 dark:to-sky-500/30",
-                      "text-white shadow-[0_10px_30px_rgba(2,132,199,0.3)] backdrop-blur-md",
-                      "hover:border-sky-300/50 hover:from-sky-500/60 hover:via-sky-500/50 hover:to-sky-500/40",
+                      "h-10 rounded-lg border border-sky-400/30 dark:border-sky-400/30",
+                      " bg-sky-500/50 dark:bg-sky-500/50 ",
+                      "text-white ",
+                      "hover:border-sky-300/50 hover:bg-sky-500/60 ",
                       "gap-2",
                     )}
                   >

@@ -1,5 +1,5 @@
 /**
- * REQ-0130 — semantic text colors for date values (light + dark).
+ * Semantic text colors for date values (light + dark).
  * Use via ClientDateTime / ClientCompactDateTime / ClientDate `semantic` prop.
  */
 
@@ -22,7 +22,7 @@ export type SemanticDateKind =
   | "completed";
 
 const SEMANTIC_DATE_CLASSES: Record<SemanticDateKind, string> = {
-  /** REQ-0138 — muted (sky reserved for links) */
+  /** Muted (sky reserved for links) */
   created: "text-gray-600 dark:text-gray-300",
   updated: "text-violet-600 dark:text-violet-400",
   expiration: "text-amber-600 dark:text-amber-400",
@@ -58,6 +58,10 @@ export function statusAtSemanticKind(
   if (st === "delivered") return "delivered";
   if (st === "shipped") return "shipped";
   if (ps === "paid" || ps === "partial" || st === "paid") return "paid";
+  // pending / confirmed / processing — created hue (matches Invoice # created icon)
+  if (st === "pending" || st === "confirmed" || st === "processing") {
+    return "created";
+  }
   return "updated";
 }
 

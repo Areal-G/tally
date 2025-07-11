@@ -17,7 +17,7 @@ export type SectionCardHeaderProps = {
   description?: React.ReactNode;
   icon?: LucideIcon;
   tone?: SectionHeaderTone;
-  /** Inline after title (e.g. HelpTooltip) — REQ-0097 */
+  /** Inline after title (e.g. HelpTooltip) */
   titleTrailing?: React.ReactNode;
   className?: string;
   titleClassName?: string;

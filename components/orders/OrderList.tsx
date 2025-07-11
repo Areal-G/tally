@@ -13,7 +13,6 @@ import React, {
   useCallback,
 } from "react";
 import { usePathname } from "next/navigation";
-import { PaginationType } from "@/components/shared/PaginationSelector";
 import { OrderTable } from "./OrderTable";
 import { createOrderColumns } from "./OrderTableColumns";
 import { useAuth } from "@/contexts";
@@ -24,6 +23,7 @@ import {
   useClientPortalDashboard,
   useSupplierPortalDashboard,
 } from "@/hooks/queries";
+import { useTypedListSearch } from "@/hooks/use-typed-list-search";
 import {
   isDataSlotLoading,
   isDataSlotUnsettled,
@@ -57,12 +57,13 @@ import type {
   ClientPortalDashboard,
   SupplierPortalDashboard,
 } from "@/types";
+import { formatStableCurrency } from "@/lib/format";
+import { EMPTY_LIST } from "@/lib/utils";
 
-const formatCurrency = (value: number) =>
-  `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const formatCurrency = formatStableCurrency;
 
 /**
- * REQ-0159 — Admin Client-badge label: prefer buyer placedByName, then shipping.
+ * Admin Client-badge label: prefer buyer placedByName, then shipping.
  * (Shipping alone can be stale/wrong after party-model seed fixes.)
  */
 function getBuyerDisplayName(order: Order): string {
@@ -81,11 +82,11 @@ export type OrderListProps = {
   detailHrefBase?: string;
   /** When "clientOrders", fetches client orders; when "adminCombined", merge personal + client with Order type filter */
   dataSource?: "orders" | "clientOrders" | "adminCombined";
-  /** SSR-passed orders for first-render hydration (REQ-0021) */
+  /** SSR-passed orders for first-render hydration */
   initialOrders?: Order[] | OrderForPage[];
-  /** SSR client-leg orders for adminCombined (REQ-0025) */
+  /** SSR client-leg orders for adminCombined */
   initialClientOrders?: Order[] | OrderForPage[];
-  /** SSR dashboard stats for header cards (REQ-0025) */
+  /** SSR dashboard stats for header cards */
   initialStats?: DashboardStats | null;
   /** SSR client portal for client /orders cards */
   initialClientPortal?: ClientPortalDashboard;
@@ -203,7 +204,7 @@ const OrderList = React.memo(
       const personal = ordersQueryDefault.data ?? [];
       const client = ordersQueryClient.data ?? [];
       const byId = new Map<string, OrderWithSource>();
-      // Product-owner leg first; Self leg overwrites (REQ-0158 isSelfOrder)
+      // Product-owner leg first; Self leg overwrites (isSelfOrder)
       client.forEach((o) => {
         const self = isSelfOrder({
           userId: o.userId,
@@ -230,7 +231,7 @@ const OrderList = React.memo(
     const allOrdersRaw =
       dataSource === "adminCombined"
         ? mergedOrdersForAdmin
-        : (ordersQuery.data ?? []);
+        : (ordersQuery.data ?? EMPTY_LIST);
     const allOrders = useMemo(() => {
       if (dataSource !== "adminCombined") return allOrdersRaw;
       if (orderSourceFilter === "both") return allOrdersRaw;
@@ -247,12 +248,9 @@ const OrderList = React.memo(
       }
     }, []);
 
-    // State for column filters, search term, and pagination
-    const [searchTerm, setSearchTerm] = useState("");
-    const [pagination, setPagination] = useState<PaginationType>({
-      pageIndex: 0,
-      pageSize: 8,
-    });
+    // State for column filters, search term, and pagination (URL-synced)
+    const { searchTerm, setSearchTerm, pagination, setPagination } =
+      useTypedListSearch();
 
     // State for selected filters
     const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
@@ -264,7 +262,7 @@ const OrderList = React.memo(
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [editingOrder, setEditingOrder] = useState<Order | null>(null);
 
-    // REQ-0061: "Create Invoice" from an order row opens InvoiceDialog pre-selected
+    // "Create Invoice" from an order row opens InvoiceDialog pre-selected
     const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false);
     const [invoiceOrderId, setInvoiceOrderId] = useState<string>("");
 
@@ -297,7 +295,7 @@ const OrderList = React.memo(
       ],
     );
 
-    // REQ-0021: shell-first — only data slots pulse
+    // Shell-first — only data slots pulse
     const tableDataLoading =
       dataSource === "adminCombined"
         ? isDataSlotLoading(ordersQueryDefault, initialOrders) ||
@@ -344,7 +342,7 @@ const OrderList = React.memo(
           tone="sky"
           title={
             isAdminCombined
-              ? "Store Orders Management (self + client)"
+              ? "Store Orders"
               : isClientOrders
                 ? "Client Orders"
                 : isClientOrdersPage
@@ -1020,7 +1018,7 @@ const OrderList = React.memo(
           </OrderDialog>
         )}
 
-        {/* REQ-0061: InvoiceDialog create mode pre-selected from an order row */}
+        {/* InvoiceDialog create mode pre-selected from an order row */}
         {isMounted && invoiceDialogOpen && (
           <InvoiceDialog
             open={invoiceDialogOpen}

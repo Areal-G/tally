@@ -9,13 +9,10 @@ import { logger } from "@/lib/logger";
 import {
   getOrderById,
   getOrderByIdForAdmin,
-  getOrderByIdForClient,
-  getOrderByIdForSupplier,
   getOrderByIdForProductOwner,
   updateOrder,
   cancelOrder,
 } from "@/prisma/order";
-import { getSupplierByUserId } from "@/prisma/supplier";
 import { prisma } from "@/prisma/client";
 import { updateOrderSchema } from "@/lib/validations";
 import { withRateLimit, defaultRateLimits } from "@/lib/api/rate-limit";
@@ -384,7 +381,7 @@ export async function PUT(
         price: item.price,
         subtotal: item.subtotal,
         createdAt: item.createdAt.toISOString(),
-        // REQ-0059: keep detail-page links + thumbnails intact after setQueryData(update response)
+        // Keep detail-page links + thumbnails intact after setQueryData(update response)
         categoryId: item.product?.categoryId ?? null,
         supplierId: item.product?.supplierId ?? null,
         imageUrl: item.product?.imageUrl ?? null,
@@ -475,7 +472,7 @@ export async function DELETE(
       );
     });
 
-    // REQ-0210 — linked invoice after cancel for instant list/detail badge patch
+    // Linked invoice after cancel for instant list/detail badge patch
     const linkedInvoice = await prisma.invoice.findFirst({
       where: { orderId: id },
       select: {

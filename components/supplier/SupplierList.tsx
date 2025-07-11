@@ -9,10 +9,10 @@ import React, {
 } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { PaginationType } from "@/components/shared/PaginationSelector";
 import { createSupplierColumns } from "./SupplierTableColumns";
 import { useAuth } from "@/contexts";
 import { useSuppliers, useDashboard } from "@/hooks/queries";
+import { useTypedListSearch } from "@/hooks/use-typed-list-search";
 import { isDataSlotLoading, isDataSlotUnsettled, queryKeys, useSyncSsrQueryData } from "@/lib/react-query";
 import { APP_SHELL_WIDTH_CLASS } from "@/lib/ui/shell-layout-styles";
 import SupplierFilters from "./SupplierFilters";
@@ -23,9 +23,9 @@ import { PageSectionHeader } from "@/components/shared";
 import { Supplier } from "@/types";
 import type { SupplierForHome } from "@/lib/server/home-data";
 import type { DashboardStats } from "@/types";
+import { formatStableCurrency } from "@/lib/format";
 
-const formatCurrency = (value: number) =>
-  `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const formatCurrency = formatStableCurrency;
 
 /**
  * Dynamic import for SupplierTable to enable code splitting
@@ -41,9 +41,9 @@ const SupplierTable = dynamic(
 );
 
 export type SupplierListProps = {
-  /** SSR-passed suppliers for first-render hydration (REQ-0021) */
+  /** SSR-passed suppliers for first-render hydration */
   initialSuppliers?: Supplier[] | SupplierForHome[];
-  /** SSR dashboard stats for /suppliers stat cards (REQ-0025 P2) */
+  /** SSR dashboard stats for /suppliers stat cards (P2) */
   initialStats?: DashboardStats;
 };
 
@@ -86,12 +86,8 @@ const SupplierList = React.memo(function SupplierList({
     }
   }, []);
 
-  // State for search term and pagination
-  const [searchTerm, setSearchTerm] = useState("");
-  const [pagination, setPagination] = useState<PaginationType>({
-    pageIndex: 0,
-    pageSize: 8,
-  });
+  const { searchTerm, setSearchTerm, pagination, setPagination } =
+    useTypedListSearch();
 
   // State for status filter (all, active, inactive)
   const [statusFilter, setStatusFilter] = useState<
@@ -102,7 +98,7 @@ const SupplierList = React.memo(function SupplierList({
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
 
-  // REQ-0021: shell-first — only data slots pulse
+  // Shell-first — only data slots pulse
   const tableDataLoading = isDataSlotLoading(suppliersQuery, initialSuppliers);
   const cardsDataLoading = isUserSuppliersPage
     ? isDataSlotUnsettled(dashboardQuery, initialStats)

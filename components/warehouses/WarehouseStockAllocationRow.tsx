@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * REQ-0101 — warehouse detail stock row: product thumb, catalog links, qty + row actions.
- * REQ-0203 gap — muted SKU; catalog meta left + edit/delete inline on same row.
+ * Warehouse detail stock row: product thumb, catalog links, qty + row actions.
+ * Muted SKU; catalog meta left + edit/delete inline on same row.
  */
 
 import type { ComponentType } from "react";
@@ -71,7 +71,10 @@ export function WarehouseStockAllocationRow({
   const available = allocation.quantity - allocation.reservedQuantity;
   const name = product?.name ?? "Unknown Product";
   const isArchived = product?.isArchived === true;
-  const catalogCommitted = product?.committedQuantity ?? 0;
+  const catalogCommitted = Math.max(
+    product?.committedQuantity ?? 0,
+    Number(allocation.reservedQuantity ?? 0),
+  );
   const catalogOnlyCommit =
     catalogCommitted > Number(allocation.reservedQuantity ?? 0);
   const commitHint = catalogOnlyCommit
@@ -156,7 +159,7 @@ export function WarehouseStockAllocationRow({
                 >
                   <Truck className="h-3 w-3 shrink-0 text-gray-500 dark:text-gray-300" />
                   <span className="shrink-0">Supplier:</span>
-                  <AvatarInlineLink
+                  <AvatarInlineLink showAvatar={false}
                     label={product.supplierName}
                     seed={product.supplierId}
                     href={supplierHref}
@@ -200,7 +203,7 @@ export function WarehouseStockAllocationRow({
         </div>
       </div>
 
-      {/* REQ-0203 gap — catalog meta left · edit/delete inline right */}
+      {/* Catalog meta left · edit/delete inline right */}
       {(showCatalogMeta || showActions || commitHint) && (
         <div className="flex flex-wrap items-center justify-between gap-2 pl-0 sm:pl-10">
           <div className="min-w-0 flex-1 space-y-0.5">
@@ -217,12 +220,11 @@ export function WarehouseStockAllocationRow({
                 <span className="text-emerald-600 dark:text-emerald-400">
                   {product!.unallocated} Unallocated
                 </span>
-                {product!.committedQuantity != null &&
-                product!.committedQuantity > 0 ? (
+                {catalogCommitted > 0 ? (
                   <>
                     <span className="text-gray-400 dark:text-white/80">·</span>
                     <span className="text-amber-600 dark:text-amber-400">
-                      {product!.committedQuantity} Reserved
+                      {catalogCommitted} Reserved
                     </span>
                   </>
                 ) : null}

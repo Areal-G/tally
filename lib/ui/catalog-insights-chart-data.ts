@@ -1,5 +1,5 @@
 /**
- * REQ-0084 / REQ-0090 — chart data helpers for catalog entity insights (client-safe).
+ * Chart data helpers for catalog entity insights (client-safe).
  */
 
 import type { CatalogEntityInsights } from "@/types/catalog-insights";
@@ -61,5 +61,5 @@ export function buildWarehouseStockChartDescription(
   return parts.join(" · ");
 }
 
-export const CATALOG_STOCK_PIE_COLORS = ["#10b981", "#f59e0b", "#ef4444"];
-export const WAREHOUSE_STOCK_PIE_COLORS = ["#10b981", "#6366f1", "#94a3b8"];
+export const CATALOG_STOCK_PIE_COLORS = ["var(--status-positive)", "var(--status-warning)", "var(--status-negative)"];
+export const WAREHOUSE_STOCK_PIE_COLORS = ["var(--accent-purple)", "var(--accent-teal)", "var(--text-secondary)"];

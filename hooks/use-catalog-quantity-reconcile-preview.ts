@@ -1,5 +1,5 @@
 /**
- * REQ-0108 — live catalog quantity reconcile preview for ProductFormDialog.
+ * Live catalog quantity reconcile preview for ProductFormDialog.
  */
 import { useMemo } from "react";
 import { planCatalogQuantityReconcile } from "@/lib/stock-allocation/catalog-quantity-reconcile";

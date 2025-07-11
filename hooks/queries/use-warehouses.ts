@@ -15,6 +15,7 @@ import {
   patchListCaches,
   removeFromListCaches,
 } from "@/lib/react-query";
+import { mergeCatalogMutationIntoDetail } from "@/lib/catalog/merge-catalog-mutation-densify";
 import { useToast } from "@/hooks/use-toast";
 import type {
   Warehouse,
@@ -66,11 +67,11 @@ export function useCreateWarehouse() {
     },
     onSuccess: (newWarehouse) => {
       if (newWarehouse.id) {
-        // REQ-0218 — merge so thin create never wipes densify if detail was warmed
+        // Merge so thin create never wipes densify if detail was warmed
         patchDetailCacheMerge<Warehouse>(
           queryClient,
           queryKeys.warehouses.detail(newWarehouse.id),
-          (old) => (old ? { ...old, ...newWarehouse } : newWarehouse),
+          (old) => mergeCatalogMutationIntoDetail(old, newWarehouse),
         );
         patchListCaches(queryClient, queryKeys.warehouses.all, newWarehouse, {
           prependIfMissing: true,
@@ -107,12 +108,11 @@ export function useUpdateWarehouse() {
     },
     onSuccess: (updatedWarehouse) => {
       if (updatedWarehouse.id) {
-        // REQ-0218 — thin PUT must not wipe warehouse densify fields
+        // Thin PUT must not wipe warehouse densify fields
         patchDetailCacheMerge<Warehouse>(
           queryClient,
           queryKeys.warehouses.detail(updatedWarehouse.id),
-          (old) =>
-            old ? { ...old, ...updatedWarehouse } : updatedWarehouse,
+          (old) => mergeCatalogMutationIntoDetail(old, updatedWarehouse),
         );
         patchListCaches(queryClient, queryKeys.warehouses.all, updatedWarehouse);
       }

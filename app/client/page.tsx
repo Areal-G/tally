@@ -4,7 +4,7 @@ import { getClientDashboard } from "@/lib/server/client-dashboard";
 import { getClientCatalogOverview } from "@/lib/server/client-catalog-data";
 import ClientPortalPage from "@/components/Pages/ClientPortalPage";
 
-/** REQ-0025 — blocking SSR prefetch (no Suspense shell flash). */
+/** Blocking SSR prefetch (no Suspense shell flash). */
 export const dynamic = "force-dynamic";
 
 export default async function ClientPortalRoute() {

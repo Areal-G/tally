@@ -3,10 +3,10 @@
 import React, { useState, useMemo, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { PaginationType } from "@/components/shared/PaginationSelector";
 import { createCategoryColumns } from "./CategoryTableColumns";
 import { useAuth } from "@/contexts";
 import { useCategories, useDashboard } from "@/hooks/queries";
+import { useTypedListSearch } from "@/hooks/use-typed-list-search";
 import { isDataSlotLoading, isDataSlotUnsettled, queryKeys, useSyncSsrQueryData } from "@/lib/react-query";
 import { APP_SHELL_WIDTH_CLASS } from "@/lib/ui/shell-layout-styles";
 import CategoryFilters from "./CategoryFilters";
@@ -17,9 +17,9 @@ import { PageSectionHeader } from "@/components/shared";
 import { Category } from "@/types";
 import type { CategoryForHome } from "@/lib/server/home-data";
 import type { DashboardStats } from "@/types";
+import { formatStableCurrency } from "@/lib/format";
 
-const formatCurrency = (value: number) =>
-  `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const formatCurrency = formatStableCurrency;
 
 const CategoryTable = dynamic(
   () =>
@@ -30,9 +30,9 @@ const CategoryTable = dynamic(
 );
 
 export type CategoryListProps = {
-  /** SSR-passed categories for first-render hydration (REQ-0021) */
+  /** SSR-passed categories for first-render hydration */
   initialCategories?: Category[] | CategoryForHome[];
-  /** SSR dashboard stats for /categories stat cards (REQ-0025 P2) */
+  /** SSR dashboard stats for /categories stat cards (P2) */
   initialStats?: DashboardStats;
 };
 
@@ -66,11 +66,8 @@ const CategoryList = React.memo(function CategoryList({
     initialCategories,
   );
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [pagination, setPagination] = useState<PaginationType>({
-    pageIndex: 0,
-    pageSize: 8,
-  });
+  const { searchTerm, setSearchTerm, pagination, setPagination } =
+    useTypedListSearch();
   const [statusFilter, setStatusFilter] = useState<
     "all" | "active" | "inactive"
   >("all");

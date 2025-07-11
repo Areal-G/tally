@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * REQ-0208 / REQ-0209 — Shared order detail footer actions (store + admin).
- * REQ-0209 — Cancel Order for unpaid|partial; Process Refund for fully paid (both modes).
+ * Shared order detail footer actions (store + admin).
+ * Cancel Order for unpaid|partial; Process Refund for fully paid (both modes).
  * Mutations stay in parent (same DELETE cancel API; partial/paid refunds Stripe server-side).
  */
 
-import React from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -26,6 +25,7 @@ import {
 } from "@/components/shared";
 import { PaymentDialog } from "@/components/payments";
 import { ShippingManagement } from "@/components/shipping";
+import { formatStableCurrency } from "@/lib/format";
 import {
   Tooltip,
   TooltipContent,
@@ -45,7 +45,7 @@ export type OrderDetailActionBarProps = {
   disableOrderActions: boolean;
   isSupplierRole?: boolean;
   /**
-   * REQ-0214 — when false, hide Pay (catalog-history client viewing another buyer).
+   * When false, hide Pay (catalog-history client viewing another buyer).
    * Default true for admin embeds / owners.
    */
   allowPay?: boolean;
@@ -76,7 +76,7 @@ export function OrderDetailActionBar({
   onCancelClick,
   onRefundClick,
 }: OrderDetailActionBarProps) {
-  void _mode; // Call sites still pass store|admin for clarity; gates are paymentStatus-based (REQ-0209)
+  void _mode; // Call sites still pass store|admin for clarity; gates are paymentStatus-based
   const actionsDisabled = dataLoading || !order || disableOrderActions;
   const isCancelled = order?.status === "cancelled";
   const isFullyPaid = order?.paymentStatus === "paid";
@@ -86,7 +86,7 @@ export function OrderDetailActionBar({
       order.paymentStatus === "partial" ||
       // Legacy / missing → Cancel (unpaid path)
       !order.paymentStatus);
-  // REQ-0211 — shared canGenerateShippingLabel (admin card + API same rule)
+  // Shared canGenerateShippingLabel (admin card + API same rule)
   const canShip = canGenerateShippingLabel(order);
   const payAmount = order ? resolveOrderPayAmount(order) : 0;
   const canPay =
@@ -96,14 +96,14 @@ export function OrderDetailActionBar({
     order.paymentStatus !== "refunded" &&
     !isCancelled &&
     payAmount > 0;
-  // REQ-0209 — unpaid|partial → Cancel Order; fully paid → Process Refund (both modes)
+  // Unpaid|partial → Cancel Order; fully paid → Process Refund (both modes)
   const showCancel = !!order && !isCancelled && isUnpaidOrPartial;
   const showRefund =
     !!order &&
     !isCancelled &&
     isFullyPaid &&
     typeof onRefundClick === "function";
-  // REQ-0214 — Process Refund must match Cancel: client/supplier cannot mutate money
+  // Process Refund must match Cancel: client/supplier cannot mutate money
   const refundDisabled = actionsDisabled || isRefunding;
 
   return (
@@ -121,7 +121,7 @@ export function OrderDetailActionBar({
           <span className="inline-block">
             <Button
               onClick={onUpdateOrder}
-              // REQ-0210 — cancelled/refunded orders are read-only
+              // Cancelled/refunded orders are read-only
               disabled={actionsDisabled || isCancelled}
               className={glassDetailFooterButtonClass("blue")}
             >
@@ -139,7 +139,7 @@ export function OrderDetailActionBar({
         </TooltipContent>
       </Tooltip>
 
-      {/* View when linked; Create when absent (REQ-0061) */}
+      {/* View when linked; Create when absent */}
       {!dataLoading && order && order.invoiceForOrder ? (
         <Button asChild className={glassDetailFooterButtonClass("indigo")}>
           <Link href={`${invoiceHrefBase}/${order.invoiceForOrder.id}`}>
@@ -194,7 +194,7 @@ export function OrderDetailActionBar({
                     className={glassDetailFooterButtonClass("emerald")}
                   >
                     <CreditCard className="h-4 w-4 shrink-0" />
-                    Pay ${payAmount.toFixed(2)}
+                    Pay {formatStableCurrency(payAmount)}
                   </Button>
                 }
               />
@@ -261,7 +261,7 @@ export function OrderDetailActionBar({
                 label="Process Refund"
                 icon={RefreshCw}
                 hue="rose"
-                // REQ-0214 — same disableOrderActions gate as Cancel Order (client/supplier)
+                // Same disableOrderActions gate as Cancel Order (client/supplier)
                 disabled={refundDisabled}
                 className="group w-full sm:w-auto gap-2"
               />

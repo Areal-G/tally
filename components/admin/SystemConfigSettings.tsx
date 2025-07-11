@@ -1,6 +1,6 @@
 /**
  * System Configuration Settings Component
- * REQ-0024: shell-first — action bar + category cards always visible; field values pulse while loading.
+ * Shell-first — action bar + category cards always visible; field values pulse while loading.
  */
 
 "use client";

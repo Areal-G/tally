@@ -1,17 +1,7 @@
 /**
- * API Performance Wrapper
- * Automatically tracks performance metrics for API route handlers
- * 
- * NOTE: This wrapper is ready to use but route wrapping is deferred.
- * Once all other features are implemented and configured, wrap API routes
- * with this function to enable performance tracking.
- * 
- * TODO (Future): After all feature implementation is complete, wrap main API routes:
- * - app/api/products/route.ts (GET, POST, PUT, DELETE)
- * - app/api/categories/route.ts (GET, POST, PUT, DELETE)
- * - app/api/suppliers/route.ts (GET, POST, PUT, DELETE)
- * - app/api/auth/* routes
- * 
+ * API performance wrapper: records response time and errors for a route handler,
+ * which the /api/performance endpoint and API status page then report.
+ *
  * Usage: export const GET = withPerformanceTracking(async (request) => { ... })
  */
 

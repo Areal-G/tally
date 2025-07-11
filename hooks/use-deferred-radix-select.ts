@@ -5,7 +5,7 @@
  * Prevents React removeChild errors when App Router navigates between pages
  * while a Select portal is mounting or unmounting (e.g. /products → /orders).
  *
- * REQ-0198 — Dialog open on the same route mounts Select immediately (no
+ * Dialog open on the same route mounts Select immediately (no
  * placeholder flash). One-frame defer only when pathname changed since the
  * last stable Select (nav teardown race). Instant path is derived (no sync
  * setState in effect) to satisfy react-hooks/set-state-in-effect.
@@ -26,7 +26,7 @@ export type UseDeferredRadixSelectResult = {
 };
 
 /**
- * REQ-0198 — true when we must wait one animation frame before showing Select
+ * True when we must wait one animation frame before showing Select
  * (pathname changed since last stable mount). False for first paint / same-route
  * dialog re-enable.
  */

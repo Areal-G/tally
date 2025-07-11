@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0119 — warehouse stock rollup tab on Business Insights.
+ * Warehouse stock rollup tab on Business Insights.
  * Shell-first: titles/cards render immediately; values pulse when loading.
  */
 
@@ -45,13 +45,17 @@ import {
   buildWarehouseSharePieData,
 } from "@/lib/insights/business-insights-warehouse-rollup";
 import { SectionTitleRow } from "@/components/shared";
+import { HelpTooltip } from "@/components/shared/HelpTooltip";
+import { getWarehouseTypeLabel } from "@/lib/ui/warehouse-type-styles";
 import {
   CHART_LABEL_TOP_MARGIN,
   createChartBarLabelRenderer,
+  createChartPiePercentLabel,
 } from "@/lib/ui/chart-point-label";
 import type { WarehouseStockSummary } from "@/types/stock-allocation";
+import { formatStableCurrency } from "@/lib/format";
 
-const PIE_COLORS = ["#06b6d4", "#0ea5e9", "#10b981", "#8b5cf6", "#f59e0b"];
+const PIE_COLORS = ["var(--accent-purple)", "var(--accent-teal)", "var(--accent-blue)", "var(--accent-amber)", "var(--accent-pink)"];
 
 export type BusinessInsightsWarehouseSectionProps = {
   rows: WarehouseStockSummary[];
@@ -103,7 +107,7 @@ export function BusinessInsightsWarehouseSection({
         />
         <AnalyticsCard
           title="Inventory value"
-          value={`$${Math.round(metrics.totalValue).toLocaleString()}`}
+          value={formatStableCurrency(Math.round(metrics.totalValue))}
           icon={DollarSign}
           variant="emerald"
           description={
@@ -138,7 +142,7 @@ export function BusinessInsightsWarehouseSection({
                 <Tooltip />
                 <Bar
                   dataKey="quantity"
-                  fill="#06b6d4"
+                  fill="var(--accent-purple)"
                   label={createChartBarLabelRenderer()}
                 />
               </BarChart>
@@ -163,19 +167,9 @@ export function BusinessInsightsWarehouseSection({
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent, x, y, textAnchor }) => (
-                    <text
-                      x={x}
-                      y={y}
-                      textAnchor={textAnchor}
-                      dominantBaseline="central"
-                      className="fill-gray-700 dark:fill-white text-xs font-normal"
-                    >
-                      {`${name} ${((percent || 0) * 100).toFixed(0)}%`}
-                    </text>
-                  )}
-                  outerRadius="100%"
-                  fill="#06b6d4"
+                  label={createChartPiePercentLabel()}
+                  outerRadius="85%"
+                  fill="var(--accent-purple)"
                   dataKey="value"
                 >
                   {pieData.map((_entry, index) => (
@@ -192,15 +186,45 @@ export function BusinessInsightsWarehouseSection({
         </ChartCard>
       </div>
 
-      <ChartCard title="Warehouse breakdown" icon={Package} variant="violet">
+      <ChartCard title="Warehouse Breakdown" icon={Package} variant="violet">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Warehouse</TableHead>
               <TableHead>SKUs</TableHead>
-              <TableHead>Quantity</TableHead>
-              <TableHead>Reserved</TableHead>
-              <TableHead>Value</TableHead>
+              <TableHead>
+                <span className="inline-flex items-center gap-1">
+                  Quantity
+                  <HelpTooltip
+                    content="Total allocated units at this warehouse"
+                    side="top"
+                    ariaLabel="Quantity column help"
+                    className="shrink-0"
+                  />
+                </span>
+              </TableHead>
+              <TableHead>
+                <span className="inline-flex items-center gap-1">
+                  Reserved
+                  <HelpTooltip
+                    content="Units reserved for open orders (amber/rose when elevated)"
+                    side="top"
+                    ariaLabel="Reserved column help"
+                    className="shrink-0"
+                  />
+                </span>
+              </TableHead>
+              <TableHead>
+                <span className="inline-flex items-center gap-1">
+                  Value
+                  <HelpTooltip
+                    content="Estimated inventory value from allocated stock"
+                    side="top"
+                    ariaLabel="Value column help"
+                    className="shrink-0"
+                  />
+                </span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           {loading && rows.length === 0 ? (
@@ -217,24 +241,44 @@ export function BusinessInsightsWarehouseSection({
               ) : (
                 [...rows]
                   .sort((a, b) => b.totalQuantity - a.totalQuantity)
-                  .map((row) => (
-                    <TableRow key={row.warehouseId}>
-                      <TableCell>
-                        <Link
-                          href={`/warehouses/${row.warehouseId}`}
-                          className={TABLE_LINK_PRIMARY}
-                        >
-                          {row.warehouseName}
-                        </Link>
-                      </TableCell>
-                      <TableCell>{row.totalProducts}</TableCell>
-                      <TableCell>{row.totalQuantity}</TableCell>
-                      <TableCell>{row.totalReserved}</TableCell>
-                      <TableCell>
-                        ${Math.round(row.totalValue).toLocaleString()}
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  .map((row) => {
+                    const typeLabel = getWarehouseTypeLabel(row.warehouseType);
+                    const hasReserved = row.totalReserved > 0;
+                    const reservedClass = hasReserved
+                      ? row.totalReserved > row.totalQuantity * 0.5
+                        ? "text-rose-600 dark:text-rose-400 font-medium"
+                        : "text-amber-600 dark:text-amber-400 font-medium"
+                      : "text-gray-400 dark:text-gray-500";
+                    return (
+                      <TableRow key={row.warehouseId}>
+                        <TableCell>
+                          <div className="flex flex-col gap-0.5">
+                            <Link
+                              href={`/warehouses/${row.warehouseId}`}
+                              className={TABLE_LINK_PRIMARY}
+                            >
+                              {row.warehouseName}
+                            </Link>
+                            {typeLabel && typeLabel !== "—" ? (
+                              <span className="text-xs text-gray-500 dark:text-gray-400">
+                                {typeLabel}
+                              </span>
+                            ) : null}
+                          </div>
+                        </TableCell>
+                        <TableCell>{row.totalProducts}</TableCell>
+                        <TableCell className="text-sky-600 dark:text-sky-400 font-medium">
+                          {row.totalQuantity}
+                        </TableCell>
+                        <TableCell className={reservedClass}>
+                          {row.totalReserved}
+                        </TableCell>
+                        <TableCell className="text-emerald-600 dark:text-emerald-400 font-medium">
+                          {formatStableCurrency(Math.round(row.totalValue))}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
               )}
             </TableBody>
           )}

@@ -1,8 +1,8 @@
 /**
- * REQ-0209 — Stripe return fallback (client).
+ * Stripe return fallback (client).
  * Prefer SSR `reconcileStripeReturnBeforeDetail` + redirect (no Pending flash).
  * This hook covers cancelled return + edge cases where query params remain.
- * REQ-0215 — patch paid invoice/order statuses from confirm response before invalidate.
+ * Patch paid invoice/order statuses from confirm response before invalidate.
  */
 
 "use client";
@@ -125,14 +125,14 @@ export function useStripeCheckoutReturn({
               status: nextStatus,
               paymentStatus: nextPayment,
             });
-            // REQ-0221/0222 — clear reserved densify when pay fulfills pending order
+            // Clear reserved densify when pay fulfills pending order
             patchCommittedAfterOrderMoneySettle(queryClient, {
               orderId: entityId,
               prevOrder: prevCached ?? null,
               nextStatus: nextStatus ?? prevCached?.status,
               nextPaymentStatus: nextPayment ?? prevCached?.paymentStatus,
             });
-            // REQ-0215 — remainder settle: patch linked order money + invoice status paid
+            // Remainder settle: patch linked order money + invoice status paid
             if (nextPayment === "paid") {
               const cached = queryClient.getQueryData<Order>(detailKey);
               const inv = cached?.invoiceForOrder;
@@ -196,7 +196,7 @@ export function useStripeCheckoutReturn({
                 invoiceNumber: inv.invoiceNumber,
               });
             }
-            // REQ-0222 — invoice-page Stripe return: densify reserved clear
+            // Invoice-page Stripe return: densify reserved clear
             if (orderId) {
               patchCommittedAfterOrderMoneySettle(queryClient, {
                 orderId,

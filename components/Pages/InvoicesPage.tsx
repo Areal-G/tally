@@ -5,7 +5,6 @@
 
 "use client";
 
-import React from "react";
 import Navbar from "@/components/layouts/Navbar";
 import InvoiceList from "@/components/invoices/InvoiceList";
 import { PageContentWrapper } from "@/components/shared";
@@ -20,17 +19,17 @@ import type {
 export type InvoicesPageProps = {
   userRole?: string;
   initialInvoices?: InvoiceForPage[];
-  /** SSR dashboard stats for admin/user /invoices cards (REQ-0025) */
+  /** SSR dashboard stats for admin/user /invoices cards */
   initialStats?: DashboardStats;
   /** SSR client portal for client /invoices cards */
   initialClientPortal?: ClientPortalDashboard;
-  /** REQ-0205 — SSR supplier portal for supplier /invoices KPI cards */
+  /** SSR supplier portal for supplier /invoices KPI cards */
   initialSupplierPortal?: SupplierPortalDashboard | null;
 };
 
 /**
  * Invoices page client component.
- * REQ-0021 — shell-first; SSR initialData passed to InvoiceList.
+ * Shell-first; SSR initialData passed to InvoiceList.
  */
 export default function InvoicesPage({
   userRole,

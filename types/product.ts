@@ -19,8 +19,11 @@ export interface Product {
   price: number;
   quantity: number;
   reservedQuantity?: number; // Product-level pending reservation (no warehouse pick)
-  /** REQ-0103 — display-only; sum of disjoint reservation paths for list badges */
+  /** Display-only; sum of disjoint reservation paths for list badges */
   committedQuantity?: number;
+  /** Optional list/detail densify for dialog allocation hints */
+  allocatedTotal?: number;
+  unallocated?: number;
   status?: ProductStatus;
   createdAt: Date;
   updatedAt?: Date | null;
@@ -30,7 +33,7 @@ export interface Product {
   categoryId: string;
   supplierId: string;
   category?: string | { id: string; name: string } | null;
-  /** REQ-0202 — email + image for PersonInlineRow densify */
+  /** Email + image for PersonInlineRow densify */
   supplier?:
     | string
     | {
@@ -45,14 +48,23 @@ export interface Product {
   imageUrl?: string; // ImageKit URL for product image
   imageFileId?: string; // ImageKit file ID for cleanup when updating/deleting
   expirationDate?: Date | null; // Product expiration date (optional, for perishable items)
+  /** Stock control: alert/reorder at or below this available quantity (default 20) */
+  reorderPoint?: number | null;
+  /** Default quantity for a reorder suggestion */
+  reorderQuantity?: number | null;
+  /** Lot / batch number of the most recent receipt */
+  lotNumber?: string | null;
+  barcode?: string | null;
   /** Set when product is archived (soft-deleted) due to order history */
   deletedAt?: Date | null;
   deletedBy?: string | null;
-  /** Product owner display name (REQ-0179 — always on list for dialog densify) */
+  /** Product owner display name (always on list for dialog densify) */
   productOwnerName?: string | null;
-  /** REQ-0179 — owner User.image for dialog/table avatars */
+  /** Owner User.image for dialog/table avatars */
   productOwnerImage?: string | null;
-  /** REQ-0179 — supplier linked User.image */
+  /** Owner email for supplier Product Owner densify (PersonNameEmailCell) */
+  productOwnerEmail?: string | null;
+  /** Supplier linked User.image */
   supplierImage?: string | null;
   /** Extended by API for detail page */
   creator?: {
@@ -87,9 +99,9 @@ export interface Product {
     proportionalAmount?: number;
     orderTotal?: number;
     orderStatus: string;
-    /** REQ-0131 — paid/refunded statusAt hue */
+    /** Paid/refunded statusAt hue */
     paymentStatus?: string;
-    /** REQ-0127 — terminal status date for recent-order cards */
+    /** Terminal status date for recent-order cards */
     statusAt?: string;
     placedBy?: {
       id: string;
@@ -98,7 +110,7 @@ export interface Product {
       image?: string | null;
     } | null;
   }> | null;
-  /** REQ-0084 — derived KPIs + sales trend from order history (SSR). */
+  /** Derived KPIs + sales trend from order history (SSR). */
   productInsights?: CatalogEntityInsights | null;
 }
 
@@ -117,6 +129,10 @@ export interface CreateProductInput {
   imageUrl?: string;
   imageFileId?: string;
   expirationDate?: string; // ISO date string
+  reorderPoint?: number | null;
+  reorderQuantity?: number | null;
+  lotNumber?: string | null;
+  barcode?: string | null;
 }
 
 /**
@@ -134,4 +150,8 @@ export interface UpdateProductInput {
   imageUrl?: string;
   imageFileId?: string;
   expirationDate?: string | null; // ISO date string or null to clear
+  reorderPoint?: number | null;
+  reorderQuantity?: number | null;
+  lotNumber?: string | null;
+  barcode?: string | null;
 }

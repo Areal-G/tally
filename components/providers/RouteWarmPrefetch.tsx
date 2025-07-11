@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * Background warm prefetch after auth session is valid (REQ-0025, REQ-0093).
+ * Background warm prefetch after auth session is valid.
  * Phase 1: TanStack API cache (role-scoped, batched).
  * Phase 2: Next.js RSC prefetch for navbar paths (staggered, non-blocking).
- * REQ-0027: admin client-orders/invoices warm deferred until `/` or `/admin` visit.
+ * Admin client-orders/invoices warm deferred until `/` or `/admin` visit.
  */
 
 import { useEffect, useRef } from "react";
@@ -29,7 +29,7 @@ function scheduleIdle(cb: () => void): void {
 
 /**
  * Stagger router.prefetch so RSC warm does not burst the network.
- * REQ-0094: warm navbar + profile + admin sidebar paths after login.
+ * Warm navbar + profile + admin sidebar paths after login.
  * Complements <Link prefetch> (viewport/hover) — Next dedupes duplicate RSC fetches.
  */
 async function prefetchNavRoutes(
@@ -72,7 +72,7 @@ export function RouteWarmPrefetch() {
     if (warmedForRef.current === warmKey) return;
     warmedForRef.current = warmKey;
 
-    // Defer until after first paint — login/dashboard not blocked (REQ-0026)
+    // Defer until after first paint — login/dashboard not blocked
     scheduleIdle(() => {
       void (async () => {
         await warmQueriesForUser(queryClient, {

@@ -33,7 +33,7 @@ export const billingAddressSchema = z.object({
 export const orderItemSchema = z.object({
   productId: z.string().min(1, "Product ID is required"),
   quantity: z.number().int().positive("Quantity must be a positive integer"),
-  /** REQ-0068 — optional in Zod; server requires when product has allocations */
+  /** Optional in Zod; server requires when product has allocations */
   warehouseId: z.string().min(1).optional(),
 });
 
@@ -61,9 +61,7 @@ export const createOrderSchema = z.object({
   items: z.array(orderItemSchema).min(1, "At least one item is required"),
   shippingAddress: z.preprocess(transformEmptyAddress, shippingAddressSchema.optional()),
   billingAddress: z.preprocess(transformEmptyAddress, billingAddressSchema.optional()),
-  tax: z.number().nonnegative("Tax must be non-negative").optional(),
-  shipping: z.number().nonnegative("Shipping must be non-negative").optional(),
-  discount: z.number().nonnegative("Discount must be non-negative").optional(),
+  // Tax/shipping/discount computed server-side; not accepted from client
   notes: z.string().optional(),
 });
 
@@ -85,7 +83,7 @@ export const updateOrderSchema = z.object({
   shippingAddress: shippingAddressSchema.optional(),
   billingAddress: billingAddressSchema.optional(),
   trackingNumber: z.string().optional(),
-  /** REQ-0146 — admin manual tracking persists carrier */
+  /** Admin manual tracking persists carrier */
   trackingCarrier: z
     .enum(["usps", "ups", "fedex", "dhl", "other"])
     .optional(),

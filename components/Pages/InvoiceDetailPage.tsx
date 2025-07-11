@@ -1,6 +1,6 @@
 /**
  * Invoice Detail Page
- * REQ-0162 — layout + info density parity with Order Detail (status|billing, items|summary, info|parties).
+ * Layout + info density parity with Order Detail (status|billing, items|summary, info|parties).
  */
 
 "use client";
@@ -38,7 +38,7 @@ import {
   useSyncSsrQueryData,
 } from "@/lib/react-query";
 import { useAuth } from "@/contexts";
-import { toDateOrNull } from "@/lib/format";
+import { formatStableCurrency, toDateOrNull } from "@/lib/format";
 import Navbar from "@/components/layouts/Navbar";
 import {
   ClientDateTime,
@@ -82,7 +82,7 @@ export type InvoiceDetailPageProps = {
   /** When true, do not wrap in Navbar (e.g. when embedded in admin layout) */
   embedInAdmin?: boolean;
   initialInvoice?: Invoice;
-  /** REQ-0163 — SSR reviews/eligibility for Order Items Write review (hydrate-safe) */
+  /** SSR reviews/eligibility for Order Items Write review (hydrate-safe) */
   initialReviewContext?: OrderReviewContext;
 };
 
@@ -96,7 +96,7 @@ export default function InvoiceDetailPage({
   const router = useRouter();
   const pathname = usePathname() ?? "";
   const { user, isCheckingAuth } = useAuth();
-  // REQ-0209 — list path follows route shell (/invoices vs /admin/invoices)
+  // List path follows route shell (/invoices vs /admin/invoices)
   const invoicesListPath = useMemo(
     () => (pathname.startsWith("/admin") ? "/admin/invoices" : "/invoices"),
     [pathname],
@@ -107,10 +107,10 @@ export default function InvoiceDetailPage({
   const invoiceId = params?.id as string;
   const onBack = backHref ? () => navigateTo(backHref) : handleBack;
   const Wrapper = embedInAdmin ? React.Fragment : Navbar;
-  /** REQ-0063 — admin invoice detail links to /admin/orders (matches InvoiceActions) */
+  /** Admin invoice detail links to /admin/orders (matches InvoiceActions) */
   const linkedOrderHrefBase = embedInAdmin ? "/admin/orders" : "/orders";
 
-  // Fetch invoice details — shell-first: layout always visible; pulse dynamic slots only (REQ-0022)
+  // Fetch invoice details — shell-first: layout always visible; pulse dynamic slots only
   const invoiceQuery = useInvoice(invoiceId, initialInvoice);
   const invoice = invoiceQuery.data;
   const dataLoading = isDataSlotLoading(invoiceQuery, initialInvoice);
@@ -127,7 +127,7 @@ export default function InvoiceDetailPage({
   const isSupplierRole = user?.role === "supplier";
   const isAdminRole = user?.role === "admin" || Boolean(embedInAdmin);
   const disableInvoiceMutations = isClientRole || isSupplierRole;
-  // REQ-0214 — catalog-history clients may view others' INV; Pay only for assigned buyer
+  // Catalog-history clients may view others' INV; Pay only for assigned buyer
   const isInvoiceBuyer =
     Boolean(user?.id) &&
     (invoice?.clientId === user?.id ||
@@ -243,8 +243,8 @@ export default function InvoiceDetailPage({
 
   const actionsDisabled = dataLoading || !invoice || disableInvoiceMutations;
 
-  // Format dates — shell visible while loading; pulse individual slots (REQ-0022)
-  // REQ-0136 — never fall back to `new Date()` ("now"): SSR/client render at different
+  // Format dates — shell visible while loading; pulse individual slots
+  // Never fall back to `new Date()` ("now"): SSR/client render at different
   // instants and that non-determinism is a classic hydration-mismatch source.
   const createdAt = toDateOrNull(invoice?.createdAt);
   const updatedAt = invoice?.updatedAt ? new Date(invoice.updatedAt) : null;
@@ -333,7 +333,7 @@ export default function InvoiceDetailPage({
             }
           />
 
-          {/* REQ-0162 — status stack | billing (Order Detail parity) */}
+          {/* Status stack | billing (Order Detail parity) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4 items-stretch">
             <div className="flex flex-col gap-2 min-w-0 h-full">
               <GlassCard padding="body" variant="violet">
@@ -379,9 +379,9 @@ export default function InvoiceDetailPage({
                         amountDueToneClass,
                       )}
                     >
-                      ${invoice!.amountDue.toFixed(2)}
+                      {formatStableCurrency(invoice!.amountDue)}
                     </div>
-                    {/* REQ-0210 — cancelled/refunded: show collected history, not "Paid in full" */}
+                    {/* Cancelled/refunded: show collected history, not "Paid in full" */}
                     {invoice!.amountPaid > 0 && (
                       <p className="text-sm mt-2 flex flex-wrap items-baseline gap-x-1 gap-y-0.5 text-gray-600 dark:text-gray-300">
                         <span>
@@ -397,11 +397,11 @@ export default function InvoiceDetailPage({
                               : "text-emerald-600 dark:text-emerald-400",
                           )}
                         >
-                          ${invoice!.amountPaid.toFixed(2)}
+                          {formatStableCurrency(invoice!.amountPaid)}
                         </span>
                         <span>/</span>
                         <span className="font-normal text-gray-600 dark:text-gray-300">
-                          ${invoice!.total.toFixed(2)}
+                          {formatStableCurrency(invoice!.total)}
                         </span>
                         {(isInvoiceCancelled || isOrderRefunded) && (
                           <span className="w-full text-xs text-rose-600 dark:text-rose-400 mt-0.5">
@@ -417,7 +417,7 @@ export default function InvoiceDetailPage({
               </GlassCard>
             </div>
 
-            {/* REQ-0210 — billing + shipping stacked (order addresses when invoice billing empty) */}
+            {/* Billing + shipping stacked (order addresses when invoice billing empty) */}
             {(dataLoading ||
               invoice?.billingAddress ||
               invoice?.shippingAddress) && (
@@ -434,7 +434,7 @@ export default function InvoiceDetailPage({
                         "text-gray-700 dark:text-white",
                       )}
                     />
-                    <p className="text-sm text-gray-700 dark:text-white p-2 rounded-xl bg-gradient-to-r from-blue-100/40 via-blue-50/20 to-transparent dark:from-blue-500/10 dark:via-blue-500/5 dark:to-transparent border border-blue-200/30 dark:border-blue-400/10">
+                    <p className="text-sm text-gray-700 dark:text-white p-2 rounded-xl bg-blue-100/40 dark:bg-blue-500/10 border border-blue-200/30 dark:border-blue-400/10">
                       {dataLoading ? (
                         <DataSlotPulse variant="text-md" className="w-full" />
                       ) : (
@@ -455,7 +455,7 @@ export default function InvoiceDetailPage({
                         "text-gray-700 dark:text-white",
                       )}
                     />
-                    <p className="text-sm text-gray-700 dark:text-white p-2 rounded-xl bg-gradient-to-r from-violet-100/40 via-violet-50/20 to-transparent dark:from-violet-500/10 dark:via-violet-500/5 dark:to-transparent border border-violet-200/30 dark:border-violet-400/10">
+                    <p className="text-sm text-gray-700 dark:text-white p-2 rounded-xl bg-violet-100/40 dark:bg-violet-500/10 border border-violet-200/30 dark:border-violet-400/10">
                       {dataLoading ? (
                         <DataSlotPulse variant="text-md" className="w-full" />
                       ) : (
@@ -468,12 +468,12 @@ export default function InvoiceDetailPage({
             )}
           </div>
 
-          {/* REQ-0162 — Order Items | Invoice Summary */}
+          {/* Order Items | Invoice Summary */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4 items-stretch">
             <InvoiceItemsCard
               invoice={invoice}
               dataLoading={dataLoading}
-              // REQ-0163 — store owner + client/supplier get portal product sky links
+              // Store owner + client/supplier get portal product sky links
               linkMode={
                 embedInAdmin || user?.role === "admin"
                   ? "admin"
@@ -495,7 +495,7 @@ export default function InvoiceDetailPage({
             <InvoiceSummaryCard invoice={invoice} dataLoading={dataLoading} />
           </div>
 
-          {/* REQ-0162 — Invoice Information | Parties */}
+          {/* Invoice Information | Parties */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 sm:gap-4 items-start">
             <GlassCard padding="body" variant="orange">
               <SectionCardHeader
@@ -539,7 +539,7 @@ export default function InvoiceDetailPage({
                       tone="emerald"
                     >
                       <span className="text-emerald-600 dark:text-emerald-400 font-normal">
-                        ${Number(invoice.amountPaid).toFixed(2)}
+                        {formatStableCurrency(Number(invoice.amountPaid))}
                       </span>
                     </DetailInfoRow>
                     <DetailInfoRow
@@ -554,7 +554,7 @@ export default function InvoiceDetailPage({
                       }
                     >
                       <span className={cn("font-normal", amountDueToneClass)}>
-                        ${Number(invoice.amountDue).toFixed(2)}
+                        {formatStableCurrency(Number(invoice.amountDue))}
                       </span>
                     </DetailInfoRow>
                   </>
@@ -566,11 +566,11 @@ export default function InvoiceDetailPage({
                       icon={Calendar}
                       label="Issued:"
                       tone="orange"
-                      loading={dataLoading}
+                      loading={dataLoading && !issuedAt}
                     >
-                      {!dataLoading && issuedAt && (
+                      {issuedAt ? (
                         <ClientDateTime date={issuedAt} semantic="created" />
-                      )}
+                      ) : null}
                     </DetailInfoRow>
                   )}
                   {(dataLoading || updatedAt) && (
@@ -578,11 +578,11 @@ export default function InvoiceDetailPage({
                       icon={Calendar}
                       label="Updated:"
                       tone="amber"
-                      loading={dataLoading}
+                      loading={dataLoading && !updatedAt}
                     >
-                      {!dataLoading && updatedAt && (
+                      {updatedAt ? (
                         <ClientDateTime date={updatedAt} semantic="updated" />
-                      )}
+                      ) : null}
                     </DetailInfoRow>
                   )}
                 </DetailInfoRowGroup>
@@ -715,7 +715,7 @@ export default function InvoiceDetailPage({
 
           {/* Actions — Back, Edit Invoice, Send Invoice, Delete Invoice; same layout as order detail */}
           <div className="flex flex-col sm:flex-row flex-wrap gap-2">
-            {/* REQ-0163 — no variant=ghost (washes out sky glass; match Order Detail) */}
+            {/* No variant=ghost (washes out sky glass; match Order Detail) */}
             <Button
               onClick={onBack}
               className={glassDetailBackButtonClass("w-full sm:w-auto gap-2")}
@@ -723,7 +723,7 @@ export default function InvoiceDetailPage({
               <ArrowLeft className="h-4 w-4 shrink-0" />
               Back
             </Button>
-            {/* REQ-0210 — cancelled invoices cannot be edited */}
+            {/* Cancelled invoices cannot be edited */}
             {invoice?.status !== "cancelled" && (
               <Button
                 onClick={handleEditInvoice}
@@ -812,7 +812,7 @@ export default function InvoiceDetailPage({
                   trigger={
                     <Button className={glassDetailFooterButtonClass("emerald")}>
                       <CreditCard className="h-4 w-4 shrink-0" />
-                      Pay ${invoice.amountDue.toFixed(2)}
+                      Pay {formatStableCurrency(invoice.amountDue)}
                     </Button>
                   }
                 />

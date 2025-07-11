@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { Product } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ForecastUrgencyBadge } from "@/lib/ui/semantic-badges";
+import { DenseCatalogProductCell } from "@/components/shared/DenseCatalogProductCell";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
@@ -11,12 +13,39 @@ import {
   BarChart3,
   Clock,
   Package,
+  Tag,
   Target,
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
 import { useMemo } from "react";
 import { getDisplayCommittedQuantity } from "@/lib/products/enrich-product-committed-quantity";
+
+/** Resolve product.category to a display name (string | {name} | null). */
+function resolveCategoryName(product: Product): string | null {
+  if (!product.category) return null;
+  if (typeof product.category === "object") return product.category.name;
+  return product.category || null;
+}
+
+/** Resolve product.supplier to a display name. */
+function resolveSupplierName(product: Product): string | null {
+  if (!product.supplier) return null;
+  if (typeof product.supplier === "object") return product.supplier.name;
+  return (product.supplier as string) || null;
+}
+
+/** Urgency-based text hue for reorder current stock value. */
+function availableStockClass(urgency: "high" | "medium" | "low"): string {
+  if (urgency === "high") return "text-rose-600 dark:text-rose-400";
+  if (urgency === "medium") return "text-amber-600 dark:text-amber-400";
+  return "text-sky-600 dark:text-sky-400";
+}
+
+/** Store hrefs for BI page (store owner context). */
+const storeProductHref = (id: string) => `/products/${id}`;
+const storeCategoryHref = (id: string) => `/categories/${id}`;
+const storeSupplierHref = (id: string) => `/suppliers/${id}`;
 
 interface ForecastingCardProps {
   products: Product[];
@@ -36,6 +65,7 @@ interface ForecastData {
   }>;
   demandForecast: Array<{
     category: string;
+    categoryId?: string | null;
     currentStock: number;
     predictedDemand: number;
     confidence: number;
@@ -75,7 +105,7 @@ export function ForecastingCard({ products, className }: ForecastingCardProps) {
       (p) => availableQty(p) <= 0,
     ).length;
 
-    // REQ-0168 — Reorder when available <= 20 (same heuristic as Low Stock / Out of Stock cards).
+    // Reorder when available <= 20 (same heuristic as Low Stock / Out of Stock cards).
     // Empty list when lowStock + outOfStock === 0 is expected (healthy stock).
     const reorderSuggestions = products
       .map((product) => ({
@@ -147,9 +177,11 @@ export function ForecastingCard({ products, className }: ForecastingCardProps) {
         );
 
         const confidence = Math.min(85, Math.max(60, 100 - avgPrice / 10)); // Higher price = lower confidence
+        const categoryId = categoryProducts[0]?.categoryId ?? null;
 
         return {
           category,
+          categoryId,
           currentStock,
           predictedDemand,
           confidence,
@@ -255,57 +287,55 @@ export function ForecastingCard({ products, className }: ForecastingCardProps) {
 
     switch (trend) {
       case "up":
-        return <TrendingUp className="h-4 w-4 text-green-500" />;
+        return <TrendingUp className="h-4 w-4 text-[var(--status-positive)]" />;
       case "down":
-        return <TrendingDown className="h-4 w-4 text-red-500" />;
+        return <TrendingDown className="h-4 w-4 text-[var(--status-negative)]" />;
       default:
-        return <BarChart3 className="h-4 w-4 text-sky-500" />;
+        return <BarChart3 className="h-4 w-4 text-[var(--accent-purple)]" />;
     }
   };
 
   return (
     <article
       className={cn(
-        "group rounded-[20px] border backdrop-blur-md transition overflow-hidden",
-        "border-violet-400/20",
-        "bg-gradient-to-br from-violet-500/15 via-violet-500/5 to-transparent",
-        "shadow-[0_15px_40px_rgba(139,92,246,0.15)] dark:shadow-[0_15px_40px_rgba(139,92,246,0.1)]",
-        "hover:border-violet-300/40",
+        "money-surface overflow-hidden",
         className,
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-4 sm:px-5 pt-4 sm:pt-5 pb-3">
-        <h3 className="text-sm sm:text-base font-medium text-gray-700 dark:text-white flex items-center gap-2">
-          <Target className="h-4 w-4 sm:h-5 sm:w-5" />
+      <div className="flex items-center justify-between px-5 sm:px-6 pt-5 sm:pt-6 pb-4">
+        <h3 className="flex items-center gap-3 text-base font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--tint-violet)] text-[var(--accent-purple)]">
+            <Target className="h-[18px] w-[18px]" />
+          </span>
           Demand Forecasting & Insights
         </h3>
       </div>
 
-      <div className="px-4 sm:px-5 pb-4 sm:pb-5 space-y-4">
+      <div className="px-5 sm:px-6 pb-5 sm:pb-6 space-y-6">
         {/* Key Metrics */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="text-center p-2 rounded-xl border border-blue-400/20 bg-gradient-to-br from-blue-500/15 via-blue-500/5 to-transparent">
-            <div className="text-sm sm:text-lg font-medium text-sky-600 dark:text-sky-400">
+        <div className="grid grid-cols-3 gap-3">
+          <div className="text-center rounded-2xl bg-[var(--bg-elevated)] p-3">
+            <div className="text-xl font-semibold tracking-[-0.03em] text-[var(--accent-purple)]">
               {forecastData.totalProducts}
             </div>
-            <div className="text-sm text-gray-600 dark:text-white/80">
+            <div className="mt-0.5 text-xs font-medium text-[var(--text-secondary)]">
               Total Products
             </div>
           </div>
-          <div className="text-center p-2 rounded-xl border border-amber-400/20 bg-gradient-to-br from-amber-500/15 via-amber-500/5 to-transparent">
-            <div className="text-sm sm:text-lg font-medium text-amber-600 dark:text-amber-400">
+          <div className="text-center rounded-2xl bg-[var(--bg-elevated)] p-3">
+            <div className="text-xl font-semibold tracking-[-0.03em] text-[var(--status-warning)]">
               {forecastData.lowStockProducts}
             </div>
-            <div className="text-sm text-gray-600 dark:text-white/80">
+            <div className="mt-0.5 text-xs font-medium text-[var(--text-secondary)]">
               Low Stock
             </div>
           </div>
-          <div className="text-center p-2 rounded-xl border border-rose-400/20 bg-gradient-to-br from-rose-500/15 via-rose-500/5 to-transparent">
-            <div className="text-sm sm:text-base font-medium text-rose-600 dark:text-rose-400">
+          <div className="text-center rounded-2xl bg-[var(--bg-elevated)] p-3">
+            <div className="text-xl font-semibold tracking-[-0.03em] text-[var(--status-negative)]">
               {forecastData.outOfStockProducts}
             </div>
-            <div className="text-sm text-gray-600 dark:text-white/80">
+            <div className="mt-0.5 text-xs font-medium text-[var(--text-secondary)]">
               Out of Stock
             </div>
           </div>
@@ -313,7 +343,7 @@ export function ForecastingCard({ products, className }: ForecastingCardProps) {
 
         {/* Reorder Suggestions */}
         <div>
-          <h4 className="font-medium mb-3 flex items-center gap-2 text-gray-700 dark:text-white">
+          <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
             <AlertTriangle className="h-4 w-4" />
             Reorder Suggestions
           </h4>
@@ -322,26 +352,49 @@ export function ForecastingCard({ products, className }: ForecastingCardProps) {
               forecastData.reorderSuggestions.map((suggestion, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-2 rounded-xl border border-gray-300/30 bg-gradient-to-r from-gray-100/50 to-transparent dark:border-white/10 dark:from-white/5 backdrop-blur-md"
+                  className="flex items-start justify-between gap-3 rounded-2xl bg-[var(--bg-elevated)] p-3"
                 >
-                  <div className="flex-1">
-                    <div className="font-medium text-sm text-gray-700 dark:text-white">
-                      {suggestion.product.name}
-                    </div>
-                    <div className="text-xs text-gray-600 dark:text-white/80">
-                      Current: {suggestion.available} | Suggested:{" "}
-                      {suggestion.suggestedQuantity}
-                    </div>
-                    <div className="text-xs text-gray-500 dark:text-white/80">
-                      {suggestion.reason}
+                  <div className="flex-1 min-w-0">
+                    <DenseCatalogProductCell
+                      productId={suggestion.product.id}
+                      productName={suggestion.product.name}
+                      sku={suggestion.product.sku}
+                      imageUrl={suggestion.product.imageUrl}
+                      categoryId={suggestion.product.categoryId}
+                      categoryName={resolveCategoryName(suggestion.product)}
+                      supplierId={suggestion.product.supplierId}
+                      supplierName={resolveSupplierName(suggestion.product)}
+                      supplierImage={suggestion.product.supplierImage}
+                      productHref={storeProductHref}
+                      categoryHref={storeCategoryHref}
+                      supplierHref={storeSupplierHref}
+                    />
+                    <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+                      <span>
+                        Current:{" "}
+                        <span className={availableStockClass(suggestion.urgency)}>
+                          {suggestion.available}
+                        </span>
+                      </span>
+                      <span aria-hidden className="text-gray-400 dark:text-gray-500">·</span>
+                      <span>
+                        Suggested:{" "}
+                        <span className="text-emerald-600 dark:text-emerald-400">
+                          {suggestion.suggestedQuantity}
+                        </span>
+                      </span>
+                      <span aria-hidden className="text-gray-400 dark:text-gray-500">·</span>
+                      <span className="text-gray-500 dark:text-gray-300 italic">
+                        {suggestion.reason}
+                      </span>
                     </div>
                   </div>
                   <ForecastUrgencyBadge urgency={suggestion.urgency} />
                 </div>
               ))
             ) : (
-              <div className="text-center py-4 text-gray-600 dark:text-white/80">
-                {/* REQ-0168 — clarify empty when Low Stock + Out of Stock are both 0 */}
+              <div className="text-center py-4 text-sm text-[var(--text-secondary)]">
+                {/* Clarify empty when Low Stock + Out of Stock are both 0 */}
                 {forecastData.lowStockProducts +
                   forecastData.outOfStockProducts ===
                 0
@@ -354,29 +407,51 @@ export function ForecastingCard({ products, className }: ForecastingCardProps) {
 
         {/* Demand Forecast by Category */}
         <div>
-          <h4 className="font-medium mb-3 flex items-center gap-2 text-gray-700 dark:text-white">
-            <Package className="h-4 w-4" />
+          <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+            <Tag className="h-4 w-4" />
             Category Demand Forecast
           </h4>
           <div className="space-y-2">
             {forecastData.demandForecast.map((forecast, index) => (
               <div
                 key={index}
-                className="space-y-2 p-2 rounded-xl border border-gray-300/20 bg-gradient-to-r from-gray-100/30 to-transparent dark:border-white/10 dark:from-white/5"
+                className="space-y-2 rounded-2xl bg-[var(--bg-elevated)] p-3"
               >
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-sm text-gray-700 dark:text-white">
-                    {forecast.category}
-                  </span>
-                  <span className="text-xs text-gray-600 dark:text-white/80">
+                <div className="flex justify-between items-center gap-2">
+                  {forecast.categoryId ? (
+                    <Link
+                      href={storeCategoryHref(forecast.categoryId)}
+                      prefetch
+                      className="inline-flex items-center gap-1 text-sm font-medium text-sky-600 dark:text-sky-400 hover:text-[var(--accent-purple)] dark:hover:text-sky-300 min-w-0 truncate"
+                    >
+                      <Tag className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                      {forecast.category}
+                    </Link>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 font-medium text-sm text-gray-700 dark:text-white min-w-0 truncate">
+                      <Tag className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                      {forecast.category}
+                    </span>
+                  )}
+                  <span className="text-xs text-gray-500 dark:text-gray-300 shrink-0">
                     {forecast.confidence.toFixed(0)}% confidence
                   </span>
                 </div>
-                <div className="flex justify-between text-xs text-gray-500 dark:text-white/80">
-                  <span>Current: {forecast.currentStock}</span>
-                  <span>Predicted: {forecast.predictedDemand}</span>
+                <div className="flex justify-between text-xs">
+                  <span>
+                    Current:{" "}
+                    <span className="text-sky-600 dark:text-sky-400 font-medium">
+                      {forecast.currentStock}
+                    </span>
+                  </span>
+                  <span>
+                    Predicted:{" "}
+                    <span className={forecast.predictedDemand >= forecast.currentStock ? "text-emerald-600 dark:text-emerald-400 font-medium" : "text-amber-600 dark:text-amber-400 font-medium"}>
+                      {forecast.predictedDemand}
+                    </span>
+                  </span>
                 </div>
-                <Progress value={forecast.confidence} className="h-2" />
+                <Progress value={forecast.confidence} className="h-1.5 bg-[var(--card-bg)]" />
               </div>
             ))}
           </div>
@@ -384,7 +459,7 @@ export function ForecastingCard({ products, className }: ForecastingCardProps) {
 
         {/* Seasonal Trends */}
         <div>
-          <h4 className="font-medium mb-3 flex items-center gap-2 text-gray-700 dark:text-white">
+          <h4 className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
             <Clock className="h-4 w-4" />
             Seasonal Demand Trends
           </h4>
@@ -393,14 +468,14 @@ export function ForecastingCard({ products, className }: ForecastingCardProps) {
               <div
                 key={index}
                 className={cn(
-                  "text-center p-2 rounded-xl border border-gray-300/20 bg-gradient-to-b from-gray-100/30 to-transparent dark:border-white/10 dark:from-white/5",
+                  "text-center rounded-2xl bg-[var(--bg-elevated)] p-2",
                   trend.isFutureMonth && "opacity-60",
                 )}
               >
-                <div className="text-xs font-medium text-gray-700 dark:text-white/80">
+                <div className="text-xs font-medium text-[var(--text-secondary)]">
                   {trend.month}
                 </div>
-                <div className="text-sm sm:text-base font-medium text-gray-700 dark:text-white">
+                <div className="text-sm sm:text-base font-semibold text-[var(--text-primary)]">
                   {trend.demand}
                 </div>
                 <div className="flex justify-center mt-1">
@@ -415,7 +490,7 @@ export function ForecastingCard({ products, className }: ForecastingCardProps) {
         <div className="flex flex-col sm:flex-row gap-2 pt-4">
           <Button
             variant="outline"
-            className="flex-1 rounded-xl border-emerald-400/30 bg-gradient-to-r from-emerald-500/10 to-transparent hover:from-emerald-500/20 hover:border-emerald-300/50"
+            className="money-secondary-action h-11 flex-1 rounded-xl font-medium"
             onClick={handleGenerateReport}
           >
             <Package className="mr-2 h-4 w-4" />
@@ -423,7 +498,7 @@ export function ForecastingCard({ products, className }: ForecastingCardProps) {
           </Button>
           <Button
             variant="outline"
-            className="flex-1 rounded-xl border-blue-400/30 bg-gradient-to-r from-blue-500/10 to-transparent hover:from-blue-500/20 hover:border-blue-300/50"
+            className="money-primary-action h-11 flex-1 rounded-xl font-semibold"
             onClick={handleViewDetails}
           >
             <TrendingUp className="mr-2 h-4 w-4" />

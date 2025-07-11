@@ -13,7 +13,7 @@ import {
   type ActivityLogPeriod,
 } from "@/hooks/queries/use-audit-logs";
 import { isDataSlotLoading } from "@/lib/react-query";
-import { cn } from "@/lib/utils";
+import { cn, EMPTY_LIST } from "@/lib/utils";
 import type { AuditLog } from "@/types";
 import {
   Select,
@@ -52,9 +52,9 @@ const PERIODS: { value: ActivityLogPeriod; label: string }[] = [
 const variantConfig = {
   border: "border-violet-400/20",
   gradient:
-    "bg-gradient-to-br from-violet-500/15 via-violet-500/5 to-transparent",
+    " bg-violet-500/15 ",
   shadow:
-    "shadow-[0_15px_40px_rgba(139,92,246,0.15)] dark:shadow-[0_15px_40px_rgba(139,92,246,0.1)]",
+    " ",
   iconBg:
     "border-violet-300/30 bg-violet-100/50 dark:border-violet-400/30 dark:bg-violet-500/20",
 };
@@ -205,7 +205,7 @@ export default function ActivityLogSection({
   const dataLoading = isDataSlotLoading(auditQuery, initialAuditData);
 
   const rawLogs =
-    data?.logs ?? (period === initialPeriod ? (initialLogs ?? []) : []);
+    data?.logs ?? (period === initialPeriod ? (initialLogs ?? EMPTY_LIST) : EMPTY_LIST);
   const logs = useMemo(() => {
     if (!searchTerm.trim()) return rawLogs;
     const term = searchTerm.toLowerCase().trim();
@@ -313,7 +313,7 @@ export default function ActivityLogSection({
   return (
     <article
       className={cn(
-        "rounded-[20px] border p-2 sm:p-4 backdrop-blur-md",
+        "rounded-xl border p-2 sm:p-4 ",
         "bg-white/60 dark:bg-white/5",
         variantConfig.border,
         variantConfig.gradient,
@@ -337,7 +337,7 @@ export default function ActivityLogSection({
         }
         className="mb-4"
       />
-      {/* REQ-0168 — filter → table gap (match Import History / Orders list) */}
+      {/* Filter → table gap (match Import History / Orders list) */}
       <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div className="relative flex-1 sm:max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600 dark:text-white/80 z-10" />
@@ -363,9 +363,9 @@ export default function ActivityLogSection({
           placeholder={
             <div
               className={cn(
-                "w-full sm:w-[180px] h-10 rounded-[28px] border border-sky-400/30 dark:border-sky-400/30",
-                "bg-gradient-to-r from-sky-500/25 via-sky-500/15 to-sky-500/10 dark:from-sky-500/25 dark:via-sky-500/15 dark:to-sky-500/10",
-                "text-gray-700 dark:text-white shadow-[0_10px_30px_rgba(2,132,199,0.2)] backdrop-blur-md",
+                "w-full sm:w-[180px] h-10 rounded-lg border border-sky-400/30 dark:border-sky-400/30",
+                " bg-sky-500/25 dark:bg-sky-500/25 ",
+                "text-gray-700 dark:text-white ",
                 "flex items-center px-2 text-sm",
               )}
               aria-hidden
@@ -382,17 +382,17 @@ export default function ActivityLogSection({
             >
               <SelectTrigger
                 className={cn(
-                  "w-full sm:w-[180px] h-10 rounded-[28px] border border-sky-400/30 dark:border-sky-400/30",
-                  "bg-gradient-to-r from-sky-500/25 via-sky-500/15 to-sky-500/10 dark:from-sky-500/25 dark:via-sky-500/15 dark:to-sky-500/10",
-                  "text-gray-700 dark:text-white shadow-[0_10px_30px_rgba(2,132,199,0.2)] backdrop-blur-md",
-                  "transition duration-200 hover:border-sky-300/40 hover:from-sky-500/35 hover:via-sky-500/25 hover:to-sky-500/15",
-                  "dark:hover:border-sky-300/40 dark:hover:from-sky-500/35 dark:hover:via-sky-500/25 dark:hover:to-sky-500/15",
+                  "w-full sm:w-[180px] h-10 rounded-lg border border-sky-400/30 dark:border-sky-400/30",
+                  " bg-sky-500/25 dark:bg-sky-500/25 ",
+                  "text-gray-700 dark:text-white ",
+                  "transition duration-200 hover:border-sky-300/40 hover:bg-sky-500/35 ",
+                  "dark:hover:border-sky-300/40 dark:hover:bg-sky-500/35 ",
                 )}
               >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent
-                className="rounded-xl border-sky-400/20 bg-white/95 dark:bg-popover/95 shadow-[0_10px_30px_rgba(2,132,199,0.15)]"
+                className="rounded-xl border-sky-400/20 bg-white/95 dark:bg-popover/95 "
                 position="popper"
               >
                 {PERIODS.map((p) => (

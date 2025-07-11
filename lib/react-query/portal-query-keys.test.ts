@@ -1,5 +1,5 @@
 /**
- * REQ-0206 — role portal dashboard keys stay user-scoped and distinct from admin portals.
+ * Role portal dashboard keys stay user-scoped and distinct from admin portals.
  */
 import { describe, expect, it } from "vitest";
 import { queryKeys } from "./config";

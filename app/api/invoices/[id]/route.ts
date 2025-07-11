@@ -11,7 +11,6 @@ import {
   getInvoiceByIdForProductOwner,
   updateInvoice,
   deleteInvoice,
-  markInvoiceAsSent,
 } from "@/prisma/invoice";
 import { prisma } from "@/prisma/client";
 import { updateInvoiceSchema } from "@/lib/validations";
@@ -140,7 +139,7 @@ export async function PUT(
     // Update invoice
     const invoice = await updateInvoice(id, updateData, ownerUserId);
 
-    // REQ-0152 — sync order unpaid|partial|paid from invoice money (incl. stock fulfill on full pay)
+    // Sync order unpaid|partial|paid from invoice money (incl. stock fulfill on full pay)
     if (invoice.orderId) {
       await syncOrderPaymentStatusFromInvoice(invoice.orderId, {
         amountPaid: invoice.amountPaid,

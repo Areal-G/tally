@@ -42,7 +42,7 @@ describe("computeProductInsights", () => {
     expect(insights.salesTrend.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("REQ-0140 — excludes pending from sold; stock uses committed available", () => {
+  it("excludes pending from sold; stock uses committed available", () => {
     const insights = computeProductInsights(
       50,
       [

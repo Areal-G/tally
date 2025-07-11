@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { densifyInvoiceFromOrder } from "./densify-invoice-from-order";
 import type { Invoice, Order } from "@/types";
 
-describe("densifyInvoiceFromOrder (REQ-0211)", () => {
+describe("densifyInvoiceFromOrder", () => {
   it("fills linked order fields from order cache", () => {
     const invoice = {
       id: "i1",

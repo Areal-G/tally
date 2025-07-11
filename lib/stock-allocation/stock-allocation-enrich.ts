@@ -177,7 +177,7 @@ export function attachProductAllocationTotals(
 }
 
 /**
- * REQ-0102 — sole production entry for API + SSR allocation lists.
+ * Sole production entry for API + SSR allocation lists.
  * DB-backed cross-warehouse totals: warehouse-scoped rows are partial per product.
  */
 export async function enrichStockAllocationRows(
@@ -238,7 +238,7 @@ export function transformStockAllocationRow(
 }
 
 /**
- * REQ-0221 — POST/PUT allocate responses match GET densify (category/supplier/catalog totals).
+ * POST/PUT allocate responses match GET densify (category/supplier/catalog totals).
  */
 export async function densifyStockAllocationWriteResponse(row: {
   id: string;

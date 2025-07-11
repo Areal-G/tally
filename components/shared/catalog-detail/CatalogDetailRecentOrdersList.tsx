@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * REQ-0086 — recent orders list for category/supplier/product detail pages.
- * REQ-0127 — status below price; statusAt on terminal orders; hideProductMeta for product detail.
- * REQ-0143 — category sky link; invoice indicator; Owner · Buyer separators.
+ * Recent orders list for category/supplier/product detail pages.
+ * Status below price; statusAt on terminal orders; hideProductMeta for product detail.
+ * Category sky link; invoice indicator; Owner · Buyer separators.
  */
 
 import Link from "next/link";
@@ -158,7 +158,7 @@ export function CatalogDetailRecentOrdersList({
                       {order.orderNumber}
                     </Link>
                   </CopyableText>
-                  {/* REQ-0143 — invoice indicator beside order number */}
+                  {/* Invoice indicator beside order number */}
                   {invoiceNode}
                 </div>
                 {!hideProductMeta ? (

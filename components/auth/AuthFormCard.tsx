@@ -14,8 +14,8 @@ type AuthFormCardProps = {
 };
 
 /**
- * REQ-0032 — shared frosted glass wrapper for login/register form column.
- * Uses backdrop-blur-2xl to match navbar glass intensity.
+ * Shared frosted glass wrapper for login/register form column.
+ * Uses to match navbar glass intensity.
  */
 export function AuthFormCard({
   variant,
@@ -25,7 +25,7 @@ export function AuthFormCard({
   return (
     <div
       className={cn(
-        "w-full rounded-[28px] p-4 sm:p-6",
+        "w-full rounded-lg p-4 sm:p-6",
         AUTH_FORM_GLASS[variant],
         className,
       )}

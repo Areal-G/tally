@@ -1,6 +1,4 @@
-import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
-import { SENTRY_TUNNEL_PATH } from "./lib/monitoring/sentry-config";
 import { buildNextProductionHeaderRules } from "./lib/vercel/production-headers";
 
 const nextConfig: NextConfig = {
@@ -26,10 +24,15 @@ const nextConfig: NextConfig = {
   },
 
   compiler: {
-    removeConsole: process.env.NODE_ENV === "production",
+    // Strip console.log/info/debug in production builds; keep errors and warnings.
+    removeConsole:
+      process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
   },
 
   poweredByHeader: false,
+
+  // Don't write AGENTS.md / CLAUDE.md into the repo on `next dev`.
+  agentRules: false,
 
   experimental: {
     optimizePackageImports: ["@/components", "@/lib"],
@@ -41,17 +44,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  org: process.env.SENTRY_ORG ?? "arnob-mahmuds-org",
-  project: process.env.SENTRY_PROJECT ?? "stock-inventory",
-  silent: !process.env.CI,
-  widenClientFileUpload: true,
-  // First-party tunnel — must match `tunnel` in instrumentation-client.ts (SENTRY_TUNNEL_PATH)
-  tunnelRoute: SENTRY_TUNNEL_PATH,
-  webpack: {
-    automaticVercelMonitors: true,
-    treeshake: {
-      removeDebugLogging: true,
-    },
-  },
-});
+export default nextConfig;

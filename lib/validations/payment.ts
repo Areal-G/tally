@@ -1,6 +1,6 @@
 /**
  * Payment API validation schemas
- * REQ-0152 — optional amount for full/partial Stripe checkout (dollars).
+ * Optional amount for full/partial Stripe checkout (dollars).
  */
 
 import { z } from "zod";
@@ -21,7 +21,7 @@ export const createCheckoutBodySchema = z.object({
 
 export type CreateCheckoutBody = z.infer<typeof createCheckoutBodySchema>;
 
-/** REQ-0209 — Stripe return URL `session_id` reconcile (idempotent with webhook). */
+/** Stripe return URL `session_id` reconcile (idempotent with webhook). */
 export const confirmCheckoutSessionBodySchema = z.object({
   sessionId: z
     .string()

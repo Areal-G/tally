@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * REQ-0162 / REQ-0164 — Invoice Summary beside Order Items.
+ * Invoice Summary beside Order Items.
  * Meaningful icon hues (Order Summary parity).
  */
 
@@ -22,13 +22,14 @@ import type { Invoice } from "@/types";
 import { cn } from "@/lib/utils";
 import { TYPO_CARD_TITLE } from "@/lib/ui/typography-scale";
 import { GlassCard } from "@/components/orders/detail/order-detail-primitives";
+import { formatStableCurrency } from "@/lib/format";
 
 export type InvoiceSummaryCardProps = {
   invoice?: Invoice;
   dataLoading: boolean;
 };
 
-/** Shared summary row — exported for PaymentDialog (REQ-0126). */
+/** Shared summary row — exported for PaymentDialog. */
 export function InvoiceSummaryRow({
   icon: Icon,
   label,
@@ -42,7 +43,7 @@ export function InvoiceSummaryRow({
   label: string;
   value: React.ReactNode;
   valueClassName?: string;
-  /** REQ-0164 — semantic icon hue */
+  /** Semantic icon hue */
   iconClassName?: string;
   loading?: boolean;
   variant?: "teal" | "glass";
@@ -50,7 +51,7 @@ export function InvoiceSummaryRow({
   const rowClass =
     variant === "glass"
       ? "flex justify-between items-center text-sm p-2 rounded-lg bg-white/5"
-      : "flex justify-between items-center text-sm p-2 rounded-lg bg-gradient-to-r from-teal-100/40 via-teal-50/20 to-transparent dark:from-teal-500/10 dark:via-teal-500/5 dark:to-transparent";
+      : "flex justify-between items-center text-sm p-2 rounded-lg bg-teal-100/40 dark:bg-teal-500/10 ";
 
   return (
     <div className={rowClass}>
@@ -95,7 +96,7 @@ export function InvoiceSummaryCard({
   dataLoading,
 }: InvoiceSummaryCardProps) {
   const amountDue = Number(invoice?.amountDue ?? 0);
-  // REQ-0210 — cancelled/refunded: collected history, not "paid in full"
+  // Cancelled/refunded: collected history, not "paid in full"
   const isClosed =
     invoice?.status === "cancelled" ||
     invoice?.linkedOrderPaymentStatus === "refunded";
@@ -115,14 +116,14 @@ export function InvoiceSummaryCard({
           label="Subtotal:"
           loading={dataLoading}
           iconClassName="text-sky-600 dark:text-sky-400"
-          value={`$${Number(invoice?.subtotal ?? 0).toFixed(2)}`}
+          value={formatStableCurrency(Number(invoice?.subtotal ?? 0))}
         />
         {!dataLoading && invoice?.tax != null && invoice.tax > 0 && (
           <SummaryRow
             icon={Percent}
             label="Tax:"
             iconClassName="text-violet-600 dark:text-violet-400"
-            value={`$${Number(invoice.tax).toFixed(2)}`}
+            value={formatStableCurrency(Number(invoice.tax))}
           />
         )}
         {!dataLoading && invoice?.shipping != null && invoice.shipping > 0 && (
@@ -130,7 +131,7 @@ export function InvoiceSummaryCard({
             icon={Truck}
             label="Shipping:"
             iconClassName="text-cyan-600 dark:text-cyan-400"
-            value={`$${Number(invoice.shipping).toFixed(2)}`}
+            value={formatStableCurrency(Number(invoice.shipping))}
           />
         )}
         {!dataLoading && invoice?.discount != null && invoice.discount > 0 && (
@@ -138,13 +139,13 @@ export function InvoiceSummaryCard({
             icon={Tag}
             label="Discount:"
             iconClassName="text-rose-600 dark:text-rose-400"
-            value={`-$${Number(invoice.discount).toFixed(2)}`}
+            value={"-" + formatStableCurrency(Number(invoice.discount))}
             valueClassName="text-rose-600 dark:text-rose-400"
           />
         )}
         <Separator className="my-2 bg-teal-200/50 dark:bg-teal-400/20" />
-        {/* REQ-0148 / REQ-0164 — Total + emerald icon (OrderSummaryCard parity) */}
-        <div className="flex justify-between text-sm sm:text-base font-normal p-2 rounded-xl bg-gradient-to-r from-emerald-100/50 via-emerald-50/30 to-transparent dark:from-emerald-500/15 dark:via-emerald-500/10 dark:to-transparent border border-emerald-200/30 dark:border-emerald-400/20">
+        {/* Total + emerald icon (OrderSummaryCard parity) */}
+        <div className="flex justify-between text-sm sm:text-base font-normal p-2 rounded-xl bg-emerald-100/50 dark:bg-emerald-500/15 border border-emerald-200/30 dark:border-emerald-400/20">
           <span className="text-gray-700 dark:text-white inline-flex items-center gap-1.5">
             <CircleDollarSign className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
             Total:
@@ -153,7 +154,7 @@ export function InvoiceSummaryCard({
             {dataLoading ? (
               <DataSlotPulse variant="currency" />
             ) : (
-              `$${Number(invoice!.total).toFixed(2)}`
+              formatStableCurrency(Number(invoice!.total))
             )}
           </span>
         </div>
@@ -166,7 +167,7 @@ export function InvoiceSummaryCard({
               ? "text-rose-600 dark:text-rose-400"
               : "text-emerald-600 dark:text-emerald-400"
           }
-          value={`$${Number(invoice?.amountPaid ?? 0).toFixed(2)}`}
+          value={formatStableCurrency(Number(invoice?.amountPaid ?? 0))}
           valueClassName={
             isClosed
               ? "text-rose-600 dark:text-rose-400"
@@ -184,7 +185,7 @@ export function InvoiceSummaryCard({
                 ? "text-amber-600 dark:text-amber-400"
                 : "text-emerald-600 dark:text-emerald-400"
           }
-          value={`$${amountDue.toFixed(2)}`}
+          value={formatStableCurrency(amountDue)}
           valueClassName={
             isClosed
               ? "text-rose-600 dark:text-rose-400"

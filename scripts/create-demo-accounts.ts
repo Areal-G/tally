@@ -6,7 +6,7 @@
  *
  * Creates missing demo users with full profile; links Test Supplier entity;
  * backfills legacy supplier name and profile fields on existing rows.
- * Does not seed catalog (REQ-0092).
+ * Does not seed catalog.
  *
  * Usage:
  *   npx tsx scripts/create-demo-accounts.ts

@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   useSupportTickets,
   useDashboard,
@@ -34,13 +34,14 @@ import type {
   DashboardStats,
 } from "@/types";
 import { ticketMessageTotal } from "@/lib/support-tickets/ticket-message-stats";
+import { EMPTY_LIST } from "@/lib/utils";
 
 export type SupportTicketListProps = {
   detailHrefBase?: string;
   productOwners?: ProductOwnerOption[];
-  /** SSR-passed tickets for first-render hydration (REQ-0021) */
+  /** SSR-passed tickets for first-render hydration */
   initialTickets?: SupportTicket[];
-  /** SSR dashboard stats for status stat card (REQ-0125 — CategoryList parity) */
+  /** SSR dashboard stats for status stat card (CategoryList parity) */
   initialStats?: DashboardStats;
 };
 
@@ -66,7 +67,7 @@ export default function SupportTicketList({
     user?.id && initialStats !== undefined ? initialStats : undefined,
   );
 
-  const allTickets = supportTicketsQuery.data ?? initialTickets ?? [];
+  const allTickets = supportTicketsQuery.data ?? initialTickets ?? EMPTY_LIST;
   const dashboard = dashboardQuery.data ?? null;
   const ticketBreakdown = dashboard?.ticketStatusBreakdown;
 
@@ -108,7 +109,7 @@ export default function SupportTicketList({
     [detailHrefBase, productOwners],
   );
 
-  // REQ-0125: dashboard status card unsettled; list-derived priority + table use loading (patched rows visible)
+  // Dashboard status card unsettled; list-derived priority + table use loading (patched rows visible)
   const statusCardsLoading = isDataSlotUnsettled(dashboardQuery, initialStats);
   const listDerivedLoading = isDataSlotLoading(
     supportTicketsQuery,
@@ -122,7 +123,7 @@ export default function SupportTicketList({
         as="h2"
         icon={MessageSquare}
         tone="violet"
-        title="Store Support Tickets (assigned to you)"
+        title="Support Tickets"
         description="Manage customer support tickets. Create, view, update status and priority, and add internal notes."
       />
 
@@ -194,7 +195,7 @@ export default function SupportTicketList({
               productOwners={productOwners}
               variant="violet"
               trigger={
-                <Button className="h-10 rounded-[28px] border border-violet-400/30 dark:border-violet-400/30 bg-gradient-to-r from-violet-500/70 via-violet-500/50 to-violet-500/30 dark:from-violet-500/70 dark:via-violet-500/50 dark:to-violet-500/30 text-white shadow-[0_10px_30px_rgba(139,92,246,0.3)] flex items-center gap-2">
+                <Button className="h-10 rounded-lg border border-violet-400/30 dark:border-violet-400/30 bg-violet-500/70 dark:bg-violet-500/70 text-white flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" />
                   Create Ticket
                 </Button>

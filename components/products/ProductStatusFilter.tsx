@@ -5,7 +5,7 @@ import {
 } from "@/lib/ui/popover-readability-styles";
 
 /**
- * Product Status Filter Dropdown — REQ-0037 glass badges (closes REQ-0028 AC7 gap).
+ * Product Status Filter Dropdown — glass badges (closes gap).
  * Rows use ProductStockStatusBadge — same component as table/detail columns.
  */
 
@@ -69,7 +69,7 @@ export function StatusDropDown({
         <PopoverTrigger asChild>
           <Button
             variant="secondary"
-            className="h-10 w-full sm:w-auto rounded-[28px] border border-rose-400/30 dark:border-rose-400/30 bg-gradient-to-r from-rose-500/25 via-rose-500/15 to-rose-500/10 dark:from-rose-500/25 dark:via-rose-500/15 dark:to-rose-500/10 text-gray-700 dark:text-white shadow-[0_10px_30px_rgba(225,29,72,0.2)] backdrop-blur-md transition duration-200 hover:border-rose-300/40 hover:from-rose-500/35 hover:via-rose-500/25 hover:to-rose-500/15 dark:hover:border-rose-300/40 dark:hover:from-rose-500/35 dark:hover:via-rose-500/25 dark:hover:to-rose-500/15"
+            className="h-10 w-full sm:w-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors duration-150 hover:bg-slate-50 dark:hover:bg-slate-700 "
           >
             <Package className="h-4 w-4 mr-1" />
             Status

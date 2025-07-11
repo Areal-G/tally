@@ -1,6 +1,6 @@
 /**
- * REQ-0150 — batch-load linked order preview for invoice list rows (SSR + API).
- * REQ-0151 — also linked order status / paymentStatus / statusAt / paidAt.
+ * Batch-load linked order preview for invoice list rows (SSR + API).
+ * Also linked order status / paymentStatus / statusAt / paidAt.
  * Server-only — uses Prisma.
  */
 
@@ -13,7 +13,7 @@ export type InvoiceListOrderPreview = {
   linkedOrderNumber: string | null;
   linkedOrderCreatedAt: string | null;
   linkedOrderItems: OrderItem[];
-  /** REQ-0151 — order status for Invoice table Order # badges */
+  /** Order status for Invoice table Order # badges */
   linkedOrderStatus?: string | null;
   linkedOrderPaymentStatus?: string | null;
   linkedOrderStatusAt?: string | null;

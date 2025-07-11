@@ -1,5 +1,5 @@
 /**
- * REQ-0145 — pure helpers for order list Order # column (product preview + item/unit counts).
+ * Pure helpers for order list Order # column (product preview + item/unit counts).
  * Client-safe — no server imports.
  */
 
@@ -33,7 +33,7 @@ export function truncateOrderProductName(
 }
 
 /**
- * Clickable product preview entries for order list rows (REQ-0145 gap).
+ * Clickable product preview entries for order list rows.
  * Skips items without productId/name; returns +extra count for overflow.
  */
 export function getOrderProductPreviewLinks(

@@ -14,7 +14,7 @@ describe("orderCancelShouldRefundPayment", () => {
     expect(orderCancelShouldRefundPayment("unpaid", "pending")).toBe(false);
   });
 
-  // REQ-0211 — confirmed without money stays unpaid (not Refunded)
+  // Confirmed without money stays unpaid (not Refunded)
   it("does not refund confirmed unpaid", () => {
     expect(orderCancelShouldRefundPayment("unpaid", "confirmed")).toBe(false);
   });

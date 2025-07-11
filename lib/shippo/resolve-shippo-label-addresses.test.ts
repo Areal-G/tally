@@ -5,7 +5,7 @@ import {
   selectShippoRateForLabel,
 } from "./server";
 
-describe("resolveShippoLabelAddresses (REQ-0211)", () => {
+describe("resolveShippoLabelAddresses", () => {
   it("test mode ignores order shipping and uses DEFAULT_TEST_TO", () => {
     const { addressTo } = resolveShippoLabelAddresses({
       testMode: true,
@@ -38,7 +38,7 @@ describe("resolveShippoLabelAddresses (REQ-0211)", () => {
   });
 });
 
-describe("selectShippoRateForLabel (REQ-0211)", () => {
+describe("selectShippoRateForLabel", () => {
   const rates = [
     { provider: "UPS", amount: "12.00", servicelevel: { token: "ups_ground" } },
     { provider: "USPS", amount: "5.00", servicelevel: { token: "priority" } },

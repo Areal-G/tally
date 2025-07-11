@@ -1,5 +1,5 @@
 /**
- * REQ-0138 — capitalize first letter of a string (e.g. reorder status "urgent" → "Urgent").
+ * Capitalize first letter of a string (e.g. reorder status "urgent" → "Urgent").
  */
 export function capitalizeFirst(value: string | null | undefined): string {
   if (value == null || value.length === 0) return "";

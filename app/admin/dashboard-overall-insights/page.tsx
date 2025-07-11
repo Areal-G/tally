@@ -4,7 +4,7 @@ import { getDashboardForAdmin } from "@/lib/server/dashboard-data";
 import { getForecastingForUser } from "@/lib/server/forecasting-data";
 import AdminDashboardMergedView from "@/components/admin/AdminDashboardMergedView";
 
-/** Store Dashboard & Analytics — blocking SSR (REQ-0025, no Suspense flash). */
+/** Store Dashboard & Analytics — blocking SSR (, no Suspense flash). */
 export const dynamic = "force-dynamic";
 
 export default async function StoreDashboardPage() {

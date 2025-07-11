@@ -32,7 +32,7 @@ async function enrichInvoice(
     include: {
       items: {
         include: {
-          // REQ-0063: widen select for line-item thumbs + party owners (single order query)
+          // Widen select for line-item thumbs + party owners (single order query)
           product: {
             select: {
               userId: true,
@@ -46,7 +46,7 @@ async function enrichInvoice(
     },
   });
 
-  // Include buyer id for Ordered by (REQ-0159 — not store owner)
+  // Include buyer id for Ordered by (not store owner)
   const orderBuyerId = order
     ? resolveBuyerUserId({
         userId: order.userId,
@@ -96,7 +96,7 @@ async function enrichInvoice(
       }
     : null;
 
-  // REQ-0159 — Ordered by = buyer (clientId when Client order)
+  // Ordered by = buyer (clientId when Client order)
   const orderedBy =
     order && orderBuyerId && userMap.get(orderBuyerId)
       ? {
@@ -139,7 +139,7 @@ async function enrichInvoice(
     })
     .filter(Boolean) as InvoiceDetailEnrichment["invoiceProductOwners"];
 
-  // REQ-0210 — billing fallback + shipping from linked order for detail cards
+  // Billing fallback + shipping from linked order for detail cards
   const resolvedBillingAddress = resolveInvoiceBillingAddressForDisplay(
     invoice.billingAddress,
     order
@@ -189,10 +189,10 @@ export async function getInvoiceDetailForPage(
   if (isAdmin) {
     invoice = await prisma.invoice.findUnique({ where: { id: invoiceId } });
   } else if (isClient) {
-    // REQ-0214 — buyer invoices + catalog recent-order INV chips (read-only; Pay gated in UI)
+    // Buyer invoices + catalog recent-order INV chips (read-only; Pay gated in UI)
     invoice = await getInvoiceByIdForClient(invoiceId, userId);
   } else if (isSupplier) {
-    // REQ-0204 — view invoices for orders that include this supplier's products
+    // View invoices for orders that include this supplier's products
     const supplier = await getSupplierByUserId(userId);
     invoice = supplier
       ? await getInvoiceByIdForSupplier(invoiceId, supplier.id)
@@ -206,7 +206,7 @@ export async function getInvoiceDetailForPage(
 
   if (!invoice) return null;
 
-  // REQ-0211 / REQ-0215 — heal draft→sent mid-pay; sent/overdue→paid when settled; sync order
+  // Heal draft→sent mid-pay; sent/overdue→paid when settled; sync order
   if (invoice.status !== "cancelled" && invoice.amountPaid > 0) {
     const healed = await healInvoiceStatusAfterMoney(invoice.id);
     if (healed?.changed) {

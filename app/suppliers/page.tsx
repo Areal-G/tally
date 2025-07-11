@@ -4,7 +4,7 @@ import SuppliersPage from "@/components/Pages/SuppliersPage";
 import { getSuppliersForUser } from "@/lib/server/home-data";
 import { prefetchListPageStats } from "@/lib/server/list-page-stats";
 
-/** REQ-0025 — blocking SSR prefetch (no Suspense shell flash). */
+/** Blocking SSR prefetch (no Suspense shell flash). */
 export const dynamic = "force-dynamic";
 
 export default async function SuppliersRoute() {

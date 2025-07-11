@@ -2,7 +2,7 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-/** Wrapper scrolls X only — `overflow-auto` nested a Y bar beside `#main-content` (REQ-0172). */
+/** Wrapper scrolls X only — `overflow-auto` nested a Y bar beside `#main-content`. */
 const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>

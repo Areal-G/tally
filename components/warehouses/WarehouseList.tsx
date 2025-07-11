@@ -1,6 +1,6 @@
 "use client";
 
-import React, {
+import {
   useState,
   useMemo,
   useCallback,
@@ -9,10 +9,10 @@ import React, {
 } from "react";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { PaginationType } from "@/components/shared/PaginationSelector";
 import { createWarehouseColumns } from "./WarehouseTableColumns";
 import { useAuth } from "@/contexts";
 import { useWarehouses, useDashboard, useWarehouseStockSummary } from "@/hooks/queries";
+import { useTypedListSearch } from "@/hooks/use-typed-list-search";
 import { isDataSlotLoading, isDataSlotUnsettled, queryKeys, useSyncSsrQueryData } from "@/lib/react-query";
 import { APP_SHELL_WIDTH_CLASS } from "@/lib/ui/shell-layout-styles";
 import WarehouseFilters from "./WarehouseFilters";
@@ -34,11 +34,11 @@ const WarehouseTable = dynamic(
 );
 
 export type WarehouseListProps = {
-  /** SSR-passed warehouses for first-render hydration (REQ-0021) */
+  /** SSR-passed warehouses for first-render hydration */
   initialWarehouses?: Warehouse[] | WarehouseForPage[];
-  /** SSR dashboard stats for warehouse stat cards (REQ-0025 P2) */
+  /** SSR dashboard stats for warehouse stat cards (P2) */
   initialStats?: DashboardStats;
-  /** REQ-0066 — warehouse stock summary for utilization column */
+  /** Warehouse stock summary for utilization column */
   initialWarehouseSummary?: WarehouseStockSummary[];
 };
 
@@ -126,11 +126,8 @@ export default function WarehouseList({
     }
   }, []);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [pagination, setPagination] = useState<PaginationType>({
-    pageIndex: 0,
-    pageSize: 8,
-  });
+  const { searchTerm, setSearchTerm, pagination, setPagination } =
+    useTypedListSearch();
   const [statusFilter, setStatusFilter] = useState<
     "all" | "active" | "inactive"
   >("all");
@@ -139,7 +136,7 @@ export default function WarehouseList({
     null,
   );
 
-  // REQ-0021: shell-first — only data slots pulse
+  // Shell-first — only data slots pulse
   const tableDataLoading = isDataSlotLoading(
     warehousesQuery,
     initialWarehouses,

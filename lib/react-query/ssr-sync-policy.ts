@@ -1,11 +1,11 @@
 /**
  * SSR → TanStack sync policy.
- * REQ-0122 / REQ-0133 — never clobber fresher client cache after CRUD / back-nav.
- * REQ-0202 — prefer richer densify when updatedAt is equal (email/image/role flash guard).
+ * Never clobber fresher client cache after CRUD / back-nav.
+ * Prefer richer densify when updatedAt is equal (email/image/role flash guard).
  */
 
 /**
- * "applyDensifyOnly" (REQ-0136 Fix B) — same trust level as REQ-0202's equal-timestamp
+ * "applyDensifyOnly" (Fix B) — same trust level as's equal-timestamp
  * densify case, but the caller must gap-fill densify fields only, never replace the
  * whole cached entity: a stale-but-differently-shaped SSR object could otherwise carry
  * an older status/paymentStatus that clobbers an already-patched, fresher cache value.
@@ -18,7 +18,7 @@ export type SsrQueryStateHint = {
   fetchStatus?: "fetching" | "paused" | "idle";
 };
 
-/** Parse ISO updatedAt for entity-level freshness compare (REQ-0122). */
+/** Parse ISO updatedAt for entity-level freshness compare. */
 function getUpdatedAtMs(value: unknown): number | null {
   if (!value || typeof value !== "object" || !("updatedAt" in value)) {
     return null;
@@ -29,7 +29,7 @@ function getUpdatedAtMs(value: unknown): number | null {
   return Number.isFinite(ms) ? ms : null;
 }
 
-/** Max row updatedAt for list payloads (REQ-0133). */
+/** Max row updatedAt for list payloads. */
 function maxUpdatedAtMs(value: unknown): number | null {
   if (!Array.isArray(value)) {
     return getUpdatedAtMs(value);
@@ -53,13 +53,13 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 /**
- * REQ-0202 / REQ-0209 / REQ-0218 — densify keys that often arrive later via client refetch when a
+ * Densify keys that often arrive later via client refetch when a
  * thinner cache row was seeded (list/create patch / warm prefetch).
  * Includes order/invoice party fields so Parties & Roles do not pop in after mount.
  * Catalog: insights / stats / committed / list share counts (soft-nav heal).
  */
 const DENSIFY_KEY_RE =
-  /(Email|Image|ImageUrl|UserId|Name)$|^(role|overview|orderProductOwners|invoiceForOrder|stripePaymentIntentId|creator|updater|items|productInsights|categoryInsights|supplierInsights|statistics|committedQuantity|recentOrders|productCount|catalogProductTotal)$|^relatedProduct|^placedBy|^assignedTo|^reviewer|^productOwner|^supplierImage|^linkedOrder/;
+  /(Email|Image|ImageUrl|UserId|Name)$|^(role|overview|orderProductOwners|invoiceForOrder|stripePaymentIntentId|creator|updater|supplier|category|items|productInsights|categoryInsights|supplierInsights|statistics|committedQuantity|recentOrders|productCount|catalogProductTotal)$|^relatedProduct|^placedBy|^assignedTo|^reviewer|^productOwner|^supplierImage|^linkedOrder/;
 
 function densifyValuePresent(value: unknown): boolean {
   if (value == null) return false;
@@ -85,6 +85,10 @@ export function serverHasRicherDensify(
     if (!densifyValuePresent(cachedVal)) {
       return true;
     }
+    // Thin list/create string (e.g. supplier: "Name") vs SSR object densify
+    if (typeof cachedVal === "string" && isPlainObject(serverVal)) {
+      return true;
+    }
   }
   return false;
 }
@@ -103,9 +107,45 @@ function rowStatusBadgeFingerprint(row: unknown): string | null {
 }
 
 /**
+ * SSR allocation qty sum strictly below cache for shared row ids.
+ * Proves DB/reconcile already shrunk while TanStack still holds pre-shrink qty
+ * (common when byWarehouse was never patched / invalidate→refetch paints old first).
+ * Inverse (SSR higher) means client patch is fresher — must keep cache.
+ */
+export function listHasLowerAllocationQuantities(
+  serverData: unknown,
+  cached: unknown,
+): boolean {
+  if (!Array.isArray(serverData) || !Array.isArray(cached)) return false;
+  if (serverData.length === 0 || cached.length === 0) return false;
+  const cachedQty = new Map<string, number>();
+  for (const row of cached) {
+    if (!isPlainObject(row) || typeof row.id !== "string") continue;
+    if (!("quantity" in row)) return false;
+    cachedQty.set(row.id, Math.max(0, Number(row.quantity ?? 0)));
+  }
+  if (cachedQty.size === 0) return false;
+  let compared = false;
+  let serverLower = false;
+  let serverHigher = false;
+  for (const row of serverData) {
+    if (!isPlainObject(row) || typeof row.id !== "string") continue;
+    if (!("quantity" in row)) continue;
+    const prev = cachedQty.get(row.id);
+    if (prev == null) continue;
+    compared = true;
+    const next = Math.max(0, Number(row.quantity ?? 0));
+    if (next < prev) serverLower = true;
+    if (next > prev) serverHigher = true;
+  }
+  // Only trust SSR when it is a pure shrink vs cache (never when any row grew).
+  return compared && serverLower && !serverHigher;
+}
+
+/**
  * Detects status/payment / linkedOrder* fingerprint inequality between SSR and cache.
  * Does NOT prove SSR is newer — `resolveSsrSyncAction` must compare updatedAt before apply
- * (REQ-0136 idle harden: equal/missing timestamps → skip so soft-nav cannot clobber patches).
+ * (idle harden: equal/missing timestamps → skip so soft-nav cannot clobber patches).
  */
 export function listHasFresherStatusBadges(
   serverData: unknown,
@@ -135,12 +175,12 @@ export function listHasFresherStatusBadges(
 /**
  * Decide whether SSR props should overwrite TanStack cache on mount.
  * router.back() can restore stale RSC props — never clobber fresher client cache.
- * REQ-0133: default skip when server cannot prove fresher than cached (lists + entities).
- * REQ-0202: apply when timestamps equal (or both missing) but SSR densify is richer.
- * REQ-0136: while invalidated/fetching NEVER apply SSR — soft-nav RSC can
+ * Default skip when server cannot prove fresher than cached (lists + entities).
+ * Apply when timestamps equal (or both missing) but SSR densify is richer.
+ * While invalidated/fetching NEVER apply SSR — soft-nav RSC can
  * lag the client patch (prod badge revert). Densify/badge apply exceptions caused flash-back.
  * listHasFresherStatusBadges detects fingerprint inequality only; idle apply requires
- * serverAt > cachedAt (REQ-0136).
+ * serverAt > cachedAt.
  */
 export function resolveSsrSyncAction<T>(
   serverData: T,
@@ -148,8 +188,24 @@ export function resolveSsrSyncAction<T>(
   state: SsrQueryStateHint | undefined,
 ): SsrSyncAction {
   // After CRUD invalidate, keep patched badges; let refetch settle from API/Redis.
-  // Applying RSC here reintroduced stale status/payment on production soft-nav.
+  // Applying full RSC here reintroduced stale status/payment on production soft-nav.
+  // When SSR has densify the thin mutation cache lacks (creator/supplier object),
+  // gap-fill immediately then refetch (avoids late audit/supplier remount on detail soft-nav).
   if (state?.isInvalidated || state?.fetchStatus === "fetching") {
+    if (
+      cached !== undefined &&
+      serverHasRicherDensify(serverData, cached)
+    ) {
+      return "applyDensifyOnly";
+    }
+    // Stock shrink: apply lower SSR qty immediately (avoids 40→10 flash),
+    // then caller still refetches while invalidated to settle densify/meta.
+    if (
+      cached !== undefined &&
+      listHasLowerAllocationQuantities(serverData, cached)
+    ) {
+      return "apply";
+    }
     return "refetch";
   }
   if (
@@ -165,7 +221,7 @@ export function resolveSsrSyncAction<T>(
 
   if (Array.isArray(cached) && Array.isArray(serverData)) {
     if (listHasFresherStatusBadges(serverData, cached)) {
-      // REQ-0136 — only apply when SSR is strictly newer by updatedAt.
+      // Only apply when SSR is strictly newer by updatedAt.
       // Equal/missing timestamps: keep patched cache (stale soft-nav RSC often matches).
       if (serverAt != null && cachedAt != null && serverAt > cachedAt) {
         return "apply";
@@ -202,9 +258,9 @@ export function resolveSsrSyncAction<T>(
     return "apply";
   }
 
-  // Equal timestamps (or both null) — prefer richer densify SSR (REQ-0202).
+  // Equal timestamps (or both null) — prefer richer densify SSR.
   // Freshness is NOT proven here (no updatedAt to compare), so the caller must only
-  // gap-fill densify fields (REQ-0136 Fix B) — never replace the whole cached entity.
+  // Gap-fill densify fields (Fix B) — never replace the whole cached entity.
   if (
     cached !== undefined &&
     (serverAt === cachedAt || (serverAt == null && cachedAt == null)) &&
@@ -225,7 +281,7 @@ export function resolveSsrSyncAction<T>(
 }
 
 /**
- * REQ-0136 Fix B — merge helpers for the "apply" / "applyDensifyOnly" actions.
+ * Fix B — merge helpers for the "apply" / "applyDensifyOnly" actions.
  * A raw `setQueryData(key, serverData)` replace can silently drop fields the cached
  * row has but the SSR snapshot omits (thin PUT/create responses), or — worse — let a
  * stale-but-differently-shaped SSR object win on fields it should never touch. Both
@@ -276,7 +332,13 @@ export function mergeDensifyOnly<T>(serverData: T, cached: T): T {
     if (!DENSIFY_KEY_RE.test(key)) continue;
     const serverVal = serverData[key];
     if (!densifyValuePresent(serverVal)) continue;
-    if (!densifyValuePresent(next[key])) {
+    const cachedVal = next[key];
+    if (!densifyValuePresent(cachedVal)) {
+      next[key] = serverVal;
+      continue;
+    }
+    // Upgrade thin string placeholders (create/PUT) when SSR has object densify
+    if (typeof cachedVal === "string" && isPlainObject(serverVal)) {
       next[key] = serverVal;
     }
   }

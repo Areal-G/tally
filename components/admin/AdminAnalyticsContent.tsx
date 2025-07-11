@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChartCard } from "@/components/ui/chart-card";
@@ -79,13 +79,15 @@ import {
   CARD_LIST_META_ROW_CLASS,
 } from "@/lib/ui/card-list-styles";
 import {
+  CHART_LABEL_RIGHT_MARGIN,
   CHART_LABEL_TOP_MARGIN,
   createChartBarLabelRenderer,
   createChartDotLabelRenderer,
+  createChartHorizontalBarLabelRenderer,
   formatChartCountLabel,
 } from "@/lib/ui/chart-point-label";
 
-/** Hydration-safe USD — en-US locale on server and client (REQ-0019). */
+/** Hydration-safe USD — en-US locale on server and client. */
 function formatCurrency(value: number): string {
   return formatStableCurrency(value);
 }
@@ -196,12 +198,11 @@ export default function AdminAnalyticsContent({
           as="h1"
           icon={BarChart3}
           tone="violet"
-          title="Store Analytics & Dashboard (self + client + supplier + other users)"
-          description="Overview, statistics, trends, and AI-powered insights across products, users, suppliers, categories, orders, invoices, warehouses, tickets, and reviews. Store-wide metrics."
+          title="Store Overview"
           className={DETAIL_PAGE_HEADER_SPACING_CLASS}
         />
 
-        {/* Overview cards — REQ-0021 shell-first: titles/icons always visible */}
+        {/* Overview cards — shell-first: titles/icons always visible */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 items-stretch">
           <StatisticsCard
             title="Total Products"
@@ -565,7 +566,6 @@ export default function AdminAnalyticsContent({
                       label={createChartDotLabelRenderer(
                         stats.trends?.length ?? 0,
                         formatChartCountLabel,
-                        false,
                       )}
                     />
                     <Area
@@ -578,8 +578,6 @@ export default function AdminAnalyticsContent({
                       dot={{ r: 3 }}
                       label={createChartDotLabelRenderer(
                         stats.trends?.length ?? 0,
-                        undefined,
-                        false,
                       )}
                     />
                   </AreaChart>
@@ -631,12 +629,14 @@ export default function AdminAnalyticsContent({
                       fill="hsl(var(--chart-1))"
                       name="Products"
                       radius={[4, 4, 0, 0]}
+                      label={createChartBarLabelRenderer(formatChartCountLabel)}
                     />
                     <Bar
                       dataKey="invoices"
                       fill="hsl(var(--chart-2))"
                       name="Invoices"
                       radius={[4, 4, 0, 0]}
+                      label={createChartBarLabelRenderer(formatChartCountLabel)}
                     />
                   </BarChart>
                 </ResponsiveChartContainer>
@@ -825,7 +825,7 @@ export default function AdminAnalyticsContent({
                       layout="vertical"
                       margin={{
                         top: CHART_LABEL_TOP_MARGIN,
-                        right: 8,
+                        right: CHART_LABEL_RIGHT_MARGIN,
                         left: 70,
                         bottom: 8,
                       }}
@@ -858,7 +858,7 @@ export default function AdminAnalyticsContent({
                       <Bar
                         dataKey="count"
                         radius={[0, 4, 4, 0]}
-                        label={createChartBarLabelRenderer(
+                        label={createChartHorizontalBarLabelRenderer(
                           formatChartCountLabel,
                         )}
                       />
@@ -1108,7 +1108,7 @@ export default function AdminAnalyticsContent({
                     layout="vertical"
                     margin={{
                       top: CHART_LABEL_TOP_MARGIN,
-                      right: 8,
+                      right: CHART_LABEL_RIGHT_MARGIN,
                       left: 70,
                       bottom: 8,
                     }}
@@ -1141,7 +1141,9 @@ export default function AdminAnalyticsContent({
                     <Bar
                       dataKey="count"
                       radius={[0, 4, 4, 0]}
-                      label={createChartBarLabelRenderer(formatChartCountLabel)}
+                      label={createChartHorizontalBarLabelRenderer(
+                        formatChartCountLabel,
+                      )}
                     />
                   </BarChart>
                 </ResponsiveChartContainer>
@@ -1246,7 +1248,7 @@ export default function AdminAnalyticsContent({
                           layout="vertical"
                           margin={{
                             top: CHART_LABEL_TOP_MARGIN,
-                            right: 8,
+                            right: CHART_LABEL_RIGHT_MARGIN,
                             left: 90,
                             bottom: 8,
                           }}
@@ -1279,7 +1281,7 @@ export default function AdminAnalyticsContent({
                           <Bar
                             dataKey="count"
                             radius={[0, 4, 4, 0]}
-                            label={createChartBarLabelRenderer(
+                            label={createChartHorizontalBarLabelRenderer(
                               formatChartCountLabel,
                             )}
                           />
@@ -1307,7 +1309,7 @@ export default function AdminAnalyticsContent({
                 ) : (
                   <ul className={CARD_LIST_DIVIDE_CLASS}>
                     {stats.recent.orders.slice(0, 5).map((o) => {
-                      // REQ-0174 — order # / product·category·supplier / buyer·date
+                      // Order # / product·category·supplier / buyer·date
                       const buyerLabel =
                         o.placedByName?.trim() ||
                         o.placedByEmail?.trim() ||
@@ -1315,7 +1317,7 @@ export default function AdminAnalyticsContent({
                       const productLabel = o.productPreview?.trim() || null;
                       return (
                         <li key={o.id} className={CARD_LIST_ROW_CLASS}>
-                          {/* REQ-0176 — gap-1.5 between meta lines; date-first buyer row (ring vs thumb align) */}
+                          {/* Gap-1.5 between meta lines; date-first buyer row (ring vs thumb align) */}
                           <div className="min-w-0 flex-1 flex flex-col gap-1.5 overflow-visible">
                             <CopyableText
                               value={o.orderNumber}
@@ -1366,7 +1368,7 @@ export default function AdminAnalyticsContent({
                               {o.supplierId && o.supplierName ? (
                                 <>
                                   <span aria-hidden>·</span>
-                                  <AvatarInlineLink
+                                  <AvatarInlineLink showAvatar={false}
                                     seed={o.supplierId}
                                     image={o.supplierImage}
                                     label={o.supplierName}
@@ -1464,7 +1466,7 @@ export default function AdminAnalyticsContent({
                           >
                             {t.subject}
                           </Link>
-                          {/* REQ-0170/0174 — creator avatar + date (clip-safe row) */}
+                          {/* Creator avatar + date (clip-safe row) */}
                           <div className={CARD_LIST_META_ROW_CLASS}>
                             {t.userId && t.userName ? (
                               <AvatarInlineLink
@@ -1521,9 +1523,9 @@ export default function AdminAnalyticsContent({
                   <ul className={CARD_LIST_DIVIDE_CLASS}>
                     {stats.recent.reviews.slice(0, 5).map((r) => (
                       <li key={r.id} className={CARD_LIST_ROW_CLASS}>
-                        {/* REQ-0176 — gap-1.5; date-first then reviewer avatar */}
+                        {/* Gap-1.5; date-first then reviewer avatar */}
                         <div className="min-w-0 flex-1 flex flex-col gap-1.5 overflow-visible">
-                          {/* REQ-0174 — thumb · name · ★ · Tag category */}
+                          {/* Thumb · name · ★ · Tag category */}
                           <div className={CARD_LIST_META_ROW_CLASS}>
                             {r.productId ? (
                               <ProductThumb

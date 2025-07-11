@@ -19,7 +19,7 @@ import {
 } from "@/lib/server/catalog-list-enrich";
 import { catalogProductSharePercent } from "@/lib/catalog/catalog-product-share";
 
-describe("catalog-list-enrich (REQ-0141 / REQ-0142)", () => {
+describe("catalog-list-enrich", () => {
   beforeEach(() => {
     vi.mocked(prisma.product.groupBy).mockReset();
     vi.mocked(prisma.product.count).mockReset();

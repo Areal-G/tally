@@ -8,7 +8,6 @@ import { createNotification } from "@/prisma/notification";
 import { logger } from "@/lib/logger";
 import type {
   CreateNotificationInput,
-  NotificationType,
   NotificationMetadata,
 } from "@/types/notification";
 

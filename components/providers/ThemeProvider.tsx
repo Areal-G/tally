@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { type ThemeProviderProps } from "next-themes";
 
@@ -9,7 +8,6 @@ import { type ThemeProviderProps } from "next-themes";
  * React 19 / Next 16.2+ warn that scripts inside components never execute on the
  * client — false positive here: the script runs from the SSR HTML stream.
  * Filter that specific console.error in development only (shadcn dark-mode guide).
- * REQ-0144
  */
 if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
   const orig = console.error;

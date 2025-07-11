@@ -1,7 +1,6 @@
 /**
  * Server-side product review detail fetch for SSR prefetch.
  * Mirrors GET /api/product-reviews/:id auth + response shape.
- * REQ-0024 / REQ-0180
  */
 
 import { prisma } from "@/prisma/client";

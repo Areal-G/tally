@@ -44,7 +44,7 @@ type FiltersAndActionsProps = {
     email: string;
     image?: string | null;
   }>;
-  /** REQ-0071 — total store owners vs owners with catalog products */
+  /** Total store owners vs owners with catalog products */
   storeOwnerCounts?: { total: number; withProducts: number };
   selectedOwnerId?: string;
   onOwnerChange?: (ownerId: string) => void;
@@ -82,9 +82,7 @@ export default function FiltersAndActions({
   setSelectedSuppliers,
   searchTerm,
   setSearchTerm,
-  pagination,
   setPagination,
-  userId,
 }: FiltersAndActionsProps) {
   const { toast } = useToast();
 
@@ -151,7 +149,7 @@ export default function FiltersAndActions({
       link.setAttribute("href", url);
       link.setAttribute(
         "download",
-        `stockly-products-${new Date().toISOString().split("T")[0]}.csv`,
+        `tally-products-${new Date().toISOString().split("T")[0]}.csv`,
       );
       link.style.visibility = "hidden";
       document.body.appendChild(link);
@@ -235,7 +233,7 @@ export default function FiltersAndActions({
       link.setAttribute("href", url);
       link.setAttribute(
         "download",
-        `stockly-products-${new Date().toISOString().split("T")[0]}.xlsx`,
+        `tally-products-${new Date().toISOString().split("T")[0]}.xlsx`,
       );
       link.style.visibility = "hidden";
       document.body.appendChild(link);
@@ -313,7 +311,7 @@ export default function FiltersAndActions({
   ]);
 
   const exportButtonClass =
-    "h-10 w-full sm:w-auto flex items-center gap-2 rounded-[28px] border border-violet-400/30 dark:border-violet-400/30 bg-gradient-to-r from-violet-500/25 via-violet-500/15 to-violet-500/10 dark:from-violet-500/25 dark:via-violet-500/15 dark:to-violet-500/10 text-gray-700 dark:text-white shadow-[0_10px_30px_rgba(139,92,246,0.2)] backdrop-blur-md transition duration-200 hover:border-violet-300/40 hover:from-violet-500/35 hover:via-violet-500/25 hover:to-violet-500/15 dark:hover:border-violet-300/40 dark:hover:from-violet-500/35 dark:hover:via-violet-500/25 dark:hover:to-violet-500/15";
+    "h-10 w-full sm:w-auto flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 transition-colors duration-150 hover:bg-slate-50 dark:hover:bg-slate-700 ";
 
   return (
     <div className="flex flex-col gap-2">
@@ -373,7 +371,7 @@ export default function FiltersAndActions({
                 variant="ghost"
                 size="sm"
                 onClick={() => setSearchTerm("")}
-                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 backdrop-blur-md"
+                className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-white/60 hover:text-white hover:bg-white/10 "
               >
                 <IoClose className="h-4 w-4 text-gray-700 dark:text-white/80" />
               </Button>

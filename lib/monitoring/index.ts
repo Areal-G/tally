@@ -3,8 +3,7 @@
  * Centralized monitoring and error tracking exports
  */
 
-export * from "./sentry";
-export * from "./sentry-config";
-export * from "./sentry-types";
+export * from "./error-reporting";
+export * from "./dom-errors";
 export * from "./performance";
 export * from "./system-metrics";
