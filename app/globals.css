@@ -278,32 +278,6 @@ html .with-scroll-bars-hidden {
   }
 }
 
-/* Viewport illustration zoom + horizontal nudge (CSS-only) */
-@keyframes authBgFloat {
-  0%,
-  100% {
-    transform: scale(1) translateX(0);
-  }
-  33% {
-    transform: scale(1.08) translateX(-14px);
-  }
-  66% {
-    transform: scale(1.12) translateX(14px);
-  }
-}
-
-.auth-bg-float {
-  animation: authBgFloat 22s ease-in-out infinite;
-  will-change: transform;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .auth-bg-float {
-    animation: none;
-    transform: none;
-  }
-}
-
 /* ======================================================================
  * Tally design system
  * ==================================================================== */

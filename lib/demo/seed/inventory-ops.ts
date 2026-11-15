@@ -1,44 +1,32 @@
 /**
- * Seed inventory-operations demo data for the local demo account:
- * reorder points, purchase orders (draft / ordered / partial / received),
- * a stock-movement history, stock counts and customer returns.
+ * Inventory-operations sample data for the demo store owner: reorder points,
+ * purchase orders (draft / ordered / partial / received), stock-movement
+ * history, stock counts, customer returns, barcodes and support tickets.
  *
- * Run after seed-demo-warehouse.ts:
- *   npx tsx --env-file=.env scripts/seed-inventory-ops.ts
- *
- * Re-running wipes and recreates only these operations rows for the demo account.
- * Historical rows are records only — current product quantities are left as seeded.
+ * Runs after seedWarehouse(). Historical rows are records only; current
+ * product quantities are left as seeded.
  */
-import { PrismaClient } from "@prisma/client";
-import { DEMO_WAREHOUSE_ACCOUNT } from "./demo-warehouse.config";
-import { seedDemoBarcodes } from "./seed-demo-barcodes";
-import { seedDemoSupport } from "./seed-demo-support";
+import type { PrismaClient } from "@prisma/client";
+import { seedDemoBarcodes } from "./barcodes";
+import { seedDemoSupport } from "./support";
 
-const prisma = new PrismaClient();
 const DAY = 86_400_000;
-const now = Date.now();
-const daysAgo = (n: number, hour = 10) => {
-  const d = new Date(now - n * DAY);
-  d.setHours(hour, (n * 17) % 60, 0, 0);
-  return d;
-};
-const year = new Date().getFullYear();
-const num = (prefix: string, n: number) => `${prefix}-${year}-${String(n).padStart(4, "0")}`;
 
 type P = { id: string; name: string; sku: string; price: number; quantity: number; supplierId: string };
 
-async function main() {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_WAREHOUSE_ACCOUNT.email },
-    select: { id: true },
-  });
-  if (!user) throw new Error("Demo account not found — run seed-demo-warehouse.ts first");
-  const userId = user.id;
-
-  await prisma.stockMovement.deleteMany({ where: { userId } });
-  await prisma.purchaseOrder.deleteMany({ where: { userId } });
-  await prisma.stockCount.deleteMany({ where: { userId } });
-  await prisma.productReturn.deleteMany({ where: { userId } });
+export async function seedInventoryOps(
+  prisma: PrismaClient,
+  userId: string,
+  nowDate: Date = new Date(),
+): Promise<void> {
+  const now = nowDate.getTime();
+  const daysAgo = (n: number, hour = 10) => {
+    const d = new Date(now - n * DAY);
+    d.setHours(hour, (n * 17) % 60, 0, 0);
+    return d;
+  };
+  const year = nowDate.getFullYear();
+  const num = (prefix: string, n: number) => `${prefix}-${year}-${String(n).padStart(4, "0")}`;
 
   const raw = await prisma.product.findMany({
     where: { userId, OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }] },
@@ -257,18 +245,6 @@ async function main() {
   }
 
   await prisma.stockMovement.createMany({ data: movements });
-  const scanDemo = await seedDemoBarcodes(prisma, userId);
-  console.log(`Demo barcodes: ${scanDemo.barcodes} added, ${scanDemo.scans} recent scans`);
-  const support = await seedDemoSupport(prisma, userId);
-  console.log(`Demo support: ${support.tickets} tickets, ${support.replies} replies, ${support.reviews} reviews`);
-  console.log(
-    `Seeded ${poPlan.length} purchase orders, ${movements.length} movements, 2 counts, ${orders.length} returns, reorder points on ${products.length} products.`,
-  );
+  await seedDemoBarcodes(prisma, userId, nowDate);
+  await seedDemoSupport(prisma, userId, nowDate);
 }
-
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exitCode = 1;
-  })
-  .finally(() => prisma.$disconnect());

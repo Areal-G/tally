@@ -16,18 +16,7 @@
     "test:watch": "vitest",
     "test:invalidate": "vitest run lib/react-query/invalidate-coverage.test.ts",
     "prisma": "prisma",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:push": "prisma db push",
-    "prisma:studio": "prisma studio",
-    "script:check-all-data": "tsx scripts/check-all-data.ts",
-    "script:delete-all-data": "tsx scripts/delete-all-data.ts",
-    "script:reset-demo-db": "tsx scripts/reset-demo-db.ts",
-    "script:seed-demo-catalog": "tsx scripts/seed-demo-catalog.ts",
-    "script:delete-all-suppliers": "tsx scripts/delete-all-suppliers.ts",
-    "script:delete-all-categories": "tsx scripts/delete-all-categories.ts",
-    "script:delete-user": "tsx scripts/delete-user.ts",
-    "seed:demo": "tsx --env-file=.env scripts/seed-demo-warehouse.ts && tsx --env-file=.env scripts/seed-inventory-ops.ts"
+    "prisma:generate": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -75,7 +64,6 @@
     "jspdf-autotable": "^5.0.8",
     "jsqr": "^1.4.0",
     "lucide-react": "^0.562.0",
-    "mongodb": "^4.17.2",
     "next": "^16.3.4",
     "next-auth": "^5.0.0-beta.32",
     "next-themes": "^0.4.3",
@@ -109,7 +97,6 @@
     "postcss": "^8.5.28",
     "prisma": "^6.19.3",
     "tailwindcss": "^3.4.19",
-    "tsx": "^4.23.13",
     "typescript": "^5",
     "vitest": "^4.1.11"
   },

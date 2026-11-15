@@ -1,17 +1,15 @@
 /**
- * Demo barcodes + recent scans for DEMO_WAREHOUSE_ACCOUNT, so /scan opens with a
+ * Barcodes + recent scans for the demo store owner, so /scan opens with a
  * "Recent scans" list instead of an empty state.
  *
  * - Every product without a barcode gets a valid EAN-13 (manufacturer-style for most,
  *   in-store "2…" for a few) so labels and scanning work out of the box.
  * - Five products get a lastScannedAt in the last couple of hours.
  *
- * Run alone:  npx tsx --env-file=.env scripts/seed-demo-barcodes.ts
- * Also called by scripts/seed-inventory-ops.ts.
+ * Called by seedInventoryOps().
  */
-import { PrismaClient } from "@prisma/client";
-import { DEMO_WAREHOUSE_ACCOUNT } from "./demo-warehouse.config";
-import { gs1CheckDigit } from "../lib/inventory/barcode";
+import type { PrismaClient } from "@prisma/client";
+import { gs1CheckDigit } from "@/lib/inventory/barcode";
 
 /** Deterministic EAN-13 per product index, so reseeding gives the same codes. */
 function demoEan13(index: number): string {
@@ -23,7 +21,11 @@ function demoEan13(index: number): string {
 
 const MINUTES_AGO = [3, 11, 26, 48, 95];
 
-export async function seedDemoBarcodes(prisma: PrismaClient, userId: string): Promise<{ barcodes: number; scans: number }> {
+export async function seedDemoBarcodes(
+  prisma: PrismaClient,
+  userId: string,
+  now: Date = new Date(),
+): Promise<{ barcodes: number; scans: number }> {
   const products = await prisma.product.findMany({
     where: { userId, OR: [{ deletedAt: null }, { deletedAt: { isSet: false } }] },
     select: { id: true, barcode: true, quantity: true },
@@ -47,30 +49,8 @@ export async function seedDemoBarcodes(prisma: PrismaClient, userId: string): Pr
   for (const [i, p] of picks.entries()) {
     await prisma.product.update({
       where: { id: p.id },
-      data: { lastScannedAt: new Date(Date.now() - MINUTES_AGO[i]! * 60_000) },
+      data: { lastScannedAt: new Date(now.getTime() - MINUTES_AGO[i]! * 60_000) },
     });
   }
   return { barcodes, scans: picks.length };
-}
-
-async function main() {
-  const prisma = new PrismaClient();
-  try {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_WAREHOUSE_ACCOUNT.email },
-    select: { id: true },
-  });
-  if (!user) throw new Error("Demo account not found — run seed-demo-warehouse.ts first");
-  const result = await seedDemoBarcodes(prisma, user.id);
-  console.log(`Demo barcodes: ${result.barcodes} added, ${result.scans} recent scans`);
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-if (process.argv[1]?.replace(/\\/g, "/").endsWith("scripts/seed-demo-barcodes.ts")) {
-  main().catch((e) => {
-    console.error(e);
-    process.exitCode = 1;
-  });
 }

@@ -1,18 +1,9 @@
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth-server";
-import RegisterPage from "@/components/Pages/RegisterPage";
-
-export const dynamic = "force-dynamic";
 
 /**
- * Register route — server component.
- * If user is already logged in (session cookie), redirect to home.
- * Otherwise render the client RegisterPage.
+ * Demo: there are no real accounts to create, so sign-up sends visitors to
+ * the login page and its "Try demo" button.
  */
-export default async function RegisterRoute() {
-  const user = await getSession();
-  if (user) {
-    redirect("/");
-  }
-  return <RegisterPage />;
+export default function RegisterRoute() {
+  redirect("/login");
 }

@@ -1,6 +1,6 @@
 /**
  * Public demo account behind the login page "Try demo" button.
- * Seeded by `npx tsx --env-file=.env scripts/seed-demo-warehouse.ts`.
+ * Seeded into the in-memory demo database at startup (lib/demo/seed).
  * Test values only — this password ships in the client bundle by design.
  */
 export const DEMO_ACCOUNT = {

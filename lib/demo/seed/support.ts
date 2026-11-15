@@ -1,6 +1,6 @@
 /**
- * Demo support tickets (with reply threads) and product reviews for
- * DEMO_WAREHOUSE_ACCOUNT, so the admin Tickets and Reviews pages look lived-in.
+ * Support tickets (with reply threads) and product reviews for the demo store
+ * owner, so the admin Tickets and Reviews pages look lived-in.
  *
  * - Clients open tickets about real products and orders; the store owner replies.
  * - A mix of open / in progress / resolved / closed and low → urgent priorities,
@@ -8,15 +8,11 @@
  * - Reviews are written by the buyer of a delivered order line (mostly approved,
  *   a few pending, one rejected).
  *
- * Safe to re-run: clears this store's tickets/reviews first.
- * Run alone:  npx tsx --env-file=.env scripts/seed-demo-support.ts
- * Also called by scripts/seed-inventory-ops.ts.
+ * Called by seedInventoryOps().
  */
-import { PrismaClient } from "@prisma/client";
-import { DEMO_WAREHOUSE_ACCOUNT } from "./demo-warehouse.config";
+import type { PrismaClient } from "@prisma/client";
 
 const HOUR = 3_600_000;
-const ago = (hours: number) => new Date(Date.now() - hours * HOUR);
 
 type Who = "client" | "owner";
 type TicketSpec = {
@@ -216,7 +212,9 @@ const REVIEWS: ReviewSpec[] = [
 export async function seedDemoSupport(
   prisma: PrismaClient,
   ownerId: string,
+  now: Date = new Date(),
 ): Promise<{ tickets: number; replies: number; reviews: number }> {
+  const ago = (hours: number) => new Date(now.getTime() - hours * HOUR);
   const clients = await prisma.user.findMany({
     where: { role: "client", email: { endsWith: ".test" } },
     select: { id: true, email: true },
@@ -227,7 +225,6 @@ export async function seedDemoSupport(
     select: { id: true, sku: true, name: true, supplierId: true },
   });
   const productId = new Map(products.map((p) => [p.sku, p]));
-  const productIds = products.map((p) => p.id);
   const orders = await prisma.order.findMany({
     where: { userId: ownerId },
     orderBy: { createdAt: "desc" },
@@ -239,13 +236,6 @@ export async function seedDemoSupport(
       items: { select: { id: true, productId: true, productName: true, sku: true } },
     },
   });
-
-  // Fresh start for this store.
-  const people = [ownerId, ...clients.map((c) => c.id)];
-  await prisma.supportTicket.deleteMany({
-    where: { OR: [{ userId: { in: people } }, { assignedToId: ownerId }] },
-  });
-  await prisma.productReview.deleteMany({ where: { productId: { in: productIds } } });
 
   let replies = 0;
   for (const spec of TICKETS) {
@@ -302,7 +292,7 @@ export async function seedDemoSupport(
         rating: spec.rating,
         comment: spec.comment,
         status: spec.status,
-        createdAt: created < new Date() ? created : ago(12 + i),
+        createdAt: created < now ? created : ago(12 + i),
         updatedAt: null,
       },
     });
@@ -310,26 +300,4 @@ export async function seedDemoSupport(
   }
 
   return { tickets: TICKETS.length, replies, reviews };
-}
-
-async function main() {
-  const prisma = new PrismaClient();
-  try {
-    const user = await prisma.user.findUnique({
-      where: { email: DEMO_WAREHOUSE_ACCOUNT.email },
-      select: { id: true },
-    });
-    if (!user) throw new Error("Demo account not found — run seed-demo-warehouse.ts first");
-    const r = await seedDemoSupport(prisma, user.id);
-    console.log(`Demo support: ${r.tickets} tickets, ${r.replies} replies, ${r.reviews} reviews`);
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-if (process.argv[1]?.replace(/\\/g, "/").endsWith("scripts/seed-demo-support.ts")) {
-  main().catch((e) => {
-    console.error(e);
-    process.exitCode = 1;
-  });
 }

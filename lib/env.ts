@@ -4,9 +4,11 @@
  * Optional vars enable features (Stripe, Brevo, Redis, etc.); app runs with only required vars.
  */
 
-/** Must be set for the app to start; used by getEnvVar() and validateEnv(). */
+/**
+ * Must be set for the app to start; used by getEnvVar() and validateEnv().
+ * Demo branch: no DATABASE_URL — data lives in memory (lib/demo).
+ */
 const requiredEnvVars = [
-  "DATABASE_URL",
   "JWT_SECRET",
   "NEXT_PUBLIC_API_URL",
 ] as const;

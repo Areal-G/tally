@@ -1,32 +1,29 @@
 /**
- * Seed a realistic warehouse catalog for the local demo account.
+ * Northgate Supply Co. sample store for the demo: categories, suppliers,
+ * warehouses, 30 products with stock allocations, client accounts, 36 orders
+ * with invoices, stock transfers and notifications.
  *
- * 1. Sign up on http://localhost:3607/register with the values in
- *    scripts/demo-warehouse.config.ts (or let this script create the user).
- * 2. npx tsx --env-file=.env scripts/seed-demo-warehouse.ts
- *
- * Re-running wipes and recreates the demo account's own catalog rows only.
+ * Deterministic: the same PRNG seed and insertion order produce the same rows
+ * (and, with the in-memory client, the same ids) on every server instance.
  */
 
-import { PrismaClient, type Prisma } from "@prisma/client";
-import bcrypt from "bcryptjs";
-import { DEMO_WAREHOUSE_ACCOUNT } from "./demo-warehouse.config";
-
-const prisma = new PrismaClient();
+import type { Prisma, PrismaClient } from "@prisma/client";
+import { DEMO_ADMIN, DEMO_COMPANY } from "@/lib/demo/accounts";
 
 const DAY = 24 * 60 * 60 * 1000;
-const now = new Date();
-const daysAgo = (n: number) => new Date(now.getTime() - n * DAY);
 
-// Deterministic PRNG so every reseed looks the same.
-let seed = 42;
-const rand = () => {
-  seed = (seed * 1664525 + 1013904223) % 4294967296;
-  return seed / 4294967296;
-};
-const pick = <T,>(arr: readonly T[]) => arr[Math.floor(rand() * arr.length)]!;
-const between = (min: number, max: number) =>
-  Math.floor(rand() * (max - min + 1)) + min;
+/** Linear congruential generator; same seed → same sequence. */
+function createRandom(seed: number) {
+  let state = seed;
+  const rand = () => {
+    state = (state * 1664525 + 1013904223) % 4294967296;
+    return state / 4294967296;
+  };
+  return {
+    pick: <T,>(arr: readonly T[]) => arr[Math.floor(rand() * arr.length)]!,
+    between: (min: number, max: number) => Math.floor(rand() * (max - min + 1)) + min,
+  };
+}
 
 const CATEGORIES = [
   ["Electronics", "Consumer electronics and accessories"],
@@ -105,63 +102,51 @@ const CITIES = [
 const statusFor = (qty: number) =>
   qty === 0 ? "Stock Out" : qty < 20 ? "Stock Low" : "Available";
 
-async function ensureUser(): Promise<string> {
-  const existing = await prisma.user.findUnique({
-    where: { email: DEMO_WAREHOUSE_ACCOUNT.email },
-    select: { id: true },
-  });
-  if (existing) return existing.id;
-  const created = await prisma.user.create({
+export type WarehouseSeedResult = {
+  ownerId: string;
+  clientIds: string[];
+};
+
+/**
+ * Create the store owner (DEMO_ADMIN) and the Northgate catalog.
+ * `passwordHashes.owner` is the store owner's login ("Try demo"); clients get
+ * `passwordHashes.other`, which nobody can sign in with.
+ */
+export async function seedWarehouse(
+  prisma: PrismaClient,
+  passwordHashes: { owner: string; other: string },
+  now: Date = new Date(),
+): Promise<WarehouseSeedResult> {
+  const daysAgo = (n: number) => new Date(now.getTime() - n * DAY);
+  const { pick, between } = createRandom(42);
+
+  const { id: userId } = await prisma.user.create({
     data: {
-      name: DEMO_WAREHOUSE_ACCOUNT.name,
-      email: DEMO_WAREHOUSE_ACCOUNT.email,
-      username: "demo-northgate",
-      password: await bcrypt.hash(DEMO_WAREHOUSE_ACCOUNT.password, 10),
+      name: DEMO_ADMIN.name,
+      email: DEMO_ADMIN.email,
+      username: DEMO_ADMIN.username,
+      password: passwordHashes.owner,
       role: "admin",
-      createdAt: now,
+      createdAt: daysAgo(160),
     },
     select: { id: true },
   });
-  return created.id;
-}
 
-async function ensureClient(name: string, email: string, i: number) {
-  const existing = await prisma.user.findUnique({ where: { email }, select: { id: true } });
-  if (existing) return existing.id;
-  const row = await prisma.user.create({
-    data: {
-      name,
-      email,
-      username: email.split("@")[0]! + i,
-      // Clients are display-only; random password nobody knows.
-      password: await bcrypt.hash(Math.random().toString(36), 10),
-      role: "client",
-      createdAt: daysAgo(120),
-    },
-    select: { id: true },
-  });
-  return row.id;
-}
+  const ensureClient = async (name: string, email: string, i: number) => {
+    const row = await prisma.user.create({
+      data: {
+        name,
+        email,
+        username: email.split("@")[0]! + i,
+        password: passwordHashes.other,
+        role: "client",
+        createdAt: daysAgo(120),
+      },
+      select: { id: true },
+    });
+    return row.id;
+  };
 
-async function wipeOwned(userId: string) {
-  const orders = await prisma.order.findMany({ where: { userId }, select: { id: true } });
-  const orderIds = orders.map((o) => o.id);
-  await prisma.invoice.deleteMany({ where: { userId } });
-  await prisma.orderItem.deleteMany({ where: { orderId: { in: orderIds } } });
-  await prisma.order.deleteMany({ where: { userId } });
-  await prisma.stockTransfer.deleteMany({ where: { userId } });
-  await prisma.stockAllocation.deleteMany({ where: { userId } });
-  await prisma.product.deleteMany({ where: { userId } });
-  await prisma.category.deleteMany({ where: { userId } });
-  await prisma.supplier.deleteMany({ where: { userId } });
-  await prisma.warehouse.deleteMany({ where: { userId } });
-  await prisma.notification.deleteMany({ where: { userId } });
-  await prisma.importHistory.deleteMany({ where: { userId } });
-}
-
-async function main() {
-  const userId = await ensureUser();
-  await wipeOwned(userId);
   const audit = { userId, createdBy: userId, updatedBy: userId };
 
   const categoryIds: string[] = [];
@@ -244,8 +229,8 @@ async function main() {
     const clientId = clientIdx === -1 ? null : clientIds[clientIdx];
     const [street, city, state, zipCode] = CITIES[n % CITIES.length]!;
     const address = {
-      name: clientIdx === -1 ? DEMO_WAREHOUSE_ACCOUNT.company : CLIENTS[clientIdx]![0],
-      email: clientIdx === -1 ? DEMO_WAREHOUSE_ACCOUNT.email : CLIENTS[clientIdx]![1],
+      name: clientIdx === -1 ? DEMO_COMPANY : CLIENTS[clientIdx]![0],
+      email: clientIdx === -1 ? DEMO_ADMIN.email : CLIENTS[clientIdx]![1],
       street, city, state, zipCode, country: "US",
     } as unknown as Prisma.InputJsonValue;
 
@@ -361,15 +346,5 @@ async function main() {
     });
   }
 
-  console.log(
-    `Seeded ${CATEGORIES.length} categories, ${SUPPLIERS.length} suppliers, ${WAREHOUSES.length} warehouses, ` +
-      `${PRODUCTS.length} products, 36 orders for ${DEMO_WAREHOUSE_ACCOUNT.email}`,
-  );
+  return { ownerId: userId, clientIds };
 }
-
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());

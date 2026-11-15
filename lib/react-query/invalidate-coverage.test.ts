@@ -78,7 +78,6 @@ const API_WRITE_ROUTE_INVALIDATION_SPEC: Record<string, readonly string[]> = {
   "app/api/users/[id]/route.ts": ["scheduleInvalidateUserCaches"],
   "app/api/user/email-preferences/route.ts": ["scheduleInvalidateEmailPreferenceCaches"],
   "app/api/system-config/route.ts": ["invalidateCache(", "scheduleInvalidateSystemConfigCaches"],
-  "app/api/auth/register/route.ts": ["scheduleInvalidateAuthCaches"],
   "app/api/payments/checkout/route.ts": ["scheduleInvalidateOrderGraphCaches"],
   "app/api/payments/confirm-session/route.ts": ["confirmCheckoutSessionById"],
   "app/api/payments/webhook/route.ts": [
@@ -117,6 +116,8 @@ const DOMAIN_KEYS_REQUIRE_LISTS = [
 const API_WRITE_EXEMPT = new Set([
   "app/api/auth/login/route.ts",
   "app/api/auth/logout/route.ts",
+  // Demo branch: sign-up is disabled (no data written)
+  "app/api/auth/register/route.ts",
   "app/api/ai/insights/route.ts",
   "app/api/shipping/rates/route.ts",
   "app/api/notifications/route.ts",

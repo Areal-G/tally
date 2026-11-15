@@ -11,8 +11,8 @@ Warehouse inventory and operations for small distributors, from purchase order t
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Prisma_6-47a248?logo=mongodb&logoColor=white)
 ![TanStack Query](https://img.shields.io/badge/TanStack_Query-5-ff4154?logo=reactquery&logoColor=white)
-![Tests](https://img.shields.io/badge/Vitest-836_passing-6e9f18?logo=vitest&logoColor=white)
-![Demo](https://img.shields.io/badge/demo-guest_login-5b4cf0)
+![Tests](https://img.shields.io/badge/Vitest-852_passing-6e9f18?logo=vitest&logoColor=white)
+[![Live demo](https://img.shields.io/badge/live_demo-tally.arealjagema.com-5b4cf0)](https://tally.arealjagema.com)
 
 [Features](#features) · [Design](#design) · [Screenshots](#screenshots) · [Tech stack](#tech-stack) · [Getting started](#getting-started)
 
@@ -29,9 +29,13 @@ Tally is a full-stack, multi-role inventory system. A store owner manages the ca
 
 It runs with nothing more than MongoDB and a JWT secret. Payments (Stripe), shipping labels (Shippo), email (Brevo), image hosting (ImageKit), caching (Upstash Redis) and AI insights switch on when their keys are present.
 
-## Try the demo
+## Live demo
 
-Run it locally (see [Getting started](#getting-started)), seed the demo data, open `/login` and click **Try demo**. You sign in as Dana, the owner of *Northgate Supply Co.*: 3 warehouses, 30 products (some low or out of stock), 36 orders with invoices, open purchase orders, stock counts, returns, support tickets and product reviews.
+> **You are on the `demo` branch.** It powers **[tally.arealjagema.com](https://tally.arealjagema.com)** and runs **without a database**: the app serves the built-in Northgate sample store from memory (`lib/demo`). For the real app with MongoDB, use the [`main`](../../tree/main) branch.
+
+Open the site and click **Try demo** on the login page. You sign in as Dana, the owner of *Northgate Supply Co.*: 3 warehouses, 30 products (some low or out of stock), 36 orders with invoices, open purchase orders, stock counts, returns, support tickets and product reviews.
+
+Changes you make are kept in that server's memory only and reset when the demo restarts.
 
 ## Features
 
@@ -123,7 +127,7 @@ Tally's look is a calm operations UI: slate-lavender surfaces, a single violet-t
   </tr>
   <tr>
     <td width="50%"><img src="readme/returns.png" alt="Returns"><br><sub><b>Returns</b>: decisions, restocks and refunds</sub></td>
-    <td width="50%"><img src="readme/login-dark.png" alt="Login"><br><sub><b>Login</b> with <b>Try demo</b> (dark)</sub></td>
+    <td width="50%"><img src="readme/login-dark.png" alt="Login"><br><sub><b>Login</b> (dark)</sub></td>
   </tr>
 </table>
 
@@ -228,65 +232,20 @@ const onKeyDown = (e: KeyboardEvent) => {
 
 ## Getting started
 
-### Prerequisites
-
-- Node.js 24 and npm
-- MongoDB 7 running as a replica set (Prisma needs one on MongoDB). Docker is the easiest way:
+This branch needs no database and no API keys.
 
 ```bash
-docker run -d --name tally-mongo -p 127.0.0.1:27017:27017 mongo:7 --replSet rs0 --bind_ip_all
-```
-
-```bash
-docker exec tally-mongo mongosh --quiet --eval "rs.initiate()"
-```
-
-### Install and configure
-
-```bash
-git clone <your-fork-url> tally
-cd tally
+git clone -b demo <your-fork-url> tally-demo
+cd tally-demo
 npm install
-cp .env.example .env
+JWT_SECRET=any-long-random-string npm run dev
 ```
 
-<details>
-<summary><b>Environment variables</b></summary>
+Open `http://localhost:3000/login` and click **Try demo**.
 
-| Variable | Required | Description |
-|---|---|---|
-| `DATABASE_URL` | Yes | MongoDB URI, e.g. `mongodb://127.0.0.1:27017/tally?replicaSet=rs0&directConnection=true` |
-| `JWT_SECRET` | Yes | Long random string used to sign session tokens |
-| `NEXT_PUBLIC_API_URL` | Yes | Base URL of the app, e.g. `http://localhost:3000` |
-| `NEXT_PUBLIC_APP_URL` | No | Public URL used in metadata, CORS and email links |
-| `PLATFORM_ADMIN_EMAILS` | No | Comma-separated emails allowed to manage all users |
-| `STRIPE_API_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | No | Invoice payments |
-| `SHIPPO_API_KEY`, `SHIPPO_WEBHOOK_SECRET`, `SHIPPO_FROM_*` | No | Shipping rates, labels and tracking |
-| `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME` | No | Transactional email |
-| `IMAGEKIT_*`, `NEXT_PUBLIC_IMAGEKIT_*` | No | Product image uploads |
-| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `QSTASH_*` | No | Response cache, distributed rate limits, email queue |
-| `OPENROUTER_API_KEY`, `GROQ_API_KEY` | No | AI business insights |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | No | Google sign-in |
-| `INTERNAL_API_KEY` | No | Bearer token for cron calls such as invoice reminders |
+### Deploy (Netlify)
 
-</details>
-
-### Database and demo data
-
-```bash
-npx prisma db push
-npm run seed:demo
-```
-
-`seed:demo` creates the demo store (catalog, warehouses, orders, invoices, transfers, notifications), then the operations data (purchase orders, stock movements, counts, returns, barcodes, recent scans, support tickets and reviews). It is safe to re-run.
-
-### Run
-
-```bash
-npm run dev
-```
-
-Open `http://localhost:3000/login` and click **Try demo**. You should land on the dashboard with "Welcome back, Dana" and 12 stock alerts.
+`netlify.toml` holds the build settings. In Netlify, create a site from this repository with **Branch to deploy** set to `demo`, add the environment variable `JWT_SECRET` (a long random string), and add your custom domain under **Domain management**.
 
 <details>
 <summary><b>Scripts</b></summary>
@@ -296,11 +255,7 @@ Open `http://localhost:3000/login` and click **Try demo**. You should land on th
 | `npm run dev` | Dev server (Turbopack) |
 | `npm run build` / `npm start` | Generate the Prisma client, build, serve |
 | `npm run lint` | ESLint (no unused vars, no `any`, exhaustive deps) |
-| `npm test` | Vitest suite |
-| `npm run test:invalidate` | Only the cache-invalidation coverage audit |
-| `npm run seed:demo` | Seed the demo store and operations data |
-| `npm run prisma:push` / `npm run prisma:studio` | Sync the schema, browse data |
-| `npm run script:reset-demo-db` | Reset the demo database |
+| `npm test` | Vitest suite (incl. the in-memory database in `lib/demo`) |
 
 </details>
 
@@ -320,11 +275,12 @@ lib/
 ├── inventory/             # stock ledger, barcode decoder, reorder suggestions
 ├── react-query/           # query keys, cache patching, invalidation map
 ├── auth/ server/ cache/   # session, rate limits, Redis helpers
-└── forecasting/ ai/       # insights and forecasts
+├── forecasting/ ai/       # insights and forecasts
+└── demo/                  # in-memory Prisma client, sample-store seed, demo accounts
 prisma/
-├── schema.prisma          # 27 models (MongoDB)
+├── schema.prisma          # 27 models (MongoDB on main; in memory on this branch)
+├── client.ts              # exports the in-memory client on this branch
 └── *.ts                   # repositories
-scripts/                   # seeders and maintenance scripts (tsx)
 ```
 
 </details>
@@ -337,12 +293,12 @@ npm run lint
 npm test
 ```
 
-- 123 Vitest files (836 tests) covering API schemas and helpers, invoice and payment maths, forecasting, stock operations, formatting, and the cache-invalidation audit.
+- 124 Vitest files (852 tests) covering API schemas and helpers, invoice and payment maths, forecasting, stock operations, formatting, and the cache-invalidation audit.
 - ESLint reports zero problems; TypeScript is strict.
 
 ## Deployment
 
-The app targets Vercel (`vercel.json` included) or any Node 24 host with `npm run build && npm start`. Use MongoDB Atlas (a replica set by default) for `DATABASE_URL`, set `JWT_SECRET`, `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_APP_URL`, and add optional keys as needed. Point the Stripe webhook at `/api/payments/webhook` and the Shippo webhook at `/api/shipping/webhook?token=<SHIPPO_WEBHOOK_SECRET>`. `docs/VERCEL_PRODUCTION_GUARDRAILS.md` covers caching headers and function limits.
+This branch deploys to Netlify (see [Deploy (Netlify)](#deploy-netlify)); the only setting it needs is `JWT_SECRET`. Deployment of the real app with MongoDB is documented on the [`main`](../../tree/main) branch.
 
 ## Roadmap
 

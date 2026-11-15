@@ -1,40 +1,27 @@
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
+import { createMemoryPrismaClient } from "@/lib/demo/memory-prisma";
+import { seedDemoDatabase } from "@/lib/demo/seed";
 
 /**
- * Prisma Client Singleton
- * Prevents connection exhaustion by reusing the same instance
- * Connection pooling is configured in the connection string
- * Example: DATABASE_URL="mongodb://...?maxPoolSize=10"
+ * Demo branch: there is no database. `prisma` is an in-memory client with the
+ * same API as PrismaClient, filled with the Northgate sample store when the
+ * server starts (see lib/demo). Changes live only in that server instance's
+ * memory and disappear when it restarts.
+ *
+ * One instance per process, shared through globalThis so every bundle that
+ * imports this module (route handlers, server components) sees the same data.
  */
 
-// PrismaClient is attached to the `global` object in development
-// to prevent exhausting database connections during hot reloads
 declare global {
-  var prisma: PrismaClient | undefined;
+  var demoPrisma: PrismaClient | undefined;
 }
 
-// Only initialize Prisma on server-side
 const isServer = typeof window === "undefined";
 
-export const prisma = isServer
-  ? (globalThis as { prisma?: PrismaClient }).prisma ||
-    new PrismaClient({
-      log:
-        process.env.NODE_ENV === "development"
-          ? ["error", "warn"] // Removed "query" to reduce log noise
-          : ["error"],
-    })
-  : ({} as PrismaClient); // Dummy client for client-side (should never be used)
-
-if (isServer && process.env.NODE_ENV !== "production") {
-  (globalThis as { prisma?: PrismaClient }).prisma = prisma;
-}
-
-// Test database connection (server-side only)
-if (isServer) {
-  prisma
-    .$connect()
-    .catch((error) => console.error("✗ Database connection error:", error));
-}
+export const prisma: PrismaClient = isServer
+  ? (globalThis.demoPrisma ??= createMemoryPrismaClient((client) =>
+      seedDemoDatabase(client),
+    ))
+  : ({} as PrismaClient); // Never used in the browser
 
 export default prisma;

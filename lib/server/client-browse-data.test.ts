@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { DEMO_ADMIN } from "@/lib/demo/accounts";
 import type { ClientBrowseMeta } from "@/types";
 
 vi.mock("@/prisma/client", () => ({
@@ -52,11 +53,11 @@ describe("getProductOwnerAdminsForBrowse", () => {
 });
 
 describe("resolveDefaultBrowseOwnerId", () => {
-  it("prefers test@admin.com when present in meta", async () => {
+  it("prefers the demo store owner when present in meta", async () => {
     const meta: ClientBrowseMeta = {
       admins: [
         { id: "1", name: "Other", email: "other@test.com" },
-        { id: "2", name: "Admin", email: "test@admin.com" },
+        { id: "2", name: "Admin", email: DEMO_ADMIN.email },
       ],
       stats: {
         storeOwners: { total: 0, withProducts: 0 },

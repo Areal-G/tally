@@ -6,7 +6,7 @@ import { prisma } from "@/prisma/client";
 import { mergeProductListWhere } from "@/lib/products/product-query";
 import { enrichProductsWithCommittedQuantity } from "@/lib/products/enrich-product-committed-quantity";
 import type { ClientBrowseMeta, ClientBrowseProductsResponse } from "@/types";
-import { DEMO_ADMIN_EMAIL } from "@/lib/auth/demo-seed-users";
+import { DEMO_ADMIN } from "@/lib/demo/accounts";
 
 /** Admins/users who own at least one active catalog product (client browse picker). */
 export async function getProductOwnerAdminsForBrowse() {
@@ -91,7 +91,7 @@ export async function resolveDefaultBrowseOwnerId(
 ): Promise<string> {
   const admins = meta?.admins ?? (await getClientBrowseMetaForPage()).admins;
   if (admins.length === 0) return "";
-  const preferred = admins.find((a) => a.email === DEMO_ADMIN_EMAIL);
+  const preferred = admins.find((a) => a.email === DEMO_ADMIN.email);
   return preferred?.id ?? admins[0]!.id;
 }
 
