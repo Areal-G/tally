@@ -33,6 +33,38 @@ export function formatStableDateTime(value: Date | string | number): string {
   return format(toDate(value), "MMM d, yyyy h:mm a", { locale: enUS });
 }
 
+const UTC_PARTS = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: "UTC",
+});
+
+function utcParts(value: Date | string | number) {
+  const parts = Object.fromEntries(
+    UTC_PARTS.formatToParts(toDate(value)).map((p) => [p.type, p.value]),
+  );
+  return parts as Record<"year" | "month" | "day" | "hour" | "minute" | "dayPeriod", string>;
+}
+
+/**
+ * Same pattern as formatStableDate, always in UTC. Use for the server render and
+ * first client paint so both produce identical text (no React #418).
+ */
+export function formatUtcDate(value: Date | string | number): string {
+  const p = utcParts(value);
+  return `${p.month} ${p.day}, ${p.year}`;
+}
+
+/** Same pattern as formatStableDateTime ("MMM d, yyyy h:mm a"), always in UTC. */
+export function formatUtcDateTime(value: Date | string | number): string {
+  const p = utcParts(value);
+  return `${p.month} ${p.day}, ${p.year} ${p.hour}:${p.minute} ${p.dayPeriod}`;
+}
+
 /** Relative time — use only after mount (see ClientRelativeTime). */
 export function formatStableRelative(value: Date | string | number): string {
   return formatDistanceToNow(toDate(value), { addSuffix: true });
