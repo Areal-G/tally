@@ -28,3 +28,14 @@ export function getStripeClient(): Promise<Stripe | null> {
 export function isStripeClientConfigured(): boolean {
   return !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 }
+
+/**
+ * True when the publishable key is a Stripe test-mode key (pk_test_…),
+ * so the UI may show Stripe's public test card numbers.
+ */
+export function isStripeTestMode(): boolean {
+  return (
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.startsWith("pk_test_") ??
+    false
+  );
+}

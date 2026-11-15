@@ -1,6 +1,6 @@
 /**
  * Shared MongoDB wipe — dependency-safe delete order for all Prisma models.
- * Used by delete-all-data.ts and reset-demo-db.ts.
+ * Used by delete-all-data.ts.
  */
 
 import type { PrismaClient } from "@prisma/client";

@@ -2,7 +2,7 @@
 
 /**
  * Test Credentials Card Component
- * Displays Stripe test credentials for demo/development
+ * Displays Stripe's public test card. Rendered only in Stripe test mode (pk_test_ key).
  */
 
 import { useState } from "react";
@@ -95,11 +95,8 @@ export default function TestCredentialsCard() {
           <CopyableField label="CVC" value="123" />
         </div>
         <p className="text-xs text-amber-700 dark:text-amber-400 mt-4 leading-relaxed">
-          <strong>Note:</strong> In this demo project, we haven&apos;t
-          implemented user address collection during checkout. For shipping
-          label generation and tracking, we&apos;re using fallback test
-          addresses. In production, customers would provide their shipping
-          address during checkout.
+          <strong>Note:</strong> Checkout does not collect a shipping address
+          yet, so shipping labels and tracking use fallback test addresses.
         </p>
       </CardContent>
     </Card>

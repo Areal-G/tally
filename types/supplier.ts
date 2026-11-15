@@ -28,8 +28,6 @@ export interface Supplier {
   productCount?: number;
   /** Role-visible catalog size for Products % column. */
   catalogProductTotal?: number;
-  /** True when this is the global Test Supplier (test@supplier.com); edit/duplicate/delete are disabled. */
-  isGlobalDemo?: boolean;
   /** Extended by API for detail page */
   creator?: {
     id: string;

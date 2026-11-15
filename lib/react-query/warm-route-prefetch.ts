@@ -9,7 +9,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api";
 import { queryKeys } from "./config";
-import { DEMO_ADMIN_EMAIL } from "@/lib/auth/demo-seed-users";
 
 type WarmUser = { id: string; role: string | null };
 
@@ -172,8 +171,7 @@ export async function warmQueriesForUser(
         staleTime: WARM_STALE_MS,
       });
       const admins = meta.admins ?? [];
-      const preferred =
-        admins.find((a) => a.email === DEMO_ADMIN_EMAIL) ?? admins[0];
+      const preferred = admins[0];
       const ownerId = preferred?.id ?? "";
       if (ownerId) {
         await queryClient.prefetchQuery({

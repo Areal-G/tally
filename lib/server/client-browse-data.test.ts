@@ -52,30 +52,15 @@ describe("getProductOwnerAdminsForBrowse", () => {
 });
 
 describe("resolveDefaultBrowseOwnerId", () => {
-  it("prefers test@admin.com when present in meta", async () => {
+  it("returns the first admin in list order", async () => {
     const meta: ClientBrowseMeta = {
       admins: [
-        { id: "1", name: "Other", email: "other@test.com" },
-        { id: "2", name: "Admin", email: "test@admin.com" },
+        { id: "first", name: "First", email: "first@test.com" },
+        { id: "second", name: "Second", email: "second@test.com" },
       ],
       stats: {
         storeOwners: { total: 0, withProducts: 0 },
         admins: 2,
-        clients: 0,
-        suppliers: { total: 0, active: 0, inactive: 0 },
-        categories: { total: 0, active: 0, inactive: 0 },
-        warehouses: { total: 0, active: 0, inactive: 0 },
-      },
-    };
-    await expect(resolveDefaultBrowseOwnerId(meta)).resolves.toBe("2");
-  });
-
-  it("falls back to first admin when preferred email missing", async () => {
-    const meta: ClientBrowseMeta = {
-      admins: [{ id: "first", name: "First", email: "first@test.com" }],
-      stats: {
-        storeOwners: { total: 0, withProducts: 0 },
-        admins: 1,
         clients: 0,
         suppliers: { total: 0, active: 0, inactive: 0 },
         categories: { total: 0, active: 0, inactive: 0 },

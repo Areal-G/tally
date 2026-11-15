@@ -255,17 +255,15 @@ export async function getCategoriesForUser(userId: string): Promise<CategoryForH
 
 /**
  * Fetch suppliers for the given user.
- * Same query as GET /api/suppliers: for admin/user includes global Demo Supplier (test@supplier.com)
- * so every admin sees the demo supplier in dropdowns. Returns serializable objects (dates as ISO strings).
- * Includes isGlobalDemo so tables/dialogs can disable edit/duplicate/delete for the demo supplier.
+ * Same query as GET /api/suppliers: the suppliers this admin/user owns.
+ * Returns serializable objects (dates as ISO strings).
  */
-export async function getSuppliersForUser(userId: string): Promise<(SupplierForHome & { isGlobalDemo?: boolean })[]> {
-  const { getSuppliersForAdminIncludingDemo, getDemoSupplierUserId } = await import("@/prisma/supplier");
+export async function getSuppliersForUser(userId: string): Promise<SupplierForHome[]> {
+  const { getSuppliersForAdmin } = await import("@/prisma/supplier");
   const { enrichSuppliersWithListFields, countActiveCatalogProductsForUser } =
     await import("@/lib/server/catalog-list-enrich");
-  const [suppliers, demoUserId, catalogProductTotal] = await Promise.all([
-    getSuppliersForAdminIncludingDemo(userId),
-    getDemoSupplierUserId(),
+  const [suppliers, catalogProductTotal] = await Promise.all([
+    getSuppliersForAdmin(userId),
     countActiveCatalogProductsForUser(userId),
   ]);
   const base = suppliers.map((s) => ({
@@ -279,7 +277,6 @@ export async function getSuppliersForUser(userId: string): Promise<(SupplierForH
     updatedAt: s.updatedAt?.toISOString() ?? null,
     createdBy: s.createdBy,
     updatedBy: s.updatedBy ?? null,
-    isGlobalDemo: demoUserId != null && s.userId === demoUserId,
   }));
   // productCount scoped to list viewer catalog (userId)
   const enriched = await enrichSuppliersWithListFields(base, userId);

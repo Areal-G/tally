@@ -13,9 +13,7 @@ const requiredEnvVars = [
 
 /** Optional: when set, enable ImageKit, OAuth, email, cache, payments, shipping, etc. */
 const optionalEnvVars = [
-  "IMAGEKIT_PUBLIC_KEY",
   "IMAGEKIT_PRIVATE_KEY",
-  "IMAGEKIT_URL_ENDPOINT",
   "NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY",
   "NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT",
   "GOOGLE_CLIENT_ID",

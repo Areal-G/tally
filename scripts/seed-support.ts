@@ -1,6 +1,6 @@
 /**
- * Demo support tickets (with reply threads) and product reviews for
- * DEMO_WAREHOUSE_ACCOUNT, so the admin Tickets and Reviews pages look lived-in.
+ * Sample support tickets (with reply threads) and product reviews for
+ * SEED_ACCOUNT, so the admin Tickets and Reviews pages look lived-in.
  *
  * - Clients open tickets about real products and orders; the store owner replies.
  * - A mix of open / in progress / resolved / closed and low → urgent priorities,
@@ -9,11 +9,11 @@
  *   a few pending, one rejected).
  *
  * Safe to re-run: clears this store's tickets/reviews first.
- * Run alone:  npx tsx --env-file=.env scripts/seed-demo-support.ts
+ * Run alone:  npx tsx --env-file=.env scripts/seed-support.ts
  * Also called by scripts/seed-inventory-ops.ts.
  */
 import { PrismaClient } from "@prisma/client";
-import { DEMO_WAREHOUSE_ACCOUNT } from "./demo-warehouse.config";
+import { SEED_ACCOUNT, SEED_ACCOUNT_MISSING_MESSAGE } from "./seed.config";
 
 const HOUR = 3_600_000;
 const ago = (hours: number) => new Date(Date.now() - hours * HOUR);
@@ -213,7 +213,7 @@ const REVIEWS: ReviewSpec[] = [
   { rating: 4, comment: "Reliable and consistent from order to order.", status: "pending" },
 ];
 
-export async function seedDemoSupport(
+export async function seedSupport(
   prisma: PrismaClient,
   ownerId: string,
 ): Promise<{ tickets: number; replies: number; reviews: number }> {
@@ -316,18 +316,18 @@ async function main() {
   const prisma = new PrismaClient();
   try {
     const user = await prisma.user.findUnique({
-      where: { email: DEMO_WAREHOUSE_ACCOUNT.email },
+      where: { email: SEED_ACCOUNT.email },
       select: { id: true },
     });
-    if (!user) throw new Error("Demo account not found — run seed-demo-warehouse.ts first");
-    const r = await seedDemoSupport(prisma, user.id);
-    console.log(`Demo support: ${r.tickets} tickets, ${r.replies} replies, ${r.reviews} reviews`);
+    if (!user) throw new Error(SEED_ACCOUNT_MISSING_MESSAGE);
+    const r = await seedSupport(prisma, user.id);
+    console.log(`Support: ${r.tickets} tickets, ${r.replies} replies, ${r.reviews} reviews`);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-if (process.argv[1]?.replace(/\\/g, "/").endsWith("scripts/seed-demo-support.ts")) {
+if (process.argv[1]?.replace(/\\/g, "/").endsWith("scripts/seed-support.ts")) {
   main().catch((e) => {
     console.error(e);
     process.exitCode = 1;

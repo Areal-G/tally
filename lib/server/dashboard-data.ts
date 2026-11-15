@@ -3,7 +3,6 @@
  * Aggregates counts, revenue, trends, and recent activity across all entities.
  * Only import from server code (e.g. app/admin/insights/page.tsx, GET /api/dashboard).
  * getDashboardForAdmin(userId) returns DashboardStats; uses Redis cache when available.
- * Supplier count includes demo supplier (getDemoSupplierUserId) so list and dashboard match.
  */
 
 import { getCache, setCache, cacheKeys } from "@/lib/cache";
@@ -18,7 +17,6 @@ import {
   type PartyUserRow,
 } from "@/lib/orders/order-party";
 import { getStoreOrderIds } from "@/lib/invoices/store-order-ids";
-import { getDemoSupplierUserId } from "@/prisma/supplier";
 import type {
   DashboardStats,
   DashboardCounts,
@@ -135,11 +133,7 @@ export async function getDashboardForAdmin(
     return cached;
   }
 
-  const demoUserId = await getDemoSupplierUserId();
-  const whereSuppliers =
-    demoUserId != null
-      ? { OR: [{ userId }, { userId: demoUserId }] }
-      : userScope(userId);
+  const whereSuppliers = userScope(userId);
 
   const since = getTwelveMonthsAgo();
   const whereUser = userScope(userId);

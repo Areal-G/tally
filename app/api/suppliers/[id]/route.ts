@@ -12,7 +12,7 @@ import { getSupplierDetailForPage } from "@/lib/server/supplier-detail-data";
 /**
  * GET /api/suppliers/:id
  * Get supplier details by ID with all related data.
- * Admin can view own suppliers or the global Demo Supplier (test@supplier.com).
+ * Admin can view own suppliers.
  */
 export async function GET(
   request: NextRequest,

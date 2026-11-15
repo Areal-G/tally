@@ -11,8 +11,8 @@ Warehouse inventory and operations for small distributors, from purchase order t
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Prisma_6-47a248?logo=mongodb&logoColor=white)
 ![TanStack Query](https://img.shields.io/badge/TanStack_Query-5-ff4154?logo=reactquery&logoColor=white)
-![Tests](https://img.shields.io/badge/Vitest-836_passing-6e9f18?logo=vitest&logoColor=white)
-![Demo](https://img.shields.io/badge/demo-guest_login-5b4cf0)
+![Tests](https://img.shields.io/badge/Vitest-841_passing-6e9f18?logo=vitest&logoColor=white)
+[![Live demo](https://img.shields.io/badge/live_demo-tally.arealjagema.com-5b4cf0)](https://tally.arealjagema.com)
 
 [Features](#features) · [Design](#design) · [Screenshots](#screenshots) · [Tech stack](#tech-stack) · [Getting started](#getting-started)
 
@@ -29,9 +29,11 @@ Tally is a full-stack, multi-role inventory system. A store owner manages the ca
 
 It runs with nothing more than MongoDB and a JWT secret. Payments (Stripe), shipping labels (Shippo), email (Brevo), image hosting (ImageKit), caching (Upstash Redis) and AI insights switch on when their keys are present.
 
-## Try the demo
+## Live demo
 
-Run it locally (see [Getting started](#getting-started)), seed the demo data, open `/login` and click **Try demo**. You sign in as Dana, the owner of *Northgate Supply Co.*: 3 warehouses, 30 products (some low or out of stock), 36 orders with invoices, open purchase orders, stock counts, returns, support tickets and product reviews.
+A showcase version runs at **[tally.arealjagema.com](https://tally.arealjagema.com)**. It is built from the [`demo`](../../tree/demo) branch, uses built-in sample data instead of a database, and lets you sign in as an admin, supplier or client in one click.
+
+To run the real app with your own database, follow [Getting started](#getting-started). `npm run seed` fills it with a sample store: *Northgate Supply Co.* with 3 warehouses, 30 products (some low or out of stock), 36 orders with invoices, open purchase orders, stock counts, returns, support tickets and product reviews.
 
 ## Features
 
@@ -123,7 +125,7 @@ Tally's look is a calm operations UI: slate-lavender surfaces, a single violet-t
   </tr>
   <tr>
     <td width="50%"><img src="readme/returns.png" alt="Returns"><br><sub><b>Returns</b>: decisions, restocks and refunds</sub></td>
-    <td width="50%"><img src="readme/login-dark.png" alt="Login"><br><sub><b>Login</b> with <b>Try demo</b> (dark)</sub></td>
+    <td width="50%"><img src="readme/login-dark.png" alt="Login"><br><sub><b>Login</b> (dark)</sub></td>
   </tr>
 </table>
 
@@ -263,22 +265,26 @@ cp .env.example .env
 | `STRIPE_API_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | No | Invoice payments |
 | `SHIPPO_API_KEY`, `SHIPPO_WEBHOOK_SECRET`, `SHIPPO_FROM_*` | No | Shipping rates, labels and tracking |
 | `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME` | No | Transactional email |
-| `IMAGEKIT_*`, `NEXT_PUBLIC_IMAGEKIT_*` | No | Product image uploads |
+| `IMAGEKIT_PRIVATE_KEY`, `NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY`, `NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT` | No | Product image uploads |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `QSTASH_*` | No | Response cache, distributed rate limits, email queue |
 | `OPENROUTER_API_KEY`, `GROQ_API_KEY` | No | AI business insights |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | No | Google sign-in |
 | `INTERNAL_API_KEY` | No | Bearer token for cron calls such as invoice reminders |
+| `NEXT_PUBLIC_DISABLE_BROWSER_TRANSLATE` | No | `true` stops browsers from offering to translate the UI |
+| `SEED_OWNER_EMAIL`, `SEED_OWNER_PASSWORD`, `SEED_OWNER_NAME` | No | Owner login created by `npm run seed` |
 
 </details>
 
-### Database and demo data
+### Database and sample data
 
 ```bash
 npx prisma db push
-npm run seed:demo
+npm run seed
 ```
 
-`seed:demo` creates the demo store (catalog, warehouses, orders, invoices, transfers, notifications), then the operations data (purchase orders, stock movements, counts, returns, barcodes, recent scans, support tickets and reviews). It is safe to re-run.
+`seed` creates an owner account and a sample store (catalog, warehouses, orders, invoices, transfers, notifications), then the operations data (purchase orders, stock movements, counts, returns, barcodes, recent scans, support tickets and reviews). It is safe to re-run.
+
+The owner signs in as `owner@northgate.test`. Set `SEED_OWNER_EMAIL` and `SEED_OWNER_PASSWORD` in `.env` before seeding to choose your own login; otherwise the local-only default password in `scripts/seed.config.ts` is used.
 
 ### Run
 
@@ -286,7 +292,7 @@ npm run seed:demo
 npm run dev
 ```
 
-Open `http://localhost:3000/login` and click **Try demo**. You should land on the dashboard with "Welcome back, Dana" and 12 stock alerts.
+Open `http://localhost:3000/login` and sign in with the seed owner account. You should land on the dashboard with "Welcome back, Dana" and 12 stock alerts.
 
 <details>
 <summary><b>Scripts</b></summary>
@@ -298,9 +304,8 @@ Open `http://localhost:3000/login` and click **Try demo**. You should land on th
 | `npm run lint` | ESLint (no unused vars, no `any`, exhaustive deps) |
 | `npm test` | Vitest suite |
 | `npm run test:invalidate` | Only the cache-invalidation coverage audit |
-| `npm run seed:demo` | Seed the demo store and operations data |
+| `npm run seed` | Seed the owner account, sample store and operations data |
 | `npm run prisma:push` / `npm run prisma:studio` | Sync the schema, browse data |
-| `npm run script:reset-demo-db` | Reset the demo database |
 
 </details>
 

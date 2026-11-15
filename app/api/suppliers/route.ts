@@ -9,7 +9,7 @@ import { getSessionFromRequest } from "@/utils/auth";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/prisma/client";
 import { createAuditLog } from "@/prisma/audit-log";
-import { getSuppliersForAdminIncludingDemo, getDemoSupplierUserId } from "@/prisma/supplier";
+import { getSuppliersForAdmin } from "@/prisma/supplier";
 import {
   createSupplierBodySchema,
   updateSupplierBodySchema,
@@ -19,9 +19,7 @@ import { scheduleInvalidateSupplierCaches } from "@/lib/cache";
 /**
  * GET /api/suppliers
  * Fetch all suppliers for the authenticated user.
- * For admin/user: includes their own suppliers plus the global Demo Supplier (test@supplier.com)
- * so every admin can assign products to the demo supplier. Clients do not use this list.
- * Each supplier includes isGlobalDemo: true when it is the demo supplier (read-only for admins).
+ * For admin/user: the suppliers they own. Clients do not use this list.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -40,17 +38,13 @@ export async function GET(request: NextRequest) {
 
     const suppliers = isClient
       ? await prisma.supplier.findMany({ where: { userId } })
-      : await getSuppliersForAdminIncludingDemo(userId);
+      : await getSuppliersForAdmin(userId);
 
-    const [demoUserId, catalogProductTotal] = await Promise.all([
-      getDemoSupplierUserId(),
-      countActiveCatalogProductsForUser(userId),
-    ]);
+    const catalogProductTotal = await countActiveCatalogProductsForUser(userId);
     const withFlags = suppliers.map((s) => ({
       ...s,
       createdAt: s.createdAt.toISOString(),
       updatedAt: s.updatedAt?.toISOString() ?? null,
-      isGlobalDemo: demoUserId != null && s.userId === demoUserId,
     }));
     // productCount (viewer-scoped) + linked email for list columns
     const enriched = await enrichSuppliersWithListFields(withFlags, userId);

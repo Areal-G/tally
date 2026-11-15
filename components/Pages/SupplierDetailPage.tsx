@@ -148,7 +148,6 @@ export default function SupplierDetailPage({
 
   const isCopying = createSupplierMutation.isPending;
   const isDeleting = deleteSupplierMutation.isPending;
-  const isGlobalDemo = Boolean(supplier?.isGlobalDemo);
   const isClientRole = user?.role === "client";
   const isSupplierRole = user?.role === "supplier";
   const disableCrud = isClientRole || isSupplierRole;
@@ -609,7 +608,7 @@ export default function SupplierDetailPage({
             </Button>
             <Button
               onClick={handleEditSupplier}
-              disabled={disableCrud || isGlobalDemo}
+              disabled={disableCrud}
               className={glassDetailFooterButtonClass("blue")}
             >
               <Edit className="h-4 w-4 shrink-0" />
@@ -617,7 +616,7 @@ export default function SupplierDetailPage({
             </Button>
             <Button
               onClick={handleDuplicateSupplier}
-              disabled={isCopying || disableCrud || isGlobalDemo}
+              disabled={isCopying || disableCrud}
               className={glassDetailFooterButtonClass("violet")}
             >
               <Copy className="h-4 w-4 shrink-0" />
@@ -631,7 +630,7 @@ export default function SupplierDetailPage({
               label="Delete Supplier"
               icon={Trash2}
               hue="rose"
-              disabled={disableCrud || isGlobalDemo}
+              disabled={disableCrud}
               className="w-full sm:w-auto gap-2"
             />
           </div>

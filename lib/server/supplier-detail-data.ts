@@ -6,7 +6,7 @@
 
 import { computeCatalogInsights } from "@/lib/server/catalog-insights";
 import { toParty } from "@/lib/server/catalog-party-snapshot";
-import { getSupplierById, getDemoSupplierUserId } from "@/prisma/supplier";
+import { getSupplierById } from "@/prisma/supplier";
 import { getCache, setCache, cacheKeys } from "@/lib/cache";
 import { prisma } from "@/prisma/client";
 import { mergeProductListWhere } from "@/lib/products/product-query";
@@ -49,7 +49,6 @@ function transformSupplierDetail(
   updaterUser: CatalogPartyUserRow | null,
   ownerMap: Map<string, CatalogPartyUserRow>,
   orderUserMap: Map<string, CatalogPartyUserRow>,
-  isDemoSupplier: boolean,
   categoryMap: Map<string, { id: string; name: string }>,
 ) {
   const supplierSnapshot = { id: supplier.id, name: supplier.name };
@@ -190,7 +189,6 @@ function transformSupplierDetail(
       category: categoryMap.get(product.categoryId) ?? null,
     })),
     recentOrders,
-    isGlobalDemo: isDemoSupplier,
   };
 }
 
@@ -245,29 +243,20 @@ export async function getSupplierDetailForPage(
   logger.info(`❌ Cache miss for supplier: ${cacheKey} - fetching from database`);
 
   let supplier: Awaited<ReturnType<typeof getSupplierById>> | null;
-  const demoUserId = await getDemoSupplierUserId();
   if (isAdmin || isClient) {
     supplier = await prisma.supplier.findUnique({ where: { id } });
   } else if (isSupplier && supplierEntity) {
     supplier = await prisma.supplier.findUnique({ where: { id } });
   } else {
     supplier = await getSupplierById(id, userId);
-    if (!supplier && demoUserId) {
-      const demoSupplier = await prisma.supplier.findFirst({
-        where: { id, userId: demoUserId },
-      });
-      if (demoSupplier) supplier = demoSupplier;
-    }
   }
 
   if (!supplier) return null;
 
-  const isDemoSupplier = demoUserId === supplier.userId;
-
   const products = await prisma.product.findMany({
     where: mergeProductListWhere({
       supplierId: supplier.id,
-      ...(isClient || isDemoSupplier || isSupplier ? {} : { userId }),
+      ...(isClient || isSupplier ? {} : { userId }),
     }),
     include: {
       orderItems: {
@@ -344,7 +333,6 @@ export async function getSupplierDetailForPage(
     updaterUser,
     ownerMap,
     orderUserMap,
-    isDemoSupplier,
     categoryMap,
   );
 

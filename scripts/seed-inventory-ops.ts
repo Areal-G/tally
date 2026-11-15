@@ -1,18 +1,18 @@
 /**
- * Seed inventory-operations demo data for the local demo account:
+ * Seed inventory-operations data for the seed owner account:
  * reorder points, purchase orders (draft / ordered / partial / received),
  * a stock-movement history, stock counts and customer returns.
  *
- * Run after seed-demo-warehouse.ts:
+ * Run after seed-warehouse.ts (`npm run seed` runs both):
  *   npx tsx --env-file=.env scripts/seed-inventory-ops.ts
  *
- * Re-running wipes and recreates only these operations rows for the demo account.
+ * Re-running wipes and recreates only these operations rows for the owner.
  * Historical rows are records only — current product quantities are left as seeded.
  */
 import { PrismaClient } from "@prisma/client";
-import { DEMO_WAREHOUSE_ACCOUNT } from "./demo-warehouse.config";
-import { seedDemoBarcodes } from "./seed-demo-barcodes";
-import { seedDemoSupport } from "./seed-demo-support";
+import { SEED_ACCOUNT, SEED_ACCOUNT_MISSING_MESSAGE } from "./seed.config";
+import { seedBarcodes } from "./seed-barcodes";
+import { seedSupport } from "./seed-support";
 
 const prisma = new PrismaClient();
 const DAY = 86_400_000;
@@ -29,10 +29,10 @@ type P = { id: string; name: string; sku: string; price: number; quantity: numbe
 
 async function main() {
   const user = await prisma.user.findUnique({
-    where: { email: DEMO_WAREHOUSE_ACCOUNT.email },
+    where: { email: SEED_ACCOUNT.email },
     select: { id: true },
   });
-  if (!user) throw new Error("Demo account not found — run seed-demo-warehouse.ts first");
+  if (!user) throw new Error(SEED_ACCOUNT_MISSING_MESSAGE);
   const userId = user.id;
 
   await prisma.stockMovement.deleteMany({ where: { userId } });
@@ -257,10 +257,10 @@ async function main() {
   }
 
   await prisma.stockMovement.createMany({ data: movements });
-  const scanDemo = await seedDemoBarcodes(prisma, userId);
-  console.log(`Demo barcodes: ${scanDemo.barcodes} added, ${scanDemo.scans} recent scans`);
-  const support = await seedDemoSupport(prisma, userId);
-  console.log(`Demo support: ${support.tickets} tickets, ${support.replies} replies, ${support.reviews} reviews`);
+  const scans = await seedBarcodes(prisma, userId);
+  console.log(`Barcodes: ${scans.barcodes} added, ${scans.scans} recent scans`);
+  const support = await seedSupport(prisma, userId);
+  console.log(`Support: ${support.tickets} tickets, ${support.replies} replies, ${support.reviews} reviews`);
   console.log(
     `Seeded ${poPlan.length} purchase orders, ${movements.length} movements, 2 counts, ${orders.length} returns, reorder points on ${products.length} products.`,
   );

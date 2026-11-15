@@ -1,6 +1,6 @@
 /**
  * Server-side data for Admin Supplier Portal page
- * Aggregates Supplier entities for this admin (own + Demo Supplier), their products, and related orders.
+ * Aggregates Supplier entities for this admin, their products, and related orders.
  * Only import from server code (e.g. app/admin/supplier-portal/page.tsx, GET /api/supplier-portal).
  * Denser recent product/order catalog meta + Redis shape guard.
  * Recent orders buyer (placedBy*) + Redis v4.
@@ -13,7 +13,7 @@ import { enrichProductsWithCommittedQuantity } from "@/lib/products/enrich-produ
 import { orderStatusAtSelect } from "@/lib/server/catalog-detail-order-select";
 import { withOrderStatusAt } from "@/lib/orders/order-status-display-date";
 import { resolveBuyerDisplayFromUsers } from "@/lib/orders/order-party";
-import { getSuppliersForAdminIncludingDemo } from "@/prisma/supplier";
+import { getSuppliersForAdmin } from "@/prisma/supplier";
 import type {
   SupplierPortalStats,
   SupplierPortalCounts,
@@ -45,7 +45,7 @@ function hasSupplierPortalCatalogMeta(stats: SupplierPortalStats): boolean {
 }
 
 /**
- * @param adminUserId - Current admin user id. Only their suppliers + Demo Supplier are included (same as sidebar badge and GET /api/suppliers).
+ * @param adminUserId - Current admin user id. Only their own suppliers are included (same as sidebar badge and GET /api/suppliers).
  */
 export async function getSupplierPortalForAdmin(
   adminUserId: string,
@@ -55,8 +55,8 @@ export async function getSupplierPortalForAdmin(
   const cached = await getCache<SupplierPortalStats>(cacheKey);
   if (cached && hasSupplierPortalCatalogMeta(cached)) return cached;
 
-  // Only suppliers this admin can see: own + Demo Supplier (same as sidebar badge)
-  const supplierEntities = await getSuppliersForAdminIncludingDemo(adminUserId);
+  // Only suppliers this admin owns (same as sidebar badge)
+  const supplierEntities = await getSuppliersForAdmin(adminUserId);
 
   const supplierUserIds = [...new Set(supplierEntities.map((s) => s.userId))];
   const supplierUserMap = new Map<

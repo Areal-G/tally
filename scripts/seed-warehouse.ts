@@ -1,16 +1,16 @@
 /**
- * Seed a realistic warehouse catalog for the local demo account.
+ * Seed a realistic warehouse catalog for the seed owner account
+ * (see scripts/seed.config.ts). Creates the owner if it does not exist.
  *
- * 1. Sign up on http://localhost:3607/register with the values in
- *    scripts/demo-warehouse.config.ts (or let this script create the user).
- * 2. npx tsx --env-file=.env scripts/seed-demo-warehouse.ts
+ *   npm run seed            (this script + seed-inventory-ops.ts)
+ *   npx tsx --env-file=.env scripts/seed-warehouse.ts
  *
- * Re-running wipes and recreates the demo account's own catalog rows only.
+ * Re-running wipes and recreates the owner's own catalog rows only.
  */
 
 import { PrismaClient, type Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import { DEMO_WAREHOUSE_ACCOUNT } from "./demo-warehouse.config";
+import { SEED_ACCOUNT } from "./seed.config";
 
 const prisma = new PrismaClient();
 
@@ -107,16 +107,16 @@ const statusFor = (qty: number) =>
 
 async function ensureUser(): Promise<string> {
   const existing = await prisma.user.findUnique({
-    where: { email: DEMO_WAREHOUSE_ACCOUNT.email },
+    where: { email: SEED_ACCOUNT.email },
     select: { id: true },
   });
   if (existing) return existing.id;
   const created = await prisma.user.create({
     data: {
-      name: DEMO_WAREHOUSE_ACCOUNT.name,
-      email: DEMO_WAREHOUSE_ACCOUNT.email,
-      username: "demo-northgate",
-      password: await bcrypt.hash(DEMO_WAREHOUSE_ACCOUNT.password, 10),
+      name: SEED_ACCOUNT.name,
+      email: SEED_ACCOUNT.email,
+      username: "northgate-owner",
+      password: await bcrypt.hash(SEED_ACCOUNT.password, 10),
       role: "admin",
       createdAt: now,
     },
@@ -244,8 +244,8 @@ async function main() {
     const clientId = clientIdx === -1 ? null : clientIds[clientIdx];
     const [street, city, state, zipCode] = CITIES[n % CITIES.length]!;
     const address = {
-      name: clientIdx === -1 ? DEMO_WAREHOUSE_ACCOUNT.company : CLIENTS[clientIdx]![0],
-      email: clientIdx === -1 ? DEMO_WAREHOUSE_ACCOUNT.email : CLIENTS[clientIdx]![1],
+      name: clientIdx === -1 ? SEED_ACCOUNT.company : CLIENTS[clientIdx]![0],
+      email: clientIdx === -1 ? SEED_ACCOUNT.email : CLIENTS[clientIdx]![1],
       street, city, state, zipCode, country: "US",
     } as unknown as Prisma.InputJsonValue;
 
@@ -363,7 +363,10 @@ async function main() {
 
   console.log(
     `Seeded ${CATEGORIES.length} categories, ${SUPPLIERS.length} suppliers, ${WAREHOUSES.length} warehouses, ` +
-      `${PRODUCTS.length} products, 36 orders for ${DEMO_WAREHOUSE_ACCOUNT.email}`,
+      `${PRODUCTS.length} products, 36 orders for ${SEED_ACCOUNT.email}`,
+  );
+  console.log(
+    `Sign in as ${SEED_ACCOUNT.email} with SEED_OWNER_PASSWORD (or the local default in scripts/seed.config.ts).`,
   );
 }
 

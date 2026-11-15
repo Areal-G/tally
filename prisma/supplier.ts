@@ -1,35 +1,15 @@
 import { logger } from "@/lib/logger";
 import { prisma } from "@/prisma/client";
 
-/** Email of the global demo supplier user (test@supplier.com). Used so all admins see Demo Supplier in dropdowns. */
-const DEMO_SUPPLIER_EMAIL = "test@supplier.com";
-
 /**
- * User id of the demo supplier account (test@supplier.com), if it exists.
- * Suppliers linked to this user are shown to all admins as "global" demo options.
+ * Fetch the suppliers an admin/user owns, sorted by name.
+ * Used by the suppliers list, product dropdowns, sidebar counts and the supplier portal.
  */
-export async function getDemoSupplierUserId(): Promise<string | null> {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_SUPPLIER_EMAIL },
-    select: { id: true },
-  });
-  return user?.id ?? null;
-}
-
-/**
- * Fetch suppliers for an admin/user: their own plus the global Demo Supplier (linked to test@supplier.com).
- * So every admin sees at least the demo supplier in product dropdown and suppliers list.
- */
-export async function getSuppliersForAdminIncludingDemo(
+export async function getSuppliersForAdmin(
   userId: string,
 ): Promise<Awaited<ReturnType<typeof getSuppliersByUser>>> {
-  const demoUserId = await getDemoSupplierUserId();
-  const where =
-    demoUserId != null
-      ? { OR: [{ userId }, { userId: demoUserId }] }
-      : { userId };
   return prisma.supplier.findMany({
-    where,
+    where: { userId },
     orderBy: { name: "asc" },
   });
 }

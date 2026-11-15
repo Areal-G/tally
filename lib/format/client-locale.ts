@@ -1,7 +1,7 @@
 /**
  * Browser-locale formatters.
  * Call only on the client after mount or in event handlers — not during SSR.
- * USD base; grouping/decimals follow visitor locale for global demo users.
+ * USD base; grouping/decimals follow the visitor's locale.
  */
 
 import { toDate } from "@/lib/date/format-stable";

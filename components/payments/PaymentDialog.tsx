@@ -31,6 +31,7 @@ import {
   CircleDollarSign,
 } from "lucide-react";
 import TestCredentialsCard from "./TestCredentialsCard";
+import { isStripeTestMode } from "@/lib/stripe/client";
 import type { CheckoutType } from "@/types";
 import { cn } from "@/lib/utils";
 import {
@@ -359,9 +360,11 @@ export default function PaymentDialog({
               </div>
             </div>
 
-            <div className="flex-shrink-0">
-              <TestCredentialsCard />
-            </div>
+            {isStripeTestMode() && (
+              <div className="flex-shrink-0">
+                <TestCredentialsCard />
+              </div>
+            )}
 
             <div className="flex flex-col gap-2 flex-shrink-0">
               <p className="text-xs text-center text-white/80">

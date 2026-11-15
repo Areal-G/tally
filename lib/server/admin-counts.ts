@@ -5,7 +5,7 @@
 
 import { prisma } from "@/prisma/client";
 import { mergeProductListWhere } from "@/lib/products/product-query";
-import { getSuppliersForAdminIncludingDemo } from "@/prisma/supplier";
+import { getSuppliersForAdmin } from "@/prisma/supplier";
 import type { AdminCounts } from "@/types";
 
 /**
@@ -13,7 +13,7 @@ import type { AdminCounts } from "@/types";
  * products, warehouses, suppliers, clients, users.
  * Client orders/invoices and product reviews: scoped to product owner (userId).
  * Products, warehouses: scoped to this admin (userId).
- * Suppliers: own + Demo Supplier (same as Supplier Portal and GET /api/suppliers).
+ * Suppliers: own (same as Supplier Portal and GET /api/suppliers).
  * Clients: users with role client. Users: all users (user management).
  */
 export async function getAdminCounts(userId: string): Promise<AdminCounts> {
@@ -27,7 +27,7 @@ export async function getAdminCounts(userId: string): Promise<AdminCounts> {
       }).then((rows) => rows.map((p) => p.id)),
       prisma.product.count({ where: mergeProductListWhere({ userId }) }),
       prisma.warehouse.count({ where: { userId } }),
-      getSuppliersForAdminIncludingDemo(userId),
+      getSuppliersForAdmin(userId),
       prisma.user.count({ where: { role: "client" } }),
       prisma.user.count(),
     ]);

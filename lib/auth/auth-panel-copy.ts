@@ -29,11 +29,11 @@ export type AuthPanelCopy = {
   items: AuthPanelListItem[];
 };
 
-/** Login left panel — demo roles + platform highlights (6 items; professional copy). */
+/** Login left panel — roles + platform highlights (6 items; professional copy). */
 export const LOGIN_AUTH_PANEL_COPY: AuthPanelCopy = {
   sectionTitle: "Explore the Platform",
   sectionLead:
-    "Press Try demo to open a sample warehouse with products, stock levels, orders and invoices already filled in. No sign-up needed.",
+    "One workspace for administrators, clients and suppliers: products, stock levels, orders and invoices in one place.",
   items: [
     {
       id: "administrator",

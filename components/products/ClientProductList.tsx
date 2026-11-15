@@ -19,7 +19,6 @@ import { Users, Truck, FolderTree, Warehouse, ShoppingBag } from "lucide-react";
 import { PageSectionHeader } from "@/components/shared";
 import { cn } from "@/lib/utils";
 import ProductFilters from "./ProductFilters";
-import { DEMO_ADMIN_EMAIL } from "@/lib/auth/demo-seed-users";
 
 const ProductTable = dynamic(
   () =>
@@ -98,8 +97,7 @@ export default function ClientProductList({
 
   useEffect(() => {
     if (admins.length > 0 && !selectedOwnerId) {
-      const defaultAdmin =
-        admins.find((a) => a.email === DEMO_ADMIN_EMAIL) ?? admins[0];
+      const defaultAdmin = admins[0];
       if (defaultAdmin) setSelectedOwnerId(defaultAdmin.id);
     }
   }, [admins, selectedOwnerId, setSelectedOwnerId]);

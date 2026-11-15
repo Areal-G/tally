@@ -8,8 +8,8 @@
  *   npm run script:delete-all-data
  *   npx tsx scripts/delete-all-data.ts
  *
- * To wipe AND recreate demo accounts in one step, prefer:
- *   npm run script:reset-demo-db
+ * To refill the database afterwards with sample data, run:
+ *   npm run seed
  */
 
 import { PrismaClient } from "@prisma/client";
@@ -26,7 +26,7 @@ async function main() {
   }
 
   console.log(
-    "\n✅ All data deleted. Run  npm run script:reset-demo-db  to recreate demo accounts.\n",
+    "\n✅ All data deleted. Run  npm run seed  to load sample data.\n",
   );
 }
 
