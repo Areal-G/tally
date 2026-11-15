@@ -129,6 +129,8 @@ export default function ScanPage() {
     setCameraOn(false);
   }, []);
 
+  // The frame loop schedules itself through a ref so it always runs the latest `tick`.
+  const tickRef = useRef<() => Promise<void>>(async () => {});
   const tick = useCallback(async () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -155,8 +157,11 @@ export default function ScanPage() {
         }
       }
     }
-    rafRef.current = requestAnimationFrame(() => void tick());
+    rafRef.current = requestAnimationFrame(() => void tickRef.current());
   }, [lookup]);
+  useEffect(() => {
+    tickRef.current = tick;
+  }, [tick]);
 
   const startCamera = async () => {
     setCameraError(null);

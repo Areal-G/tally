@@ -28,7 +28,6 @@
       ]
     },
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     // Additional strict checks for better type safety
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true

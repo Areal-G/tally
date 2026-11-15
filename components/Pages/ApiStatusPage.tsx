@@ -151,7 +151,15 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
   const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [loadedRole, setLoadedRole] = useState(userRole);
   const { toast } = useToast();
+
+  // Show the loading state again when the role changes (adjusted during render,
+  // not in an effect, so React skips the extra render pass).
+  if (loadedRole !== userRole) {
+    setLoadedRole(userRole);
+    setIsLoading(true);
+  }
 
   const loadSystemStatus = async (opts?: { isCancelled?: () => boolean }) => {
     const isCancelled = () => opts?.isCancelled?.() ?? false;
@@ -237,7 +245,8 @@ export default function ApiStatusPage({ userRole }: ApiStatusPageProps) {
 
   useEffect(() => {
     let cancelled = false;
-    setIsLoading(true);
+    // State is only set after the fetches resolve (asynchronously), so this is a normal data load.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async fetch, not a synchronous update
     void loadSystemStatus({ isCancelled: () => cancelled });
     return () => {
       cancelled = true;

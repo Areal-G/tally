@@ -3,6 +3,8 @@ import {
   formatStableCompactDateTime,
   formatStableCurrency,
   formatStableNumber,
+  formatUtcDate,
+  formatUtcDateTime,
 } from "./format-stable";
 
 describe("formatStableCurrency", () => {
@@ -39,5 +41,19 @@ describe("formatStableCompactDateTime", () => {
     expect(formatStableCompactDateTime(iso)).toBe(
       formatStableCompactDateTime(iso),
     );
+  });
+});
+
+describe("formatUtcDate / formatUtcDateTime", () => {
+  // 21:05 UTC on Nov 9 is already Nov 10 in UTC+3: the UTC helpers must ignore the host zone.
+  const instant = "2026-11-09T21:05:00.000Z";
+
+  it("formats the date in UTC with the stable pattern", () => {
+    expect(formatUtcDate(instant)).toBe("Nov 9, 2026");
+  });
+
+  it("formats date and time in UTC with the stable pattern", () => {
+    expect(formatUtcDateTime(instant)).toBe("Nov 9, 2026 9:05 PM");
+    expect(formatUtcDateTime("2026-01-02T00:07:00.000Z")).toBe("Jan 2, 2026 12:07 AM");
   });
 });

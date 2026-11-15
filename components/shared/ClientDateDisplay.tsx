@@ -2,7 +2,8 @@
 
 /**
  * Hydration-safe date display for client components pre-rendered on the server.
- * Server and first client paint use en-US stable strings; relative labels update after mount.
+ * Server and first client paint use the same UTC string; after mount the label
+ * switches to the visitor's local time zone (relative labels update too).
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -10,6 +11,8 @@ import {
   formatStableDate,
   formatStableDateTime,
   formatStableRelative,
+  formatUtcDate,
+  formatUtcDateTime,
   toDate,
 } from "@/lib/date/format-stable";
 import { useMounted } from "@/hooks/use-mounted";
@@ -36,7 +39,7 @@ export function ClientRelativeTime({
   semantic,
 }: ClientRelativeTimeProps) {
   const d = useMemo(() => toDate(date), [date]);
-  const stable = useMemo(() => formatStableDate(d), [d]);
+  const stable = useMemo(() => formatUtcDate(d), [d]);
   const [label, setLabel] = useState(stable);
   const mounted = useMounted();
 
@@ -66,9 +69,13 @@ export type ClientDateTimeProps = {
   semantic?: SemanticDateKind;
 };
 
-/** Absolute date+time — same output on server and client (no hydration mismatch). */
+/** Absolute date+time — UTC on the server and first paint, visitor local time after mount. */
 export function ClientDateTime({ date, className, semantic }: ClientDateTimeProps) {
-  const text = useMemo(() => formatStableDateTime(date), [date]);
+  const mounted = useMounted();
+  const text = useMemo(
+    () => (mounted ? formatStableDateTime(date) : formatUtcDateTime(date)),
+    [mounted, date],
+  );
   return (
     <span className={cn(semanticDateClass(semantic), className)}>{text}</span>
   );
@@ -81,14 +88,18 @@ export type ClientDateProps = {
   semantic?: SemanticDateKind;
 };
 
-/** Absolute date only — same output on server and client. */
+/** Absolute date only — UTC on the server and first paint, visitor local date after mount. */
 export function ClientDate({
   date,
   className,
   prefix = "",
   semantic,
 }: ClientDateProps) {
-  const text = useMemo(() => formatStableDate(date), [date]);
+  const mounted = useMounted();
+  const text = useMemo(
+    () => (mounted ? formatStableDate(date) : formatUtcDate(date)),
+    [mounted, date],
+  );
   return (
     <span className={cn(semanticDateClass(semantic), className)}>
       {prefix}

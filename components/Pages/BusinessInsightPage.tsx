@@ -6,6 +6,7 @@ import {
   useMemo,
   useCallback,
   useRef,
+  useSyncExternalStore,
 } from "react";
 import { AnalyticsCard } from "@/components/ui/analytics-card";
 import { Button } from "@/components/ui/button";
@@ -147,6 +148,9 @@ export type BusinessInsightPageProps = {
  * Uses tabs (Overview, Distribution, Trends, Alerts), cards, and charts only — no table view.
  * Accepts optional server-fetched data to hydrate React Query and avoid client round-trips.
  */
+/** The page origin never changes while the page is open. */
+const subscribeToNothing = () => () => {};
+
 export default function BusinessInsightPage({
   initialProducts,
   initialOrders,
@@ -182,8 +186,13 @@ export default function BusinessInsightPage({
   ]);
   const { toast } = useToast();
 
-  // State for QR code URL - set on client side to avoid SSR window error
-  const [qrUrl, setQrUrl] = useState("");
+  // QR code URL: needs window.location, so it is empty on the server and
+  // filled in on the client without a hydration mismatch.
+  const qrUrl = useSyncExternalStore(
+    subscribeToNothing,
+    () => `${window.location.origin}/business-insights`,
+    () => "",
+  );
 
   // AI insights (OpenRouter) — generated on demand
   const [aiInsightsText, setAiInsightsText] = useState<string | null>(null);
@@ -202,13 +211,6 @@ export default function BusinessInsightPage({
   // Custom calendar button targets for From/To
   const startDateInputRef = useRef<HTMLInputElement | null>(null);
   const endDateInputRef = useRef<HTMLInputElement | null>(null);
-
-  // Set QR URL after component mounts (client-side only)
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setQrUrl(`${window.location.origin}/business-insights`);
-    }
-  }, []);
 
   // Filter products by date range if specified
   const filteredProducts = useMemo(() => {

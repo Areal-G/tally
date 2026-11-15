@@ -329,8 +329,10 @@ export default function Navbar({ children }: NavbarProps) {
   const [commandOpen, setCommandOpen] = useState(false);
 
   // Restore collapsed state after mount (avoids SSR/client mismatch).
+  // Reading localStorage must wait until after hydration, so this effect is intentional.
   useEffect(() => {
     try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync from localStorage after hydration
       setCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "1");
     } catch {
       /* storage unavailable */
@@ -361,10 +363,12 @@ export default function Navbar({ children }: NavbarProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Close the mobile drawer on route change.
-  useEffect(() => {
+  // Close the mobile drawer on route change (adjusted during render, not in an effect).
+  const [drawerPathname, setDrawerPathname] = useState(pathname);
+  if (drawerPathname !== pathname) {
+    setDrawerPathname(pathname);
     setIsMobileMenuOpen(false);
-  }, [pathname]);
+  }
 
   const handleLogout = async () => {
     setIsLoggingOut(true);

@@ -174,6 +174,8 @@ function useToast() {
 
   React.useEffect(() => {
     listeners.push(setState)
+    // Subscribing to the external toast store: pick up toasts queued before mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- external store sync
     setState(memoryState)
     return () => {
       const index = listeners.indexOf(setState)
